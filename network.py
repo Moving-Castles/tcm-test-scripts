@@ -1,3 +1,73 @@
+class Material:
+	def __init__(self, base_temp):
+		self.temp = base_temp
+
+	def heat(self, amount):
+		self.temp = self.temp + amount
+
+
+class Solid(Material):
+	def __init__(self, base_temp):
+		super().__init__(base_temp)
+		self.can_freeze = False
+
+class Liquid(Material):
+	def __init__(self, base_temp):
+		super().__init__(base_temp)
+		self.can_freeze = True
+
+class Dirt(Solid):
+	def __init__(self, base_temp=20, name='dirt'):
+		super().__init__(base_temp)
+		self.name = name
+
+	def dry(self):
+		return Sand(base_temp = self.temp)
+
+	def wet(self):
+		return Muck(base_temp = self.temp)
+
+class Sand(Solid):
+	def __init__(self, base_temp=20, name='sand'):
+		super().__init__(base_temp)
+		self.name = name
+
+	def wet(self):
+		return Dirt(base_temp = self.temp)
+
+class Muck(Liquid):
+	def __init__(self, base_temp=20, name='muck'):
+		super().__init__(base_temp)
+		self.name = name
+
+	def dry(self):
+		return Dirt(base_temp = self.temp)
+
+class Piss(Liquid):
+	def __init__(self, base_temp=20, name='piss'):
+		super().__init__(base_temp)
+		self.name = name
+
+class Blood(Liquid):
+	def __init__(self, base_temp=20, name='blood'):
+		super().__init__(base_temp)
+		self.name = name
+
+class Teeth(Solid):
+	def __init__(self, base_temp=20, name='teeth'):
+		super().__init__(base_temp)
+		self.name = name
+
+class Pellet(Solid):
+	def __init__(self, base_temp=20, name='pellet'):
+		super().__init__(base_temp)
+		self.name = name
+
+
+# class Recipe:
+# 	def __init__(self, ingredients, result)
+# invert_op = getattr(self, "invert_op", None) <- check if method exists on object
+
 class Machine:
 	def __init__(self, machine_id, outputs_to):
 		self.inputs = [False]
@@ -27,7 +97,9 @@ class split_gate(Machine):
 		self.outputs_to = outputs_to
 
 	def process(self):
-		return [self.inputs[0]/2, self.inputs[0]/2]
+		return [{ 'amount': self.inputs[0]['amount']/2, 'material': self.inputs[0]['material']}, 
+		{ 'amount': self.inputs[0]['amount']/2, 'material': self.inputs[0]['material']}]
+
 
 class mixer(Machine):
 	def __init__(self, machine_id, outputs_to):
@@ -36,11 +108,11 @@ class mixer(Machine):
 		self.outputs_to = outputs_to
 
 	def process(self):
-		if self.inputs[0] > self.inputs[1]:
-			return [self.inputs[1]*2]
+		if self.inputs[0]['amount'] > self.inputs[1]['amount']:
+			return [{'material': self.inputs[1]['material'], 'amount': self.inputs[1]['amount']*2}]
 
 		else:
-			return [self.inputs[0]*2]
+			return [{'material': self.inputs[0]['material'], 'amount': self.inputs[0]['amount']*2}]
 
 class core(Machine):
 	def __init__(self, machine_id, outputs_to):
@@ -49,7 +121,8 @@ class core(Machine):
 		self.outputs_to = outputs_to
 
 	def process(self):
-		return [self.inputs[0]*0.4, self.inputs[0]*0.4]
+		return [{ 'material': self.inputs[0]['material'], 'amount': self.inputs[0]['amount']*0.4}, 
+			{ 'material': self.inputs[0]['material'], 'amount': self.inputs[0]['amount']*0.4}]
 
 class combi_gate(Machine):
 	def __init__(self, machine_id, outputs_to):
@@ -64,7 +137,7 @@ class combi_gate(Machine):
 
 class inlet(Machine):
 	def __init__(self, machine_id, outputs_to):
-		self.inputs = [1.0]
+		self.inputs = [{'amount': 1.0, 'material': Pellet()}]
 		self.machine_id = machine_id
 		self.outputs_to = outputs_to
 
@@ -89,6 +162,12 @@ def initialise_network():
 	return network
 
 
+def initialise_recipes():
+	recipes = []
+
+
+	return recipes
+
 if __name__ == '__main__':
 	network = initialise_network()
 	resolved_nodes = []
@@ -96,6 +175,7 @@ if __name__ == '__main__':
 	while len(resolved_nodes) < len(network):
 		for node in network:
 			if False not in node.inputs:
+				print('node inputs are', node.inputs)
 				if node.machine_id not in resolved_nodes: 
 					resolved_nodes.append(node.machine_id)
 
@@ -103,31 +183,23 @@ if __name__ == '__main__':
 				for i, rx in enumerate(node.outputs_to):
 					print('rx is', rx)
 					rx_node = next((x for x in network if x.machine_id == rx), None)
+					# rx_node.inputs[rx_node.inputs.index(False)] = {
+					# 	'amount': outputs[i]['amount'], 
+					# 	'material': outputs[i]['material'] 
+					# }
 
 					if rx_node is not None:
 						try:
-							rx_node.inputs[rx_node.inputs.index(False)] = outputs[i]
+							rx_node.inputs[rx_node.inputs.index(False)] = {
+									'amount': outputs[i]['amount'], 
+									'material': outputs[i]['material']
+								}
+
 							print('set input of', rx, 'to', rx_node.inputs)
 						except:
 							print('no available inlets')
-						# next((inlet for inlet in rx_node.inputs if inlet == False), None)
 					else:
 						print('end of network')
 
 
-
-			print('got output from', node.machine_id, outputs)
-
-# main_input = 1.0
-# output = combi_gate([mixer([split_gate(main_input)[1], split_gate(core(split_gate(main_input)[0])[0])[1]]), heater(mixer([core(split_gate(main_input)[0])[1], split_gate(core(split_gate(main_input)[0])[0])[0]]))])
-
-# algorithm:
-# work backward from the output to get the input?
-
-# or -- work through and check if inputs in list, if not go to next linked node
-
-
-# b = split_gate(main_input)[0]
-# f = split_gate(main_input)[1]
-# print(output)
-
+			# print('got output from', node.machine_id, outputs)
