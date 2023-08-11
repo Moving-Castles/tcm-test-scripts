@@ -64,8 +64,10 @@ class Pellet(Solid):
 		self.name = name
 
 
-# class Recipe:
-# 	def __init__(self, ingredients, result)
+class Recipe:
+	def __init__(self, ingredients, result):
+		self.ingredients = ingredients
+		self.result = result
 # invert_op = getattr(self, "invert_op", None) <- check if method exists on object
 
 class Machine:
@@ -114,11 +116,17 @@ class mixer(Machine):
 		self.outputs_to = outputs_to
 
 	def process(self):
+		ingredients = {self.inputs[1]['material'].name, self.inputs[0]['material'].name}
+		result = Dirt()
+		for recipe in recipes:
+			if recipe.ingredients == ingredients:
+				result = recipe.result
+
 		if self.inputs[0]['amount'] > self.inputs[1]['amount']:
-			return [{'material': self.inputs[1]['material'], 'amount': self.inputs[1]['amount']*2}]
+			return [{'material': result, 'amount': self.inputs[1]['amount']*2}]
 
 		else:
-			return [{'material': self.inputs[0]['material'], 'amount': self.inputs[0]['amount']*2}]
+			return [{'material': result, 'amount': self.inputs[0]['amount']*2}]
 
 class core(Machine):
 	def __init__(self, machine_id, outputs_to):
@@ -137,7 +145,11 @@ class combi_gate(Machine):
 		self.outputs_to = outputs_to
 
 	def process(self):
-		print('sent', self.inputs, 'to outlet')
+		print('sent:')
+		for out in self.inputs:
+			print('  -  ', out['amount'], out['material'].name)
+
+		print('to outlet')
 		return self.inputs
 
 
@@ -170,33 +182,34 @@ def initialise_network():
 
 def initialise_recipes():
 	recipes = []
-
+	recipes.append(Recipe({'piss', 'blood'}, Teeth()))
 
 	return recipes
 
 if __name__ == '__main__':
 	network = initialise_network()
+	recipes = initialise_recipes()
+
 	resolved_nodes = []
 
 	while len(resolved_nodes) < len(network):
 		for node in network:
 			if False not in node.inputs and node.machine_id not in resolved_nodes:
-				print('node inputs are', node.inputs)
 				resolved_nodes.append(node.machine_id)
 				outputs = node.process()
 
 				for i, rx in enumerate(node.outputs_to):
-					print('rx is', rx)
 					rx_node = next((x for x in network if x.machine_id == rx), None)
 
 					if rx_node is not None:
 						try:
-							rx_node.inputs[rx_node.inputs.index(False)] = {
+							in_idx = rx_node.inputs.index(False)
+							rx_node.inputs[in_idx] = {
 									'amount': outputs[i]['amount'], 
 									'material': outputs[i]['material']
 								}
 
-							print('set input of', rx, 'to', rx_node.inputs)
+							print('set input', in_idx, 'of', rx, 'to', outputs[i]['amount'], outputs[i]['material'].name)
 						except:
 							print('no available inlets')
 					else:
