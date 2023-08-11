@@ -79,7 +79,9 @@ class heater(Machine):
 		self.outputs_to = outputs_to
 
 	def process(self):
-		return self.inputs
+		material = self.inputs[0]['material']
+		material.name = "hot " + material.name
+		return [{'material': material, 'amount': self.inputs[0]['amount']}]
 
 class dryer(Machine):
 	def __init__(self, machine_id, outputs_to):
@@ -88,7 +90,11 @@ class dryer(Machine):
 		self.outputs_to = outputs_to
 
 	def process(self):
-		return self.inputs
+		material = self.inputs[0]['material']
+		if getattr(material, "dry", None) is not None:
+			material = material.dry()
+		else: print('cannot dry')
+		return [{'material': material, 'amount': self.inputs[0]['amount']}]
 
 class split_gate(Machine):
 	def __init__(self, machine_id, outputs_to):
@@ -121,8 +127,8 @@ class core(Machine):
 		self.outputs_to = outputs_to
 
 	def process(self):
-		return [{ 'material': self.inputs[0]['material'], 'amount': self.inputs[0]['amount']*0.4}, 
-			{ 'material': self.inputs[0]['material'], 'amount': self.inputs[0]['amount']*0.4}]
+		return [{ 'material': Piss(), 'amount': self.inputs[0]['amount']*0.4}, 
+			{ 'material': Blood(), 'amount': self.inputs[0]['amount']*0.4}]
 
 class combi_gate(Machine):
 	def __init__(self, machine_id, outputs_to):
@@ -174,19 +180,14 @@ if __name__ == '__main__':
 
 	while len(resolved_nodes) < len(network):
 		for node in network:
-			if False not in node.inputs:
+			if False not in node.inputs and node.machine_id not in resolved_nodes:
 				print('node inputs are', node.inputs)
-				if node.machine_id not in resolved_nodes: 
-					resolved_nodes.append(node.machine_id)
-
+				resolved_nodes.append(node.machine_id)
 				outputs = node.process()
+
 				for i, rx in enumerate(node.outputs_to):
 					print('rx is', rx)
 					rx_node = next((x for x in network if x.machine_id == rx), None)
-					# rx_node.inputs[rx_node.inputs.index(False)] = {
-					# 	'amount': outputs[i]['amount'], 
-					# 	'material': outputs[i]['material'] 
-					# }
 
 					if rx_node is not None:
 						try:
