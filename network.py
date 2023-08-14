@@ -5,6 +5,18 @@ class Material:
 	def heat(self, amount):
 		self.temp = self.temp + amount
 
+class Connection():
+	def __init__(self, source, dest):
+		self.source = source
+		self.dest = dest
+
+	def draw(self, machines):
+		# check if there's space on the input of source
+		# and on the output of dest. if not then 
+
+	def delete(self, machines):
+		# remove
+
 
 class Solid(Material):
 	def __init__(self, base_temp):
@@ -71,12 +83,14 @@ class Recipe:
 # invert_op = getattr(self, "invert_op", None) <- check if method exists on object
 
 class Machine:
-	def __init__(self, machine_id, outputs_to):
+	def __init__(self, machine_id, outputs_to, name):
 		self.inputs = [False]
+		self.name = name
 
 class heater(Machine):
-	def __init__(self, machine_id, outputs_to):
+	def __init__(self, machine_id, outputs_to, name):
 		self.inputs = [False]
+		self.name = name
 		self.machine_id = machine_id
 		self.outputs_to = outputs_to
 
@@ -86,8 +100,9 @@ class heater(Machine):
 		return [{'material': material, 'amount': self.inputs[0]['amount']}]
 
 class dryer(Machine):
-	def __init__(self, machine_id, outputs_to):
+	def __init__(self, machine_id, outputs_to, name):
 		self.inputs = [False]
+		self.name = name
 		self.machine_id = machine_id
 		self.outputs_to = outputs_to
 
@@ -99,8 +114,9 @@ class dryer(Machine):
 		return [{'material': material, 'amount': self.inputs[0]['amount']}]
 
 class split_gate(Machine):
-	def __init__(self, machine_id, outputs_to):
+	def __init__(self, machine_id, outputs_to, name):
 		self.inputs = [False]
+		self.name = name
 		self.machine_id = machine_id
 		self.outputs_to = outputs_to
 
@@ -110,8 +126,9 @@ class split_gate(Machine):
 
 
 class mixer(Machine):
-	def __init__(self, machine_id, outputs_to):
+	def __init__(self, machine_id, outputs_to, name):
 		self.inputs = [False, False]
+		self.name = name
 		self.machine_id = machine_id
 		self.outputs_to = outputs_to
 
@@ -129,8 +146,9 @@ class mixer(Machine):
 			return [{'material': result, 'amount': self.inputs[0]['amount']*2}]
 
 class core(Machine):
-	def __init__(self, machine_id, outputs_to):
+	def __init__(self, machine_id, outputs_to, name):
 		self.inputs = [False]
+		self.name = name
 		self.machine_id = machine_id
 		self.outputs_to = outputs_to
 
@@ -139,8 +157,9 @@ class core(Machine):
 			{ 'material': Blood(), 'amount': self.inputs[0]['amount']*0.4}]
 
 class combi_gate(Machine):
-	def __init__(self, machine_id, outputs_to):
+	def __init__(self, machine_id, outputs_to, name):
 		self.inputs = [False, False]
+		self.name = name
 		self.machine_id = machine_id
 		self.outputs_to = outputs_to
 
@@ -154,8 +173,9 @@ class combi_gate(Machine):
 
 
 class inlet(Machine):
-	def __init__(self, machine_id, outputs_to):
-		self.inputs = [{'amount': 1.0, 'material': Pellet()}]
+	def __init__(self, machine_id, outputs_to, name):
+		self.inputs = [False] #[{'amount': 1.0, 'material': Pellet()}]
+		self.name = name
 		self.machine_id = machine_id
 		self.outputs_to = outputs_to
 
@@ -163,21 +183,21 @@ class inlet(Machine):
 		return self.inputs
 
 
-def initialise_network():
-	network = []
+def initialise_machines():
+	machines = []
 
 	#add inlet
-	network.append(inlet(0, [1]))
-	network.append(split_gate(1, [2, 3]))
-	network.append(core(2, [5, 6]))
-	network.append(mixer(3, [4]))
-	network.append(dryer(4, [8]))
-	network.append(split_gate(5, [3, 6]))
-	network.append(mixer(6, [7]))
-	network.append(heater(7, [8]))
-	network.append(combi_gate(8, [9]))
+	machines.append(inlet(0, [1], 'inlet'))
+	machines.append(split_gate(1, [2, 3], 'splitter'))
+	machines.append(core(2, [5, 6], 'you'))
+	machines.append(mixer(3, [4], 'mixer'))
+	machines.append(dryer(4, [8], 'dryer'))
+	machines.append(split_gate(5, [3, 6], 'splitter'))
+	machines.append(mixer(6, [7], 'mixer'))
+	machines.append(heater(7, [8], 'heater'))
+	machines.append(combi_gate(8, [9], 'combined flow pipe'))
 
-	return network
+	return machines
 
 
 def initialise_recipes():
@@ -187,19 +207,25 @@ def initialise_recipes():
 	return recipes
 
 if __name__ == '__main__':
-	network = initialise_network()
+	machines = initialise_machines()
 	recipes = initialise_recipes()
+
+
+	# each time a machine or connection is added
+	# go over the list of connections and 'redraw' the network
+	# recalculate input / output
 
 	resolved_nodes = []
 
-	while len(resolved_nodes) < len(network):
-		for node in network:
+	counter = 0
+	while len(resolved_nodes) < len(machines):
+		for node in machines:
 			if False not in node.inputs and node.machine_id not in resolved_nodes:
 				resolved_nodes.append(node.machine_id)
 				outputs = node.process()
 
 				for i, rx in enumerate(node.outputs_to):
-					rx_node = next((x for x in network if x.machine_id == rx), None)
+					rx_node = next((x for x in machines if x.machine_id == rx), None)
 
 					if rx_node is not None:
 						try:
@@ -209,11 +235,18 @@ if __name__ == '__main__':
 									'material': outputs[i]['material']
 								}
 
-							print('set input', in_idx, 'of', rx, 'to', outputs[i]['amount'], outputs[i]['material'].name)
+							print('sending', outputs[i]['amount'], outputs[i]['material'].name, 'from', node.name, 'to', rx_node.name)
 						except:
 							print('no available inlets')
 					else:
 						print('end of network')
 
+		# if we have to go over the network more than twice the size of the network
+		# then we know it's not solvable (is this true?!)
+		counter+=1
+
+		if counter == len(machines)*2:
+			print('no source/sink connection')
+			break
 
 			# print('got output from', node.machine_id, outputs)
