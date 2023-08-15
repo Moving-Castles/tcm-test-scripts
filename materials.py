@@ -66,3 +66,6 @@ class Pellet(Solid):
 	def __init__(self, base_temp=20, name='pellet'):
 		super().__init__(base_temp)
 		self.name = name
+
+recipes = []
+recipes.append(Recipe({'piss', 'blood'}, Teeth()))

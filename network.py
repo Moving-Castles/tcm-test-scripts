@@ -1,7 +1,7 @@
 from components import *
 from materials import *
 
-def initialise_machines():
+def initialise_machines_full():
 	machines = []
 	connections = []
 
@@ -35,15 +35,11 @@ def initialise_machines():
 	return machines, connections
 
 
-def initialise_recipes():
-	recipes = []
-	recipes.append(Recipe({'piss', 'blood'}, Teeth()))
+# def initialise_grid():
 
-	return recipes
 
 if __name__ == '__main__':
-	recipes = initialise_recipes()
-	machines, connections = initialise_machines()
+	machines, connections = initialise_machines_full()
 
 	# each time a machine or connection is added
 	# go over the list of connections and 'redraw' the network

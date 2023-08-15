@@ -67,7 +67,7 @@ class split_gate(Machine):
 
 
 class mixer(Machine):
-	def __init__(self, machine_id, name, recipes):
+	def __init__(self, machine_id, name, recipes=recipes):
 		self.inputs = [False, False]
 		self.name = name
 		self.machine_id = machine_id
