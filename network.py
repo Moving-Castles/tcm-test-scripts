@@ -2,6 +2,8 @@ from components import *
 from materials import *
 import components
 import os
+from collections import Counter
+import time
 
 def initialise_machines_full():
 	machines = []
@@ -47,8 +49,8 @@ def print_state():
 
 	for machine in machines:
 		print(machine.name, "with id", machine.machine_id)
-		print(" - ", len(machine.inputs), "available inputs")
-		print(" - ", len(machine.outputs), "available outputs")
+		print(" - ", machine.inputs.count(False), "available inputs")
+		print(" - ", machine.outputs.count(False), "available outputs")
 
 		for i, inflow in enumerate(machine.inputs):
 			if inflow != False:
@@ -56,20 +58,35 @@ def print_state():
 
 		for i, output in enumerate(machine.outflow):
 			if output != False:
-				print("leaking", output["amount"], output["material"].name, "from output", i+1)
+				if output["material"].material_type == "liquid":
+					outword = "leaking"
+				else:
+					outword = "shedding"
+
+				if machine.outputs[i] != False:
+					outword = "pumping"
+
+				print(outword, output["amount"], output["material"].name, "from output", i+1)
 
 		print("")
 
 	for connection in connections:
 		print("connection from", connection.source, "to", connection.dest)
-		print("")
+	
+	print("")
 
 
 def initialise_grid():
 	machines = []
 
 	machines.append(inlet(str(len(machines)), 'inlet'))
+
+	# possibility for second input, hacky for now
+	# machines.append(inlet(str(len(machines)), 'inlet'))
+	# machines[1].inputs = [{'material': Flesh(), 'amount': 1.0}]
+
 	machines.append(core(str(len(machines)), 'you'))
+
 
 	return machines
 
@@ -120,29 +137,55 @@ if __name__ == '__main__':
 	machines = initialise_grid()
 	connections = []
 
+	os.system('clear')
+	time.sleep(0.5)
+	print("#############################")
+	print("WELCOME TO THIS CURSED MACHINE")
+	print("#############################\n")
+	# time.sleep(1)
+
+	print("loading goal", end='')
+	for i in range(0, 10):
+		print(".", end='', flush=True)
+		time.sleep(0.2)
+
+	# time.sleep(1)
+	os.system('clear')
+	print("#############################")
+	print("WELCOME TO THIS CURSED MACHINE")
+	print("#############################\n")
+	print("goal: 10 hot teeth, 20 sand\n")
+
 	# each time a machine or connection is added
 	# go over the list of connections and 'redraw' the network
 	# recalculate input / output
+
+	print("initialising world", end='')
+	for i in range(0, 10):
+		print(".", end='', flush=True)
+		time.sleep(0.2)
+
 
 	while True:
 		resolve_network()
 		print_state()
 
-		opt = input('to add a machine press [1]. to make a connection, press [2]. to run simulation, press [3] \n> ')
+		opt = input('to add a machine type [m]. to make a connection, type [c]\n> ')
 
-		if opt == "1":
-			new_machine = input('name of new machine \n> ')
+		if opt == "m":
+			# print("available machines: [heater, mixer, dryer, split_gate]")
+			new_machine = input('name of new machine (choose from [heater, mixer, dryer, split_gate]): \n> ')
 			add_machine(new_machine)
 
-		elif opt == "2":
-			source = input('id of machine for source of connection \n> ')
-			dest = input('id of machine for destination of connection \n> ')
+		elif opt == "c":
+			source = input('source machine id: ')
+			dest = input('target machine id: ')
 			new_conn = Connection(source, dest)
 			new_conn.draw(machines)
 
 			connections.append(new_conn)
 
-		elif opt == "3":
+		elif opt == "0":
 			break
 
 		else:

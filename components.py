@@ -106,10 +106,15 @@ class core(Machine):
 		self.outputs = [False, False]
 
 	def process(self):
-		self.outflow = [{ 'material': Piss(), 'amount': self.inputs[0]['amount']*0.4}, 
-			{ 'material': Blood(), 'amount': self.inputs[0]['amount']*0.4}]
-		return [{ 'material': Piss(), 'amount': self.inputs[0]['amount']*0.4}, 
-			{ 'material': Blood(), 'amount': self.inputs[0]['amount']*0.4}]
+		if self.inputs[0]['material'].isFood:
+			self.outflow = [{ 'material': Piss(), 'amount': self.inputs[0]['amount']*0.4}, 
+				{ 'material': Blood(), 'amount': self.inputs[0]['amount']*0.4}]
+			return [{ 'material': Piss(), 'amount': self.inputs[0]['amount']*0.4}, 
+				{ 'material': Blood(), 'amount': self.inputs[0]['amount']*0.4}]
+		else:
+			print('ugh! not food!')
+			self.outflow = self.inputs
+			return self.inputs
 
 class combi_gate(Machine):
 	def __init__(self, machine_id, name):
