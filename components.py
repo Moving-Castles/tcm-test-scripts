@@ -37,7 +37,7 @@ class Organ:
 		self.alive = True
 
 
-class heater(Machine):
+class scorcher(Machine):
 	def __init__(self, machine_id, name):
 		super().__init__()
 		self.inputs = [False]
@@ -52,7 +52,7 @@ class heater(Machine):
 		self.outflow =  [{'material': material, 'amount': self.inputs[0]['amount']}]
 		return [{'material': material, 'amount': self.inputs[0]['amount']}]
 
-class dryer(Machine):
+class parcher(Machine):
 	def __init__(self, machine_id, name):
 		super().__init__()
 		self.inputs = [False]
@@ -69,7 +69,7 @@ class dryer(Machine):
 		self.outflow = [{'material': material, 'amount': self.inputs[0]['amount']}]
 		return [{'material': material, 'amount': self.inputs[0]['amount']}]
 
-class split_gate(Machine):
+class splitter(Machine):
 	def __init__(self, machine_id, name):
 		super().__init__()
 		self.inputs = [False]
@@ -85,7 +85,7 @@ class split_gate(Machine):
 		{ 'amount': self.inputs[0]['amount']/2, 'material': self.inputs[0]['material']}]
 
 
-class mixer(Machine):
+class blender(Machine):
 	def __init__(self, machine_id, name, recipes=recipes):
 		super().__init__()
 		self.inputs = [False, False]
@@ -170,3 +170,20 @@ class inlet(Machine):
 	def process(self):
 		self.outflow = self.inputs
 		return self.inputs
+
+class outlet(Machine):
+	def __init__(self, machine_id, name):
+		super().__init__()
+		self.inputs = [False]
+		self.pool = []
+		self.name = name
+		self.machine_id = machine_id
+		self.outputs = []
+
+	def process(self):
+		if self.inputs[0] != False:
+			pool_material = next((o for o in self.pool if o['material'].get_name() == self.inputs[0]['material'].get_name()), None)
+			if pool_material is not None:
+				pool_material['amount'] = round(pool_material['amount'] + self.inputs[0]['amount'], 1)
+			else:
+				self.pool.append(self.inputs[0])

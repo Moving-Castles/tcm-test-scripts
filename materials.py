@@ -7,31 +7,25 @@ class Material:
 
 	def change_temp(self, amount):
 		material = copy.deepcopy(self)
-		print('changing temp', material.temp, amount)
 		material.temp = material.temp + amount
-		print('temp is now', material.temp, 'hot temp is', material.hot_temp)
 
 		# deal with the extreme cases first
 		if getattr(material, "freeze", None) is not None:
 			if material.temp <= material.freeze_temp:
 				frozen = material.freeze()
-				print('returning')
 				return frozen
 
-		print('gets here')
 		if getattr(material, "vapourise", None) is not None:
 			if material.temp >= material.vapour_temp:
 				vapour = material.vapourise()
-				print('returning vaput')
 				return vapour
 
-		print('gets here')
 		if material.temp >= material.hot_temp:
 			material.temp_state = "hot"
-			print('changed name')
+		
 		elif material.temp <= material.cold_temp:
 			material.temp_state = "cold"
-			print('changed name')
+		
 		else:
 			material.temp_state = ""
 

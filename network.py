@@ -59,6 +59,18 @@ def print_state():
 
 	print("you currently have", player.energy, "energy remaining\n")
 
+	if len(grid_output.pool) !=0:
+		print("in your pool there is:")
+
+		for item in grid_output.pool:
+			print(item["amount"], item["material"].get_name())
+
+	else:
+		print('no materials in pool')
+
+	print("")
+
+
 	for machine in machines:
 		print(machine.name, "with id", machine.machine_id)
 		print(" - ", machine.inputs.count(False), "available inputs")
@@ -83,7 +95,7 @@ def print_state():
 		print("")
 
 	for connection in connections:
-		print("connection from", connection.source, "to", connection.dest)
+		print("pipe from", connection.source, "to", connection.dest)
 	
 	print("")
 
@@ -99,8 +111,10 @@ def initialise_grid():
 	player = core(str(len(machines)), 'you', 200)
 	machines.append(player)
 
+	output = outlet(str(len(machines)), 'outlet')
+	machines.append(output)
 
-	return machines, player
+	return machines, player, output
 
 def add_machine(machine_type):
 	machineClass = getattr(components, machine_type)
@@ -167,14 +181,14 @@ def resolve_network():
 
 if __name__ == '__main__':
 	# machines, connections = initialise_machines_full()
-	machines, player = initialise_grid()
+	machines, player, grid_output = initialise_grid()
 	connections = []
 
 	os.system('clear')
 	time.sleep(0.2)
-	print("#############################")
-	print("WELCOME TO THIS CURSED MACHINE")
-	print("#############################\n")
+	print("################################")
+	print("INTELLIGENT LEARNING ENVIRONMENT")
+	print("################################\n")
 	# time.sleep(1)
 
 	print("loading goal", end='')
@@ -203,14 +217,14 @@ if __name__ == '__main__':
 		resolve_network()
 		print_state()
 
-		opt = input('to add a machine type [m]. to make a connection, type [c]. To do nothing, press any other key. \n> ')
+		opt = input('to add a machine type [m]. to link a pipe, type [p]. To do nothing, press any other key. \n> ')
 
 		if opt == "m":
 			# print("available machines: [heater, mixer, dryer, split_gate]")
-			new_machine = input('name of new machine (choose from [heater, mixer, dryer, split_gate]): \n> ')
+			new_machine = input('name of new machine (choose from [splitter, scorcher, blender, parcher]): \n> ')
 			add_machine(new_machine)
 
-		elif opt == "c":
+		elif opt == "p":
 			source = input('source machine id: ')
 			dest = input('target machine id: ')
 			add_connection(source, dest)
