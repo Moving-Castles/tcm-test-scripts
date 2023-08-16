@@ -40,7 +40,7 @@ def initialise_machines_full():
 
 def print_state():
 	# print(machines)
-	os.system('clear')
+	# os.system('clear')
 	print("#############################")
 	print("WELCOME TO THIS CURSED MACHINE")
 	print("#############################\n")
@@ -54,7 +54,7 @@ def print_state():
 
 		for i, inflow in enumerate(machine.inputs):
 			if inflow != False:
-				print("recieving", inflow["amount"], inflow["material"].name, "on input", i+1)
+				print("recieving", inflow["amount"], inflow["material"].get_name(), "on input", i+1)
 
 		for i, output in enumerate(machine.outflow):
 			if output != False:
@@ -66,7 +66,7 @@ def print_state():
 				if machine.outputs[i] != False:
 					outword = "pumping"
 
-				print(outword, output["amount"], output["material"].name, "from output", i+1)
+				print(outword, output["amount"], output["material"].get_name(), "from output", i+1)
 
 		print("")
 
@@ -138,7 +138,7 @@ if __name__ == '__main__':
 	connections = []
 
 	os.system('clear')
-	time.sleep(0.5)
+	time.sleep(0.2)
 	print("#############################")
 	print("WELCOME TO THIS CURSED MACHINE")
 	print("#############################\n")
@@ -147,7 +147,7 @@ if __name__ == '__main__':
 	print("loading goal", end='')
 	for i in range(0, 10):
 		print(".", end='', flush=True)
-		time.sleep(0.2)
+		time.sleep(0.1)
 
 	# time.sleep(1)
 	os.system('clear')
@@ -163,7 +163,7 @@ if __name__ == '__main__':
 	print("initialising world", end='')
 	for i in range(0, 10):
 		print(".", end='', flush=True)
-		time.sleep(0.2)
+		time.sleep(0.1)
 
 
 	while True:

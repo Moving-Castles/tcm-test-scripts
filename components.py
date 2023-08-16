@@ -35,10 +35,10 @@ class heater(Machine):
 		self.name = name
 		self.machine_id = machine_id
 		self.outputs = [False]
+		self.heating_power = 30
 
 	def process(self):
-		material = copy.deepcopy(self.inputs[0]['material'])
-		material.name = "hot " + material.name
+		material = self.inputs[0]['material'].change_temp(self.heating_power)
 		self.outflow =  [{'material': material, 'amount': self.inputs[0]['amount']}]
 		return [{'material': material, 'amount': self.inputs[0]['amount']}]
 
@@ -106,7 +106,7 @@ class core(Machine):
 		self.outputs = [False, False]
 
 	def process(self):
-		if self.inputs[0]['material'].isFood:
+		if self.inputs[0]['material'].is_food:
 			self.outflow = [{ 'material': Piss(), 'amount': self.inputs[0]['amount']*0.4}, 
 				{ 'material': Blood(), 'amount': self.inputs[0]['amount']*0.4}]
 			return [{ 'material': Piss(), 'amount': self.inputs[0]['amount']*0.4}, 
