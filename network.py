@@ -2,6 +2,7 @@ from components import *
 from materials import *
 import components
 import os
+import sys
 from collections import Counter
 import time
 
@@ -38,14 +39,25 @@ def initialise_machines_full():
 
 	return machines, connections
 
+
+def game_over():
+	os.system('clear')
+	print("#############################")
+	print("YOU DIED!!!!!!!!!!!!!!")
+	print("#############################\n")
+	time.sleep(2)
+	sys.exit()
+
+
 def print_state():
-	# print(machines)
-	# os.system('clear')
+	os.system('clear')
 	print("#############################")
 	print("WELCOME TO THIS CURSED MACHINE")
 	print("#############################\n")
 	print("goal: 10 hot teeth, 20 sand\n")
 	print("current world state:\n")
+
+	print("you currently have", player.energy, "energy remaining\n")
 
 	for machine in machines:
 		print(machine.name, "with id", machine.machine_id)
@@ -84,24 +96,49 @@ def initialise_grid():
 	# possibility for second input, hacky for now
 	# machines.append(inlet(str(len(machines)), 'inlet'))
 	# machines[1].inputs = [{'material': Flesh(), 'amount': 1.0}]
+	player = core(str(len(machines)), 'you', 200)
+	machines.append(player)
 
-	machines.append(core(str(len(machines)), 'you'))
 
-
-	return machines
+	return machines, player
 
 def add_machine(machine_type):
-	print(machines)
 	machineClass = getattr(components, machine_type)
 	if machineClass is not None:
-		machines.append(machineClass(str(len(machines)), machine_type))
+		new_machine = machineClass(str(len(machines)), machine_type)
+		player.update_energy(-new_machine.cost)
+
+		if(player.alive):
+			machines.append(new_machine)
+
+		else:
+			game_over()
 	else:
 		print('no machine of this type avaible')
 
 
+def add_connection(source, dest):
+	new_conn = Connection(source, dest)
+	player.update_energy(-new_conn.cost)
+	
+	if(player.alive):
+		new_conn.draw(machines)
+		connections.append(new_conn)
+
+	else:
+		game_over()
+
+# clear out all the gunk before you recalculate (apart from the inlet node)
+def reset_network():
+	for node in machines:
+		if node.name != "inlet":
+			for i, node_in in enumerate(node.inputs):
+				node.inputs[i] = False
+
 def resolve_network():
 		resolved_nodes = []
 		counter = 0
+		reset_network()
 
 		while len(resolved_nodes) < len(machines):
 			for node in machines:
@@ -110,19 +147,15 @@ def resolve_network():
 					outputs = node.process()
 
 					for i, rx in enumerate(node.outputs):
-						rx_node = next((x for x in machines if x.machine_id == rx), None)
+						if rx != False:
+							rx_node = next((x for x in machines if x.machine_id == rx), None)
 
-						if rx_node is not None:
-							try:
-								in_idx = rx_node.inputs.index(False)
-								rx_node.inputs[in_idx] = {
-										'amount': outputs[i]['amount'], 
-										'material': outputs[i]['material']
-									}
-
-								# print('sending', outputs[i]['amount'], outputs[i]['material'].name, 'from', node.name, 'to', rx_node.name)
-							except:
-								print('no available inlets for', node.machine_id)
+							if rx_node is not None:
+								try:
+									in_idx = rx_node.inputs.index(False)
+									rx_node.inputs[in_idx] = outputs[i]
+								except:
+									print('no available inlets for', node.machine_id)
 
 			# if we have to go over the network more than twice the size of the network
 			# then we know it's not solvable (is this true?!)
@@ -134,7 +167,7 @@ def resolve_network():
 
 if __name__ == '__main__':
 	# machines, connections = initialise_machines_full()
-	machines = initialise_grid()
+	machines, player = initialise_grid()
 	connections = []
 
 	os.system('clear')
@@ -170,7 +203,7 @@ if __name__ == '__main__':
 		resolve_network()
 		print_state()
 
-		opt = input('to add a machine type [m]. to make a connection, type [c]\n> ')
+		opt = input('to add a machine type [m]. to make a connection, type [c]. To do nothing, press any other key. \n> ')
 
 		if opt == "m":
 			# print("available machines: [heater, mixer, dryer, split_gate]")
@@ -180,16 +213,7 @@ if __name__ == '__main__':
 		elif opt == "c":
 			source = input('source machine id: ')
 			dest = input('target machine id: ')
-			new_conn = Connection(source, dest)
-			new_conn.draw(machines)
-
-			connections.append(new_conn)
-
-		elif opt == "0":
-			break
-
-		else:
-			print("invalid input, try again")
+			add_connection(source, dest)
 
 
 				# print('got output from', node.machine_id, outputs)
