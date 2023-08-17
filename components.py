@@ -2,10 +2,11 @@ from materials import *
 import copy
 
 class Connection():
-	def __init__(self, source, dest):
+	def __init__(self, source, dest, conn_id):
 		self.source = source
 		self.dest = dest
-		self.cost = 3
+		self.cost = 6
+		self.conn_id = conn_id
 
 	def draw(self, machines):
 		# check if there's space on the input of source
@@ -13,18 +14,23 @@ class Connection():
 
 		machine = next((m for m in machines if m.machine_id == self.source), None)
 		if machine is not None:
-			print('machine outputs', machine.outputs)
 			in_idx = machine.outputs.index(False)
 			machine.outputs[in_idx] = self.dest
-			print('machine outputs after connection', machine.outputs)
-			print('connected', machine.name, (machine.machine_id), 'to', self.dest)
 		else:
 			print("couldn't find source machine")
 
+	def remove_conn(self, machines):
+		source_machine = next((m for m in machines if m.machine_id == self.source), None)
+		if source_machine is not None:
+			in_idx = source_machine.outputs.index(self.dest)
+			print('outputs', source_machine.outputs, in_idx)
+			source_machine.outputs[in_idx] = False
+			# source_machine.outflow[in_idx] = False
 
-	def delete(self, machines):
-		# remove
-		print('deleting', self.source, self.dest)
+		# target_machine = next(())
+		else:
+			print("couldn't find source machine")
+
 
 class Machine:
 	def __init__(self):
@@ -128,7 +134,7 @@ class core(Organ):
 				{ 'material': Blood(), 'amount': self.inputs[0]['amount']*0.4}]
 		else:
 			print('ugh! not food!')
-			self.outflow = self.inputs
+			self.outflow = copy.deepcopy(self.inputs)
 			return self.inputs
 
 	def update_energy(self, amount):
@@ -155,7 +161,7 @@ class combi_gate(Machine):
 			print('  -  ', out['amount'], out['material'].name)
 
 		print('to outlet')
-		self.outflow = self.inputs
+		self.outflow = copy.deepcopy(self.inputs)
 		return self.inputs
 
 
@@ -163,12 +169,12 @@ class inlet(Machine):
 	def __init__(self, machine_id, name):
 		super().__init__()
 		self.inputs = [{'amount': 1.0, 'material': Pellet()}]
-		self.name = name
+		self.name = 'inlet'
 		self.machine_id = machine_id
 		self.outputs = [False]
 
 	def process(self):
-		self.outflow = self.inputs
+		self.outflow = copy.deepcopy(self.inputs)
 		return self.inputs
 
 class outlet(Machine):

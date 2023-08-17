@@ -6,42 +6,10 @@ import sys
 from collections import Counter
 import time
 
-def initialise_machines_full():
-	machines = []
-	connections = []
-
-	#add inlet
-	machines.append(inlet(0, 'inlet'))
-	machines.append(split_gate(1, 'splitter'))
-	machines.append(core(2, 'you'))
-	machines.append(mixer(3, 'mixer'))
-	machines.append(dryer(4, 'dryer'))
-	machines.append(split_gate(5,'splitter'))
-	machines.append(mixer(6, 'mixer'))
-	machines.append(heater(7, 'heater'))
-	machines.append(combi_gate(8, 'combined flow pipe'))
-
-	connections.append(Connection(0, 1))
-	connections.append(Connection(1, 2))
-	connections.append(Connection(1, 3))
-	connections.append(Connection(2, 5))
-	connections.append(Connection(2, 6))
-	connections.append(Connection(3, 4))
-	connections.append(Connection(4, 8))
-	connections.append(Connection(5, 3))
-	connections.append(Connection(5, 6))
-	connections.append(Connection(6, 7))
-	connections.append(Connection(7, 8))
-	connections.append(Connection(8, 9))
-
-	for conn in connections:
-		conn.draw(machines)
-
-	return machines, connections
-
+debug_mode = False
 
 def game_over():
-	os.system('clear')
+	if not debug_mode: os.system('clear')
 	print("#############################")
 	print("YOU DIED!!!!!!!!!!!!!!")
 	print("#############################\n")
@@ -50,7 +18,7 @@ def game_over():
 
 
 def print_state():
-	os.system('clear')
+	if not debug_mode: os.system('clear')
 	print("#############################")
 	print("WELCOME TO THIS CURSED MACHINE")
 	print("#############################\n")
@@ -95,7 +63,7 @@ def print_state():
 		print("")
 
 	for connection in connections:
-		print("pipe from", connection.source, "to", connection.dest)
+		print("pipe from", connection.source, "to", connection.dest, "with id", connection.conn_id)
 	
 	print("")
 
@@ -130,9 +98,20 @@ def add_machine(machine_type):
 	else:
 		print('no machine of this type avaible')
 
+# I think this has to also remove all the connections
+def remove_machine(machine_id):
+	machine = next((x for x in machines if x.machine_id == machine_id), None)
+	if machine is not None:
+		machines.remove(machine)
+	for connection in connections:
+		if connection.source == machine_id or connection.dest == machine_id:
+			remove_connection(connection.conn_id)
+	else:
+		print('no machine with this id to remove')
+
 
 def add_connection(source, dest):
-	new_conn = Connection(source, dest)
+	new_conn = Connection(source, dest, str(len(connections)))
 	player.update_energy(-new_conn.cost)
 	
 	if(player.alive):
@@ -142,12 +121,24 @@ def add_connection(source, dest):
 	else:
 		game_over()
 
+def remove_connection(conn_id):
+	conn = next((x for x in connections if x.conn_id == conn_id), None)
+	if conn is not None:
+		conn.remove_conn(machines)
+		connections.remove(conn)
+	else:
+		print('no connection with this id to remove')
+
+
 # clear out all the gunk before you recalculate (apart from the inlet node)
 def reset_network():
 	for node in machines:
 		if node.name != "inlet":
 			for i, node_in in enumerate(node.inputs):
 				node.inputs[i] = False
+
+		for i, node_out in enumerate(node.outflow):
+			node.outflow[i] = False
 
 def resolve_network():
 		resolved_nodes = []
@@ -187,7 +178,7 @@ if __name__ == '__main__':
 	os.system('clear')
 	time.sleep(0.2)
 	print("################################")
-	print("INTELLIGENT LEARNING ENVIRONMENT")
+	print("WELCOME TO THIS CURSED MACHINE")
 	print("################################\n")
 	# time.sleep(1)
 
@@ -199,7 +190,7 @@ if __name__ == '__main__':
 	# time.sleep(1)
 	os.system('clear')
 	print("#############################")
-	print("WELCOME TO THIS CURSED MACHINE")
+	print("INTELLIGENT LEARNING ENVIRONMENT")
 	print("#############################\n")
 	print("goal: 10 hot teeth, 20 sand\n")
 
@@ -217,7 +208,7 @@ if __name__ == '__main__':
 		resolve_network()
 		print_state()
 
-		opt = input('to add a machine type [m]. to link a pipe, type [p]. To do nothing, press any other key. \n> ')
+		opt = input('To add a machine type [m]. to link a pipe, type [p].\nTo remove a machine, type [rm] and to remove a pipe, type [rp].\nTo do nothing, press any other key. \n> ')
 
 		if opt == "m":
 			# print("available machines: [heater, mixer, dryer, split_gate]")
@@ -228,6 +219,14 @@ if __name__ == '__main__':
 			source = input('source machine id: ')
 			dest = input('target machine id: ')
 			add_connection(source, dest)
+
+		elif opt == "rm":
+			rm = input('enter the id of the machine you would like to remove: ')
+			remove_machine(rm)
+
+		elif opt == "rp":
+			rp = input('enter the id of the pipe you would like to remove: ')
+			remove_connection(rp)
 
 
 				# print('got output from', node.machine_id, outputs)

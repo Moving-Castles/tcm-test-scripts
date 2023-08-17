@@ -62,7 +62,7 @@ class Liquid(Material):
 
 class Dirt(Solid):
 	def __init__(self, base_temp=20, name='dirt'):
-		super().__init__(base_temp)
+		super().__init__(base_temp, hot_temp=30)
 		self.name = name
 
 	def dry(self):
