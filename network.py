@@ -26,6 +26,41 @@ def game_over():
 	sys.exit()
 
 
+def is_in_cycle(machine_id, visited, recursion_stack):
+	nxt = visited.index(False)
+	visited[nxt] = machine_id
+	nxt_2 = recursion_stack.index(False)
+	recursion_stack[nxt_2] = machine_id
+
+	links = list(filter(lambda c: c.source == machine_id, connections))
+
+	for link in links:
+		# if we get back to where we came from in the same loop
+		if link.dest not in visited:
+			if is_in_cycle(link.dest, visited, recursion_stack):
+				return True
+		elif link.dest in recursion_stack:
+				return True
+
+	recursion_stack[nxt_2] = False
+	return False
+
+# if there's a cycle and it's still valid replace cycle w/ pseudomachine
+def detect_cycles():
+	visited = [False]*len(machines)
+	recursion_stack = [False]*len(machines)
+
+	for machine in machines:
+		if machine.machine_id not in visited:
+			if is_in_cycle(machine.machine_id, visited, recursion_stack):
+				if not debug_mode: os.system('clear')
+				print('feedback cycle detected', end='')
+				dot_dot()
+				print('system overload', end='')
+				dot_dot()
+				player.die()
+				game_over()
+
 def print_messages():
 	global messages
 	if not debug_mode: os.system('clear')
@@ -225,6 +260,7 @@ if __name__ == '__main__':
 
 
 	while True:
+		detect_cycles()
 		resolve_network()
 		if len(messages) > 0: print_messages()
 		print_state()
