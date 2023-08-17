@@ -17,6 +17,16 @@ def dot_dot(length=10):
 		print(".", end='', flush=True)
 		time.sleep(0.1)
 
+
+def victory():
+	if not debug_mode: os.system('clear')
+	print("#############################")
+	print("YOU WON!!!!!!!!!!!!!!")
+	print("#############################\n")
+	time.sleep(2)
+	sys.exit()
+
+
 def game_over():
 	if not debug_mode: os.system('clear')
 	print("#############################")
@@ -77,7 +87,11 @@ def print_state():
 	print("#############################")
 	print("WELCOME TO THIS CURSED MACHINE")
 	print("#############################\n")
-	print("goal: 10 hot teeth, 20 sand\n")
+	print('goal:')
+	for material in win_state:
+		print(material['amount'], material['material_name'])
+	print('')
+
 	print("current world state:\n")
 
 	print("you currently have", player.energy, "energy remaining\n")
@@ -122,6 +136,19 @@ def print_state():
 	
 	print("")
 
+def check_win_state():
+	global win_state
+
+	for win_material in win_state:
+		pool_material = next((o for o in grid_output.pool if o['material'].get_name() == win_material['material_name']), None)
+		if pool_material is not None:
+			if pool_material['amount'] >= win_material['amount']:
+				feedback_message('you got enough ' + win_material['material_name'] + '!')
+				win_state.remove(win_material)
+
+	if len(win_state) == 0:
+		print_messages()
+		victory()
 
 def initialise_grid():
 	machines = []
@@ -131,7 +158,7 @@ def initialise_grid():
 	# possibility for second input, hacky for now
 	# machines.append(inlet(str(len(machines)), 'inlet'))
 	# machines[1].inputs = [{'material': Flesh(), 'amount': 1.0}]
-	player = core(str(len(machines)), 'you', 200)
+	player = core(str(len(machines)), 'you', 300)
 	machines.append(player)
 
 	output = outlet(str(len(machines)), 'outlet')
@@ -160,9 +187,9 @@ def remove_machine(machine_id):
 		if getattr(machine, "remove_machine", None) is not None:
 			machine.remove_machine
 		if machine.can_remove: machines.remove(machine)
-	for connection in connections:
-		if connection.source == machine_id or connection.dest == machine_id:
-			remove_connection(connection.conn_id)
+		for connection in connections:
+			if connection.source == machine_id or connection.dest == machine_id:
+				remove_connection(connection.conn_id)
 	else:
 		feedback_message('no machine with this id to remove')
 
@@ -233,6 +260,16 @@ if __name__ == '__main__':
 	# machines, connections = initialise_machines_full()
 	machines, player, grid_output = initialise_grid()
 	connections = []
+	win_state = [{
+		'material_name': 'hot teeth',
+		'amount': 10,
+		'done': False
+	},
+	{
+		'material_name': 'sand',
+		'amount': 20,
+		'done': False
+	}]
 
 	os.system('clear')
 	time.sleep(0.2)
@@ -249,7 +286,10 @@ if __name__ == '__main__':
 	print("################################")
 	print("WELCOME TO THIS CURSED MACHINE")
 	print("################################\n")
-	print("goal: 10 hot teeth, 20 sand\n")
+	print('goal:')
+	for material in win_state:
+		print(material['amount'], material['material_name'])
+	print('')
 
 	# each time a machine or connection is added
 	# go over the list of connections and 'redraw' the network
@@ -262,6 +302,7 @@ if __name__ == '__main__':
 	while True:
 		detect_cycles()
 		resolve_network()
+		check_win_state()
 		if len(messages) > 0: print_messages()
 		print_state()
 
