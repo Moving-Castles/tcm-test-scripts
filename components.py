@@ -1,5 +1,6 @@
 from materials import *
 import copy
+from network import feedback_message
 
 class Connection():
 	def __init__(self, source, dest, conn_id):
@@ -17,25 +18,26 @@ class Connection():
 			in_idx = machine.outputs.index(False)
 			machine.outputs[in_idx] = self.dest
 		else:
-			print("couldn't find source machine")
+			feedback_message("pipe was not added -- couldn't find source machine")
 
 	def remove_conn(self, machines):
 		source_machine = next((m for m in machines if m.machine_id == self.source), None)
 		if source_machine is not None:
-			in_idx = source_machine.outputs.index(self.dest)
-			print('outputs', source_machine.outputs, in_idx)
+			try:
+				in_idx = source_machine.outputs.index(self.dest)
+			except:
+				feedback_message("pipe was not removed -- couldn't find target machine")
+				return
 			source_machine.outputs[in_idx] = False
-			# source_machine.outflow[in_idx] = False
-
-		# target_machine = next(())
+		
 		else:
-			print("couldn't find source machine")
+			feedback_message("pipe was not removed -- couldn't find source machine")
 
 
 class Machine:
 	def __init__(self):
 		self.outflow = []
-
+		self.can_remove = True
 
 class Organ:
 	def __init__(self):
@@ -173,6 +175,9 @@ class inlet(Machine):
 		self.machine_id = machine_id
 		self.outputs = [False]
 
+	def remove_machine():
+		feedback_message('you jam your stump into the pipe and the inflow slurps to a stop')
+
 	def process(self):
 		self.outflow = copy.deepcopy(self.inputs)
 		return self.inputs
@@ -185,6 +190,10 @@ class outlet(Machine):
 		self.name = name
 		self.machine_id = machine_id
 		self.outputs = []
+		self.can_remove = False
+
+	def remove_machine():
+		feedback_message('your stumps scrape uselessly at the pipe, you cannot remove it')
 
 	def process(self):
 		if self.inputs[0] != False:
