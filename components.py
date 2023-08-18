@@ -1,6 +1,6 @@
 from materials import *
 import copy
-from network import feedback_message
+from network import print_message
 
 class Connection():
 	def __init__(self, source, dest, conn_id):
@@ -16,10 +16,31 @@ class Connection():
 
 		machine = next((m for m in machines if m.machine_id == self.source), None)
 		if machine is not None:
-			in_idx = machine.outputs.index(False)
-			machine.outputs[in_idx] = self.dest
+			# check if you can actually put it on the output
+			try:
+				in_idx = machine.outputs.index(False)
+				machine.outputs[in_idx] = self.dest
+			except:
+				print_message("pipe was not added -- no available outputs on source machine")
+				return False
+
+			# now check if you can find the target
+			rx_node = next((x for x in machines if x.machine_id == self.dest), None)
+			if rx_node is not None:
+				try:
+					in_idx = rx_node.inputs.index(False)
+				except:
+					print_message("pipe was not added -- no available inputs on target machine")
+					return False
+			else:
+				print_message("pipe was not added -- couldn't find target machine")
+				return False
+
 		else:
-			feedback_message("pipe was not added -- couldn't find source machine")
+			print_message("pipe was not added -- couldn't find source machine")
+			return False
+
+		return True
 
 	def remove_conn(self, machines):
 		source_machine = next((m for m in machines if m.machine_id == self.source), None)
@@ -27,12 +48,12 @@ class Connection():
 			try:
 				in_idx = source_machine.outputs.index(self.dest)
 			except:
-				feedback_message("pipe was not removed -- couldn't find target machine")
+				print_message("pipe was not removed -- couldn't find target machine")
 				return
 			source_machine.outputs[in_idx] = False
 		
 		else:
-			feedback_message("pipe was not removed -- couldn't find source machine")
+			print_message("pipe was not removed -- couldn't find source machine")
 
 
 class Machine:
@@ -184,7 +205,7 @@ class inlet(Machine):
 		self.description = "Special resource inlet."
 
 	def remove_machine():
-		feedback_message('you jam your stump into the pipe and the inflow slurps to a stop')
+		print_message('you jam your stump into the pipe and the inflow slurps to a stop')
 
 	def process(self):
 		self.outflow = copy.deepcopy(self.inputs)
@@ -202,7 +223,7 @@ class outlet(Machine):
 		self.description = "Streaming bile duct, pipe in the fruits of your labour here."
 
 	def remove_machine():
-		feedback_message('your stumps scrape uselessly at the pipe, you cannot remove it')
+		print_message('your stumps scrape uselessly at the pipe, you cannot remove it')
 
 	def process(self):
 		if self.inputs[0] != False:

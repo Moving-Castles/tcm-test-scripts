@@ -18,8 +18,10 @@ if '-s' in sys.argv:
 if '-d' in sys.argv:
 	debug_mode = True
 
-def feedback_message(message):
-	messages.append(message)
+def feedback_message(message, messages=messages):
+	player_messages = messages
+	player_messages.append(message)
+	print('adding feedback message', player_messages)
 
 def dot_dot(length=10):
 	for i in range(0, length):
@@ -184,14 +186,26 @@ def detect_cycles():
 
 def print_messages():
 	global messages
+	header()
 	if not debug_mode: os.system('clear')
 	for message in messages:
-		print(message)
+		print_text(message)
 		time.sleep(0.2)
 
 	# reset every time
 	messages = []
-	dot_dot()
+	input('[ENTER]')
+	# dot_dot()
+
+def print_message(message):
+	# if not debug_mode: os.system('clear')
+	header()
+	print_text(message)
+	time.sleep(0.2)
+
+	input('[ENTER]')
+	# dot_dot()
+
 
 def print_state():
 	header()
@@ -329,14 +343,18 @@ def remove_machine(machine_id):
 
 def add_connection(source, dest):
 	new_conn = Connection(source, dest, str(len(connections)))
-	player.update_energy(-new_conn.cost)
-	
-	if(player.alive):
-		new_conn.draw(machines)
-		connections.append(new_conn)
+
+	# try drawing the connection
+	if new_conn.draw(machines):
+		if(player.alive):
+			player.update_energy(-new_conn.cost)
+			connections.append(new_conn)
+			print('gets here')
+		else:
+			game_over()
 
 	else:
-		game_over()
+		print('im here now')
 
 def remove_connection(conn_id):
 	conn = next((x for x in connections if x.conn_id == conn_id), None)
@@ -394,6 +412,7 @@ if __name__ == '__main__':
 	machines, player, grid_output = initialise_grid()
 	per_turn_energy_cost = -2
 	connections = []
+	# messages = []
 	win_state = [{
 		'material_name': 'hot teeth',
 		'amount': 10,
@@ -432,6 +451,7 @@ if __name__ == '__main__':
 		resolve_network()
 		player.update_energy(per_turn_energy_cost)
 		check_win_state()
+		print('messages', messages)
 		if len(messages) > 0: print_messages()
 		print_state()
 
