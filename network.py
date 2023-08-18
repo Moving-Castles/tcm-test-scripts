@@ -5,6 +5,8 @@ import os
 import sys
 from collections import Counter
 import time
+import textwrap
+# from termcolor import colored
 
 debug_mode = False
 messages = []
@@ -16,77 +18,109 @@ def dot_dot(length=10):
 	for i in range(0, length):
 		print(".", end='', flush=True)
 		time.sleep(0.1)
+	
+	print('\n')
 
-
-def intro():
+def header():
 	if not debug_mode: os.system('clear')
 	print("#############################")
 	print("WELCOME TO THIS CURSED MACHINE")
 	print("#############################\n")
+
+def print_text(text, wrapper=70, newline=True, speed=0.05):
+	counter = 0
+	words = text.split(' ')  # ['I', 'need', 'practice']
+	for letter in text:
+	  print(letter, end='', flush=True)
+	  # counter += len(word) + 1
+	  counter+=1
+	  time.sleep(speed)
+	  
+	  if counter >= wrapper and letter == ' ':
+	  	print('')
+	  	counter = 0
+
+	if newline: print('\n')
+
+
+def intro():
+	header()
 	dot_dot()
+	print_text("ahhhh, you're awake")
+	print('\n')
 	time.sleep(1)
-	print("\n\nahhhh, you're awake\n")
-	time.sleep(2)
+	input('[ENTER]')
+
+	header()
+	time.sleep(0.5)
+	print_text("such a pleasure to meet our newest flesh tribute")
 	dot_dot()
 	print('\n')
-	time.sleep(2)
-	print("\nsuch a pleasure to meet our newest flesh tribute")
-	time.sleep(2)
-	print("No, don't try moving -- you can't do that any more.")
-	time.sleep(1)
+	input('[ENTER]')
+
+	header()
 	dot_dot()
+	print_text("no, don't try moving -- you can't do that any more")
+	dot_dot()
+	print_text("Allow me to introduce myself:")
+	print_text("I'm Puppitywink, your new manager")
 	print('\n')
-	time.sleep(2)
-	print("Allow me to introduce myself:")
-	time.sleep(2)
-	print("I'm Puppitywink, your new manager.\n")
-	time.sleep(2)
-	dot_dot()
+	input('[ENTER]')
+
+
+	header()
+	print_text("You will soon be placed in a Box.")
+	time.sleep(1)
+	print_text("Boxes are Controlled Production Environments essential to the functioning and upkeep of this operation.")	
+	print_text("Each Box is specially designed to allow the production of novel Materials...")
+	time.sleep(1)
+	print_text("...and you are here to produce them.")
+	time.sleep(1)
+	print_text("\nYour stumps will be wired in to the controls of this box.\n")
+	time.sleep(1)
 	print('\n')
-	time.sleep(1)
-	print("You will soon be placed in a Box.")
-	time.sleep(2)
-	print("Boxes are Controlled Production Environments...")
-	time.sleep(2)
-	print("essential to the functioning and upkeep of this operation.\n")
-	time.sleep(2)	
-	print("Each box is specially designed to allow the production of novel Materials...")
-	time.sleep(2)
-	print("...and you are here to produce them.")
-	time.sleep(2)
-	print("\nYour stumps will be wired in to the controls of this box.\n")
-	# dot_dot()
-	# print('\n')
-	time.sleep(1)
+	input('[...stumps?]')
+
+
+	header()
 	dot_dot()
-	print("stumps? ha ha ha", end='')
+	print_text("stumps? ha ha ha")
 	dot_dot()
-	time.sleep(2)
-	print("\nWe removed your limbs for ease of access. thank me later.\n")
-	time.sleep(2)
-	print("In each box, an inlet pipe pumps material in, and an outflow pipe allows you to move material out.")
-	time.sleep(2)
-	print("The materials are processed by a series of machines, including your good self.")
-	time.sleep(4)
-	print("\nTo complete the box, you must wire the required material to the outlet.")
-	time.sleep(2)
-	print("Connect up the machines to series of pipes to mix, crunch, scorch, digest and metabolise.\n")
-	time.sleep(4)
-	print("You pay for the machines with your own, precious energy.")
-	time.sleep(2)
-	print("Be careful not to let it run out!\n\n")
-	time.sleep(4)
-	print("Ah, stop screaming, it's not all so bad.")
-	time.sleep(2)
-	print("If you do well here, you might even get a sticker!")
-	time.sleep(2)
-	print("...now wouldn't that be nice\n\n")
-	time.sleep(4)
-	print("Right! enough chat")
-	time.sleep(2)
-	print("All you know now is pipes, machines, and piss. Get salivating!\n\n")
-	time.sleep(4)
-	input("press enter to continue...")
+	print_text("we removed your limbs for ease of access. thank me later.")
+	time.sleep(1)
+	print('\n')
+	input('[ok]')
+
+
+	header()
+	print_text("As I was saying: in each Box, an inlet pipe pumps material in, and an outflow pipe allows you to move material out. The materials are processed by a series of machines, including your good self.")
+	time.sleep(1)
+	print_text("To complete the Box, you must wire the required material to the outlet.")
+	time.sleep(1)
+	print_text("Connect up the machines via a series of pipes to mix, crunch, scorch, digest and metabolise your way out.")
+	time.sleep(1)
+	print_text("You pay for the machines with your own, precious energy. Be careful not to let it run out!")
+	time.sleep(1)
+	print('\n')
+	input('[AAAAAAAAAAAGHHH!!!]')
+
+	header()
+	print_text("Ah, stop screaming, it's not all so bad.")
+	time.sleep(1)
+	print_text("If you do well here, you might even get a sticker!")
+	time.sleep(1)
+	print_text("Now wouldn't that be nice?")
+	time.sleep(1)
+	print('\n')
+	input('[yes]')
+
+
+	header()
+	print_text("Right! enough chat.")
+	time.sleep(1)
+	print_text("All you know now is pipes, machines, and piss. Get salivating!")
+	time.sleep(1)
+	input("[START]")
 
 def victory():
 	if not debug_mode: os.system('clear')
@@ -153,10 +187,7 @@ def print_messages():
 	dot_dot()
 
 def print_state():
-	if not debug_mode: os.system('clear')
-	print("#############################")
-	print("WELCOME TO THIS CURSED MACHINE")
-	print("#############################\n")
+	header()
 	print('goal:')
 	for material in win_state:
 		print(material['amount'], material['material_name'])
@@ -228,13 +259,38 @@ def initialise_grid():
 	# possibility for second input, hacky for now
 	# machines.append(inlet(str(len(machines)), 'inlet'))
 	# machines[1].inputs = [{'material': Flesh(), 'amount': 1.0}]
-	player = core(str(len(machines)), 'you', 300)
+	player = core(str(len(machines)), 'you', initial_energy=300)
 	machines.append(player)
 
 	output = outlet(str(len(machines)), 'outlet')
 	machines.append(output)
 
 	return machines, player, output
+
+def get_info(machine_type):
+	machineClass = getattr(components, machine_type, None)
+	if machineClass is not None:
+		temp_machine = machineClass('xx', machine_type)
+		header()
+		dot_dot()
+		print_text(machine_type.title())
+		# print('energy cost:', temp_machine.cost)
+		print_text('inputs: ' + str(len(temp_machine.inputs)), newline=False)
+		print('')
+		print_text('outputs: ' + str(len(temp_machine.outputs)), newline=False)
+		print('')
+
+		if hasattr(temp_machine, "cost"):
+			print_text('cost: ' + str(temp_machine.cost) + ' energy')
+		else:
+			print_text('You are not currently permitted to purchase this machine')
+
+
+		print_text('description: ' + temp_machine.description)
+		input('[ENTER]')
+
+	else:
+		feedback_message("couldn't find a machine with this name")
 
 def add_machine(machine_type):
 	machineClass = getattr(components, machine_type, None)
@@ -343,19 +399,14 @@ if __name__ == '__main__':
 	}]
 
 	os.system('clear')
-	intro()
+	# intro()
 
-	print("################################")
-	print("WELCOME TO THIS CURSED MACHINE")
-	print("################################\n")
+	header()
 	print("loading goal", end='')
 	dot_dot()
 
-	# time.sleep(1)
-	os.system('clear')
-	print("################################")
-	print("WELCOME TO THIS CURSED MACHINE")
-	print("################################\n")
+	time.sleep(1)
+	header()
 	print('goal:')
 	for material in win_state:
 		print(material['amount'], material['material_name'])
@@ -377,7 +428,7 @@ if __name__ == '__main__':
 		if len(messages) > 0: print_messages()
 		print_state()
 
-		opt = input('To add a machine type [m]. to link a pipe, type [p].\nTo remove a machine, type [rm] and to remove a pipe, type [rp].\nTo do nothing, press any other key. \n> ')
+		opt = input('To add a machine type [m]. to link a pipe, type [p].\nTo remove a machine, type [rm] and to remove a pipe, type [rp].\nFor more information about the machines, press [i].\nTo do nothing, press enter. \n> ')
 
 		if opt == "m":
 			# print("available machines: [heater, mixer, dryer, split_gate]")
@@ -396,3 +447,7 @@ if __name__ == '__main__':
 		elif opt == "rp":
 			rp = input('enter the id of the pipe you would like to remove: ')
 			remove_connection(rp)
+
+		elif opt == "i":
+			info = input('\ntype the name of one of the following machines:\n[inlet, outlet, core, splitter, scorcher, blender, parcher]\n> ') #\n\nor one of the following materials: [piss, blood, dirt, muck, sand, teeth, pellet]'
+			get_info(info)

@@ -125,7 +125,7 @@ class blender(Machine):
 			return [{'material': result, 'amount': self.inputs[0]['amount']*2}]
 
 class core(Organ):
-	def __init__(self, machine_id, name, initial_energy):
+	def __init__(self, machine_id, name, initial_energy=100):
 		super().__init__()
 		self.inputs = [False]
 		self.name = name

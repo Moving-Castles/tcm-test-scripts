@@ -127,6 +127,7 @@ class Teeth(Solid):
 	def __init__(self, base_temp=20, name='teeth'):
 		super().__init__(base_temp)
 		self.name = name
+		self.description = "Crunchier than you remember."
 
 class Pellet(Solid):
 	def __init__(self, base_temp=20, name='pellet'):
