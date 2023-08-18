@@ -8,6 +8,7 @@ class Connection():
 		self.dest = dest
 		self.cost = 6
 		self.conn_id = conn_id
+		self.description = "Pumping your vile fluids from A to B."
 
 	def draw(self, machines):
 		# check if there's space on the input of source
@@ -38,12 +39,13 @@ class Machine:
 	def __init__(self):
 		self.outflow = []
 		self.can_remove = True
+		self.description = "You don't know much about this machine"
 
 class Organ:
 	def __init__(self):
 		self.outflow = []
 		self.alive = True
-
+		self.description = "You don't know much about this organ"
 
 class scorcher(Machine):
 	def __init__(self, machine_id, name):
@@ -54,6 +56,7 @@ class scorcher(Machine):
 		self.outputs = [False]
 		self.heating_power = 30
 		self.cost = 30
+		self.description = "A sweltering, hellish box."
 
 	def process(self):
 		material = self.inputs[0]['material'].change_temp(self.heating_power)
@@ -68,6 +71,7 @@ class parcher(Machine):
 		self.machine_id = machine_id
 		self.outputs = [False]
 		self.cost = 20
+		self.description = "Dessicates whatever enters its gaping maw."
 
 	def process(self):
 		material = self.inputs[0]['material']
@@ -85,6 +89,7 @@ class splitter(Machine):
 		self.machine_id = machine_id
 		self.outputs = [False, False]
 		self.cost = 15
+		self.description = "Split up the juices."
 
 	def process(self):
 		self.outflow = [{ 'amount': self.inputs[0]['amount']/2, 'material': self.inputs[0]['material']}, 
@@ -102,6 +107,7 @@ class blender(Machine):
 		self.outputs = [False]
 		self.recipes = recipes
 		self.cost = 40
+		self.description = "Crunching and mashing into a uniform pulp. Results may vary."
 
 	def process(self):
 		ingredients = {self.inputs[1]['material'].name, self.inputs[0]['material'].name}
@@ -126,6 +132,7 @@ class core(Organ):
 		self.machine_id = machine_id
 		self.outputs = [False, False]
 		self.energy = initial_energy
+		self.description = "That’s you, how about you hook some pipes up to those nice stumps of yours and get to work?"
 
 	def process(self):
 		if self.inputs[0]['material'].is_food:
@@ -174,6 +181,7 @@ class inlet(Machine):
 		self.name = 'inlet'
 		self.machine_id = machine_id
 		self.outputs = [False]
+		self.description = "Special resource inlet."
 
 	def remove_machine():
 		feedback_message('you jam your stump into the pipe and the inflow slurps to a stop')
@@ -191,6 +199,7 @@ class outlet(Machine):
 		self.machine_id = machine_id
 		self.outputs = []
 		self.can_remove = False
+		self.description = "Streaming bile duct, pipe in the fruits of your labour here."
 
 	def remove_machine():
 		feedback_message('your stumps scrape uselessly at the pipe, you cannot remove it')

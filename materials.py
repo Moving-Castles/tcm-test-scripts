@@ -4,6 +4,7 @@ class Material:
 	def __init__(self, base_temp):
 		self.temp = base_temp
 		self.temp_state = ''
+		self.description = "You don't know much about this material"
 
 	def change_temp(self, amount):
 		material = copy.deepcopy(self)
@@ -64,6 +65,7 @@ class Dirt(Solid):
 	def __init__(self, base_temp=20, name='dirt'):
 		super().__init__(base_temp, hot_temp=30)
 		self.name = name
+		self.description = "Grimy, stupid dirt. What are you going to do with this, idiot?"
 
 	def dry(self):
 		return Sand(base_temp = self.temp)
@@ -75,6 +77,7 @@ class Sand(Solid):
 	def __init__(self, base_temp=20, name='sand'):
 		super().__init__(base_temp)
 		self.name = name
+		self.description = "Fine, dry and gritty."
 
 	def wet(self):
 		return Dirt(base_temp = self.temp)
@@ -83,16 +86,20 @@ class Scab(Solid):
 	def __init__(self, base_temp=20, name='scab'):
 		super().__init__(base_temp)
 		self.name = name
+		self.is_food = True
+		self.description = "Coagulated lumpen cells. Delicious."
 
 class Flesh(Solid):
 	def __init__(self, base_temp=20, name='flesh'):
 		super().__init__(base_temp)
 		self.name = name
+		self.description = "Wet, chewy, crunchy. A loose mass of fat and sinew. "
 
 class Muck(Liquid):
 	def __init__(self, base_temp=20, name='muck'):
 		super().__init__(base_temp)
 		self.name = name
+		self.description = "Like dirt but even more useless. Jesus Fucking Christ."
 
 	def dry(self):
 		return Dirt(base_temp = self.temp)
@@ -101,6 +108,7 @@ class Piss(Liquid):
 	def __init__(self, base_temp=20, name='piss', vapour_temp=90):
 		super().__init__(base_temp, vapour_temp=90)
 		self.name = name
+		self.description = "Steaming, streaming, fresh excreta."
 
 	def vapourise(self):
 		print('turning to vapour')
@@ -110,6 +118,7 @@ class Blood(Liquid):
 	def __init__(self, base_temp=20, name='blood'):
 		super().__init__(base_temp)
 		self.name = name
+		self.description = "Warm liquid gore. Is it yours? Is it theirs? At this point, who cares."
 
 	def dry(self):
 		return Scab(base_temp = self.temp)
@@ -124,6 +133,7 @@ class Pellet(Solid):
 		super().__init__(base_temp)
 		self.name = name
 		self.is_food = True
+		self.description = "God you love the pellets, don’t you? Crunch crunch crunch basic foodstuff, eh? Wouldn’t this be nice with a cold beer? Some piss? ha ha ha."
 
 recipes = []
 recipes.append(Recipe({'piss', 'blood'}, Teeth()))
