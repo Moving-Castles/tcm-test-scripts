@@ -216,20 +216,6 @@ def print_state():
 
 	print("current world state:\n")
 
-	print("you currently have", player.energy, "energy remaining\n")
-
-	if len(grid_output.pool) !=0:
-		print("in your pool there is:")
-
-		for item in grid_output.pool:
-			print(item["amount"], item["material"].get_name())
-
-	else:
-		print('no materials in pool')
-
-	print("")
-
-
 	for machine in machines:
 		print(machine.name, "with id", machine.machine_id)
 		print(" - ", machine.inputs.count(False), "available inputs")
@@ -255,7 +241,21 @@ def print_state():
 
 	for connection in connections:
 		print("pipe from", connection.source, "to", connection.dest, "with id", connection.conn_id)
-	
+
+	print("you currently have", player.energy, "energy remaining\n")
+
+	if len(grid_output.pool) !=0:
+		print("in your pool there is:")
+
+		for item in grid_output.pool:
+			print(item["amount"], item["material"].get_name())
+
+	else:
+		print('no materials in pool')
+
+	print("")
+
+
 	print("")
 
 def check_win_state():
@@ -280,7 +280,7 @@ def initialise_grid():
 	# possibility for second input, hacky for now
 	# machines.append(inlet(str(len(machines)), 'inlet'))
 	# machines[1].inputs = [{'material': Flesh(), 'amount': 1.0}]
-	player = core(str(len(machines)), 'you', initial_energy=300)
+	player = core(str(len(machines)), 'you', initial_energy=500)
 	machines.append(player)
 
 	output = outlet(str(len(machines)), 'outlet')

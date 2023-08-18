@@ -47,11 +47,10 @@ class Connection():
 		if source_machine is not None:
 			try:
 				in_idx = source_machine.outputs.index(self.dest)
+				source_machine.outputs[in_idx] = False
 			except:
 				print_message("pipe was not removed -- couldn't find target machine")
 				return
-			source_machine.outputs[in_idx] = False
-		
 		else:
 			print_message("pipe was not removed -- couldn't find source machine")
 
@@ -66,6 +65,7 @@ class Organ:
 	def __init__(self):
 		self.outflow = []
 		self.alive = True
+		self.can_remove = False
 		self.description = "You don't know much about this organ"
 
 class scorcher(Machine):
