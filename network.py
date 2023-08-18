@@ -259,6 +259,7 @@ def resolve_network():
 if __name__ == '__main__':
 	# machines, connections = initialise_machines_full()
 	machines, player, grid_output = initialise_grid()
+	per_turn_energy_cost = -2
 	connections = []
 	win_state = [{
 		'material_name': 'hot teeth',
@@ -302,6 +303,7 @@ if __name__ == '__main__':
 	while True:
 		detect_cycles()
 		resolve_network()
+		player.update_energy(per_turn_energy_cost)
 		check_win_state()
 		if len(messages) > 0: print_messages()
 		print_state()
@@ -325,6 +327,3 @@ if __name__ == '__main__':
 		elif opt == "rp":
 			rp = input('enter the id of the pipe you would like to remove: ')
 			remove_connection(rp)
-
-
-				# print('got output from', node.machine_id, outputs)
