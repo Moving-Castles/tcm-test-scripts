@@ -3,13 +3,20 @@ from materials import *
 import components
 import os
 import sys
-from collections import Counter
 import time
-import textwrap
-# from termcolor import colored
 
 debug_mode = False
 messages = []
+skip_intro = False
+
+# command line arguments: 
+# -s skips intro
+# -d disables clearing terminal output between screens
+if '-s' in sys.argv:
+	skip_intro = True
+
+if '-d' in sys.argv:
+	debug_mode = True
 
 def feedback_message(message):
 	messages.append(message)
@@ -399,7 +406,7 @@ if __name__ == '__main__':
 	}]
 
 	os.system('clear')
-	# intro()
+	if not skip_intro: intro()
 
 	header()
 	print("loading goal", end='')
