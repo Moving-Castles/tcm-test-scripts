@@ -1,6 +1,6 @@
 from materials import *
 import copy
-from network import print_message
+from network import print_message, game_over
 
 class Connection():
 	def __init__(self, source, dest, conn_id):
@@ -173,8 +173,13 @@ class core(Organ):
 		if(self.energy <= 0):
 			self.die()
 
+	def remove_machine(self):
+		print_message("you idiot!!!!!")
+		self.die()
+
 	def die(self):
 		self.alive = False
+		game_over()
 
 class combi_gate(Machine):
 	def __init__(self, machine_id, name):

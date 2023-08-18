@@ -332,7 +332,7 @@ def remove_machine(machine_id):
 	machine = next((x for x in machines if x.machine_id == machine_id), None)
 	if machine is not None:
 		if getattr(machine, "remove_machine", None) is not None:
-			machine.remove_machine
+			machine.remove_machine()
 		if machine.can_remove: machines.remove(machine)
 		for connection in connections:
 			if connection.source == machine_id or connection.dest == machine_id:
