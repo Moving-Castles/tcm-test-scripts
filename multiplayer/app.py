@@ -47,6 +47,7 @@ def remove_player(player_id):
 
 def game_over(player_id):
     remove_player(player_id)
+    emit('die')
     disconnect(player_id)
 
 @app.route('/')

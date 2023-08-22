@@ -14,8 +14,15 @@ class Connection(object):
 		self.source = source
 		self.dest = dest
 		self.cost = 6
+		self.vote_cost = 10
+		self.votes = []
 		self.conn_id = conn_id
 		self.description = "Pumping your vile fluids from A to B."
+
+	# if a player disconnects need to remove their vote from counting
+	# or maybe there's just a live check on this?
+	def vote(self, voter_id):
+		self.votes.append(voter_id)
 
 	def draw(self, machines):
 		# check if there's space on the input of source
