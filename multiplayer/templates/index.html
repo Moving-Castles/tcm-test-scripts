@@ -29,6 +29,7 @@
                $('#machines').text('')
                $('#connections').text('')
                 world_state.machines.forEach((machine, i) => $('#machines').append( $('<li/>').text(machine.name + ' with id: ' + machine.machine_id)));
+                world_state.connections.forEach((conn, i) => $('#connections').append( $('<li/>').text('from ' + conn.source + ' to ' + conn.dest + ' with id: ' + conn.conn_id)));
                 if (cb)
                     cb();
             });
@@ -108,8 +109,12 @@
     </form>
 
     <h2>world state:</h2>
-      <div><ul id="machines"></ul></div>
-
+      <div>
+         <h3>machines</h3>
+         <ul id="machines"></ul></div>
+      <div>
+         <h3>connections</h3>
+         <ul id="connections"></ul></div>
     <h2>player status:</h2>`
 
     <div id="log"></div>

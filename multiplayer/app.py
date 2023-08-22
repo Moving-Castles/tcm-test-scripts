@@ -40,12 +40,15 @@ def update_world():
                     print('machine out is', outflow)
                     machine_json['outflow'][i] = {'amount': outflow['amount'], 'material': outflow['material'].__dict__}
 
-        # again i am filled with remorse. screaming, crying, throwing up.
+        # again i am filled with remorse
         if hasattr(machine, 'inputs'):
             for i, machine_in in enumerate(machine.inputs):
                 if machine_in is not False:
                     print('machine in is', machine_in)
                     machine_json['inputs'][i] = {'amount': machine_in['amount'], 'material': machine_in['material'].__dict__}
+
+        # screaming, crying, throwing up
+        if hasattr(machine, 'recipes'): del machine_json['recipes']
 
         world_state['machines'].append(machine_json)
     for connection in connections:
@@ -54,8 +57,8 @@ def update_world():
     emit('world_state', {'data': json.dumps(world_state)}, broadcast=True)
 
 def initialise_grid():
-    machines.append(inlet(network.machine_num(), 'inlet'))
-    output = outlet(network.machine_num(), 'outlet')
+    machines.append(inlet(str(network.machine_num()), 'inlet'))
+    output = outlet(str(network.machine_num()), 'outlet')
     machines.append(output) 
 
 def background_thread():
@@ -87,11 +90,12 @@ def index():
 def create_core():
     # global machines
     session['receive_count'] = session.get('receive_count', 0) + 1
-    new_core = core(network.machine_num(), request.sid, 'you', initial_energy=300)
+    new_core = core(str(network.machine_num()), request.sid, 'you', initial_energy=300)
     machines.append(new_core)
     print('created core', new_core.machine_id)
     emit('core_info',
          {'data': json.dumps(new_core.__dict__)})
+    update_world()
 
 
 @socketio.event
@@ -101,7 +105,6 @@ def connect():
     with thread_lock:
         if thread is None:
             thread = socketio.start_background_task(background_thread)
-    emit('my_response', {'data': 'Connected', 'count': 0})
 
 @socketio.event
 def add_machine(data):
@@ -116,7 +119,10 @@ def add_machine(data):
 
 @socketio.event
 def add_connection(conn_data):
+    global machines, connections
     print('adding connection', json.dumps(conn_data), request.sid)
+    player = fetch_player(request.sid)
+    machines, connections, player = network.add_connection(conn_data['source'], conn_data['dest'], machines, connections, player)
     update_world()
 
 @socketio.event

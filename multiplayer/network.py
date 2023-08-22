@@ -7,6 +7,7 @@ def machine_num():
 	machine_number +=1
 	return machine_number
 
+
 def get_info(machine_type):
 	machineClass = getattr(components, machine_type, None)
 	if machineClass is not None:
@@ -36,7 +37,7 @@ def add_machine(machine_type, machines, player):
 	machineClass = getattr(components, machine_type, None)
 	print('adding machine of type', machineClass)
 	if machineClass is not None:
-		new_machine = machineClass(machine_num(), machine_type)
+		new_machine = machineClass(str(machine_num()), machine_type)
 		player.update_energy(-new_machine.cost)
 
 		if(player.alive):

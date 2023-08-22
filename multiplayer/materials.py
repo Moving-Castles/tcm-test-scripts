@@ -36,7 +36,7 @@ class Material(object):
 		return (self.temp_state + " " + self.name).strip()
 
 
-class Recipe:
+class Recipe(object):
 	def __init__(self, ingredients, result):
 		self.ingredients = ingredients
 		self.result = result
