@@ -64,7 +64,21 @@ def connect():
             thread = socketio.start_background_task(background_thread)
     emit('my_response', {'data': 'Connected', 'count': 0})
 
+@socketio.event
+def add_machine(machine_type):
+    print('adding machine', machine_type, request.sid)
 
+@socketio.event
+def add_connection(conn_data):
+    print('adding connection', json.dumps(conn_data), request.sid)
+
+@socketio.event
+def rm_connection(conn_id):
+    print('removing connection', conn_id, request.sid)
+
+@socketio.event
+def vote(conn_id):
+    print('voting', conn_id, request.sid)
 
 @socketio.on('disconnect')
 def test_disconnect():

@@ -18,10 +18,6 @@
                 socket.emit('create_core');
             });
 
-            // Event handler for server sent data.
-            // The callback function is invoked whenever the server emits data
-            // to the client. The data is then displayed in the "Received"
-            // section of the page.
             socket.on('my_response', function(msg, cb) {
                 $('#log').append('<br>' + $('<div/>').text('Received #' + msg.count + ': ' + msg.data).html());
                 if (cb)
@@ -32,11 +28,60 @@
                 socket.emit('disconnect');
             });
 
+            $('form#add_machine').submit(function(event) {
+                socket.emit('add_machine', {machine_type: $('#machine_type').val()});
+                return false;
+            });
+
+            $('form#add_connection').submit(function(event) {
+                socket.emit('add_connection', {source: $('#source').val(), dest: $('#dest').val()});
+                return false;
+            });
+
+            $('form#rm_connection').submit(function(event) {
+                socket.emit('rm_connection', {conn_id: $('#rm_conn_id').val()});
+                return false;
+            });
+
+            $('form#vote').submit(function(event) {
+                socket.emit('vote', {conn_id: $('#vote_conn_id').val()});
+                return false;
+            });
+
         });
     </script>
 </head>
 <body>
     <h1>THIS CURSED MACHINE</h1>
+    <h2>Send:</h2>
+    <form id="add_machine" method="POST" action='#'>
+      <!-- <label>add machine</label> -->
+      <select name="machine_type" id="machine_type">
+        <option value="blender">blender</option>
+        <option value="scorcher">scorcher</option>
+        <option value="splitter">splitter</option>`
+        <option value="wetter">wetter</option>
+        <option value="parcher">parcher</option>
+      </select>
+        <input type="submit" value="Add Machine">
+    </form>
+
+    <form id="add_connection" method="POST" action='#'>
+        <input type="text" name="source" id="source" placeholder="source machine id">
+        <input type="text" name="dest" id="dest" placeholder="target machine id">
+        <input type="submit" value="Add Connection">
+    </form>
+
+    <form id="rm_connection" method="POST" action='#'>
+        <input type="text" name="rm_conn_id" id="rm_conn_id" placeholder="connection id to remove">
+        <input type="submit" value="Remove Connection">
+    </form>
+
+    <form id="vote" method="POST" action='#'>
+        <input type="text" name="vote_conn_id" id="vote_conn_id" placeholder="connection id to remove">
+        <input type="submit" value="Vote To Remove Connection">
+    </form>
+
     <h2>Receive:</h2>
     <div id="log"></div>
 </body>
