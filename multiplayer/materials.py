@@ -1,6 +1,6 @@
 import copy
 
-class Material:
+class Material(object):
 	def __init__(self, base_temp):
 		self.temp = base_temp
 		self.temp_state = ''

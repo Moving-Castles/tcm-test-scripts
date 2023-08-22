@@ -1,7 +1,7 @@
 <!DOCTYPE HTML>
 <html>
 <head>
-    <title>Flask-SocketIO Test</title>
+    <title>THIS CURSED MACHINE</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js" integrity="sha512-aMGMvNYu8Ue4G+fHa359jcPb1u+ytAF+P2SCb+PxrjCdO3n3ZTxJ30zuH39rimUggmTwmh2u7wvQsDTHESnmfQ==" crossorigin="anonymous"></script>
     <script type="text/javascript" charset="utf-8">
@@ -18,8 +18,17 @@
                 socket.emit('create_core');
             });
 
-            socket.on('my_response', function(msg, cb) {
-                $('#log').append('<br>' + $('<div/>').text('Received #' + msg.count + ': ' + msg.data).html());
+            socket.on('chat_msg', function(msg, cb) {
+                $('#chat_log').append( $('<li/>').text(msg.data));
+                if (cb)
+                    cb();
+            });
+
+           socket.on('world_state', function(msg, cb) {
+               const world_state = JSON.parse(msg.data)
+               $('#machines').text('')
+               $('#connections').text('')
+                world_state.machines.forEach((machine, i) => $('#machines').append( $('<li/>').text(machine.name + ' with id: ' + machine.machine_id)));
                 if (cb)
                     cb();
             });
@@ -52,12 +61,17 @@
                 return false;
             });
 
+            $('form#chat').submit(function(event) {
+                socket.emit('chat', {data: $('#chat_msg').val()});
+                return false;
+            });
+
         });
     </script>
 </head>
 <body>
     <h1>THIS CURSED MACHINE</h1>
-    <h2>Send:</h2>
+    <h2>modify grid</h2>
     <form id="add_machine" method="POST" action='#'>
       <!-- <label>add machine</label> -->
       <select name="machine_type" id="machine_type">
@@ -86,7 +100,18 @@
         <input type="submit" value="Vote To Remove Connection">
     </form>
 
-    <h2>Receive:</h2>
+    <h2>chat:</h2>
+    <div><ul id="chat_log"></ul></div>
+    <form id="chat" method="POST" action='#'>
+        <input type="text" name="chat_msg" id="chat_msg" placeholder="make your opinion known">
+        <input type="submit" value="chat">
+    </form>
+
+    <h2>world state:</h2>
+      <div><ul id="machines"></ul></div>
+
+    <h2>player status:</h2>`
+
     <div id="log"></div>
 </body>
 </html>

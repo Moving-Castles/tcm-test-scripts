@@ -6,6 +6,7 @@ from flask_socketio import SocketIO, emit, join_room, leave_room, \
 from components import *
 import network
 import json
+import copy
 
 # Set this variable to "threading", "eventlet" or "gevent" to test the
 # different async modes, or leave it set to None for the application to choose
@@ -24,6 +25,31 @@ machine_number = 0
 def fetch_player(id):
     player = next((x for x in machines if hasattr(x, 'session_id') and x.session_id == request.sid), None)
     return player
+
+def update_world():
+    world_state = {'machines': [], 'connections': []}
+    for machine in machines:
+        machine_json = copy.deepcopy(machine).__dict__
+
+        # this is disgusting. rasmus if you are reading this I'm sorry.
+        if hasattr(machine, 'outflow'):
+            for i, outflow in enumerate(machine.outflow):
+                if outflow is not False:
+                    print('machine out is', outflow)
+                    machine_json['outflow'][i] = {'amount': outflow['amount'], 'material': outflow['material'].__dict__}
+
+        # again i am filled with remorse. screaming, crying, throwing up.
+        if hasattr(machine, 'inputs'):
+            for i, machine_in in enumerate(machine.inputs):
+                if machine_in is not False:
+                    print('machine in is', machine_in)
+                    machine_json['inputs'][i] = {'amount': machine_in['amount'], 'material': machine_in['material'].__dict__}
+
+        world_state['machines'].append(machine_json)
+    for connection in connections:
+        world_state['connections'].append(connection.__dict__)
+
+    emit('world_state', {'data': json.dumps(world_state)}, broadcast=True)
 
 def initialise_grid():
     machines.append(inlet(network.machine_num(), 'inlet'))
@@ -84,23 +110,29 @@ def add_machine(data):
     if not player.alive:
         game_over(player.session_id)
     print('machines is now', machines)
+    update_world()
 
 @socketio.event
 def add_connection(conn_data):
     print('adding connection', json.dumps(conn_data), request.sid)
+    update_world()
 
 @socketio.event
 def rm_connection(conn_id):
     print('removing connection', conn_id, request.sid)
+    update_world()
 
 @socketio.event
 def vote(conn_id):
     print('voting', conn_id, request.sid)
 
+@socketio.event
+def chat(message):
+    emit('chat_msg', {'data': message['data']}, broadcast=True)
+
 @socketio.on('disconnect')
 def test_disconnect():
     remove_player(request.sid)
-
 
 if __name__ == '__main__':
     initialise_grid()
