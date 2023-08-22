@@ -2,9 +2,6 @@ from components import *
 import components
 from app import machine_number
 
-def game_over():
-    print('game over')
-
 def machine_num():
 	global machine_number
 	machine_number +=1
@@ -44,12 +41,10 @@ def add_machine(machine_type, machines, player):
 
 		if(player.alive):
 			machines.append(new_machine)
-		else:
-			game_over()
 	else:
 		feedback_message('no machine of this type available')
 
-	return machines
+	return machines, player
 
 
 def remove_machine(machine_id, connections):

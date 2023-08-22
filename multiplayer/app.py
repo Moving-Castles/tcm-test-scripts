@@ -39,6 +39,16 @@ def background_thread():
         socketio.emit('my_response',
                       {'data': 'another tick', 'count': count})
 
+def remove_player(player_id):
+    rm_player = fetch_player(player_id)
+    if rm_player is not None: 
+        machines.remove(rm_player)
+        print('removed core', rm_player.machine_id)
+
+def game_over(player_id):
+    remove_player(player_id)
+    disconnect(player_id)
+
 @app.route('/')
 def index():
     return render_template('index.html', async_mode=socketio.async_mode)
@@ -69,7 +79,9 @@ def add_machine(data):
     global machines
     print('adding machine', data, request.sid)
     player = fetch_player(request.sid)
-    machines = network.add_machine(data['machine_type'], machines, player)
+    machines, player = network.add_machine(data['machine_type'], machines, player)
+    if not player.alive:
+        game_over(player.session_id)
     print('machines is now', machines)
 
 @socketio.event
@@ -86,10 +98,7 @@ def vote(conn_id):
 
 @socketio.on('disconnect')
 def test_disconnect():
-    rm_player = player(request.sid)
-    if rm_player is not None: 
-        machines.remove(rm_player)
-        print('removed core', rm_player.machine_id)
+    remove_player(request.sid)
 
 
 if __name__ == '__main__':
