@@ -27,8 +27,10 @@ def fetch_player(id):
     return player
 
 def update_world():
+    resolved_machines = network.resolve_network(machines)
     world_state = {'machines': [], 'connections': []}
-    for machine in machines:
+
+    for machine in resolved_machines:
         machine_json = copy.deepcopy(machine).__dict__
 
         # this is disgusting. rasmus if you are reading this I'm sorry.

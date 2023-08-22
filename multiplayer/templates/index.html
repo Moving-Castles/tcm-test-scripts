@@ -73,6 +73,7 @@
     <h1>THIS CURSED MACHINE</h1>
     <h2>modify grid</h2>
     <form id="add_machine" method="POST" action='#'>
+        <input type="submit" value="Add Machine">
       <!-- <label>add machine</label> -->
       <select name="machine_type" id="machine_type">
         <option value="blender">blender</option>
@@ -81,30 +82,29 @@
         <option value="wetter">wetter</option>
         <option value="parcher">parcher</option>
       </select>
-        <input type="submit" value="Add Machine">
     </form>
 
     <form id="add_connection" method="POST" action='#'>
+        <input type="submit" value="Add Connection">
         <input type="text" name="source" id="source" placeholder="source machine id">
         <input type="text" name="dest" id="dest" placeholder="target machine id">
-        <input type="submit" value="Add Connection">
     </form>
 
     <form id="rm_connection" method="POST" action='#'>
-        <input type="text" name="rm_conn_id" id="rm_conn_id" placeholder="connection id to remove">
         <input type="submit" value="Remove Connection">
+        <input type="text" name="rm_conn_id" id="rm_conn_id" placeholder="connection id to remove">
     </form>
 
     <form id="vote" method="POST" action='#'>
-        <input type="text" name="vote_conn_id" id="vote_conn_id" placeholder="connection id to remove">
         <input type="submit" value="Vote To Remove Connection">
+        <input type="text" name="vote_conn_id" id="vote_conn_id" placeholder="connection id to remove">
     </form>
 
     <h2>chat:</h2>
     <div><ul id="chat_log"></ul></div>
     <form id="chat" method="POST" action='#'>
-        <input type="text" name="chat_msg" id="chat_msg" placeholder="make your opinion known">
         <input type="submit" value="chat">
+        <input type="text" name="chat_msg" id="chat_msg" placeholder="make your opinion known">
     </form>
 
     <h2>world state:</h2>
