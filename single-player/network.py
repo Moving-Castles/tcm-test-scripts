@@ -242,16 +242,18 @@ def print_state():
 	for connection in connections:
 		print("pipe from", connection.source, "to", connection.dest, "with id", connection.conn_id)
 
-	print("you currently have", player.energy, "energy remaining\n")
+	print("")
+
+	print("> you currently have", player.energy, "energy remaining\n")
 
 	if len(grid_output.pool) !=0:
-		print("in your pool there is:")
+		print("> in your pool there is:")
 
 		for item in grid_output.pool:
-			print(item["amount"], item["material"].get_name())
+			print("  -", item["amount"], item["material"].get_name())
 
 	else:
-		print('no materials in pool')
+		print('> no materials in pool')
 
 	print("")
 
