@@ -153,11 +153,12 @@ class blender(Machine):
 			return [{'material': result, 'amount': self.inputs[0]['amount']*2}]
 
 class core(Organ):
-	def __init__(self, machine_id, name, initial_energy=100):
+	def __init__(self, machine_id, session_id, name, initial_energy=100):
 		super().__init__()
 		self.inputs = [False]
 		self.name = name
 		self.machine_id = machine_id
+		self.session_id = session_id
 		self.outputs = [False, False]
 		self.energy = initial_energy
 		self.description = "That’s you, how about you hook some pipes up to those nice stumps of yours and get to work?"
@@ -181,8 +182,8 @@ class core(Organ):
 			self.die()
 
 	def remove_machine(self):
-		print_message("you idiot!!!!!")
-		self.die()
+		print_message("nice try, asshole")
+		# self.die()
 
 	def die(self):
 		self.alive = False

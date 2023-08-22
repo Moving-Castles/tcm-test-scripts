@@ -17,6 +17,20 @@ socketio = SocketIO(app, async_mode=async_mode)
 thread = None
 thread_lock = Lock()
 machines = []
+machine_number = 0
+
+def machine_num():
+    global machine_number
+    machine_number += 1
+    return str(machine_number)
+
+def initialise_grid():
+    global machines
+    machines.append(inlet(machine_num(), 'inlet'))
+    output = outlet(machine_num(), 'outlet')
+    machines.append(output)
+
+    return machines, output  
 
 def background_thread():
     # each tick, recalculate and send world state
@@ -37,10 +51,9 @@ def index():
 def create_core():
     # global machines
     session['receive_count'] = session.get('receive_count', 0) + 1
-    new_core = core(request.sid, 'you', initial_energy=300)
+    new_core = core(machine_num(), request.sid, 'you', initial_energy=300)
     machines.append(new_core)
     print('created core', new_core.machine_id)
-    print('machines is now', machines)
     emit('core_info',
          {'data': json.dumps(new_core.__dict__)})
 
@@ -58,11 +71,11 @@ def connect():
 
 @socketio.on('disconnect')
 def test_disconnect():
-    rem_core = next((x for x in machines if x.machine_id == request.sid), None)
-    print('client disconnected; removing core', request.sid)
+    rem_core = next((x for x in machines if hasattr(x, 'session_id') and x.session_id == request.sid), None)
     machines.remove(rem_core)
-    print('machines is now', machines)
+    print('removed core', rem_core.machine_id)
 
 
 if __name__ == '__main__':
+    initialise_grid()
     socketio.run(app)
