@@ -21,13 +21,14 @@ machines = []
 connections = []
 machine_number = 0
 
+def fetch_player(id):
+    player = next((x for x in machines if hasattr(x, 'session_id') and x.session_id == request.sid), None)
+    return player
+
 def initialise_grid():
-    global machines
     machines.append(inlet(network.machine_num(), 'inlet'))
     output = outlet(network.machine_num(), 'outlet')
-    machines.append(output)
-
-    return machines, output  
+    machines.append(output) 
 
 def background_thread():
     # each tick, recalculate and send world state
@@ -37,7 +38,6 @@ def background_thread():
         count += 1
         socketio.emit('my_response',
                       {'data': 'another tick', 'count': count})
-
 
 @app.route('/')
 def index():
@@ -65,8 +65,12 @@ def connect():
     emit('my_response', {'data': 'Connected', 'count': 0})
 
 @socketio.event
-def add_machine(machine_type):
-    print('adding machine', machine_type, request.sid)
+def add_machine(data):
+    global machines
+    print('adding machine', data, request.sid)
+    player = fetch_player(request.sid)
+    machines = network.add_machine(data['machine_type'], machines, player)
+    print('machines is now', machines)
 
 @socketio.event
 def add_connection(conn_data):
@@ -82,9 +86,10 @@ def vote(conn_id):
 
 @socketio.on('disconnect')
 def test_disconnect():
-    rem_core = next((x for x in machines if hasattr(x, 'session_id') and x.session_id == request.sid), None)
-    machines.remove(rem_core)
-    print('removed core', rem_core.machine_id)
+    rm_player = player(request.sid)
+    if rm_player is not None: 
+        machines.remove(rm_player)
+        print('removed core', rm_player.machine_id)
 
 
 if __name__ == '__main__':

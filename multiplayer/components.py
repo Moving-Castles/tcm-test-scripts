@@ -177,7 +177,6 @@ class core(Organ):
 
 	def update_energy(self, amount):
 		self.energy = round(self.energy + amount, 1)
-
 		if(self.energy <= 0):
 			self.die()
 
@@ -187,7 +186,6 @@ class core(Organ):
 
 	def die(self):
 		self.alive = False
-		game_over()
 
 class combi_gate(Machine):
 	def __init__(self, machine_id, name):

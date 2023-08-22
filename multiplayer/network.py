@@ -1,5 +1,9 @@
+from components import *
 import components
 from app import machine_number
+
+def game_over():
+    print('game over')
 
 def machine_num():
 	global machine_number
@@ -33,6 +37,7 @@ def get_info(machine_type):
 
 def add_machine(machine_type, machines, player):
 	machineClass = getattr(components, machine_type, None)
+	print('adding machine of type', machineClass)
 	if machineClass is not None:
 		new_machine = machineClass(str(len(machines)), machine_type)
 		player.update_energy(-new_machine.cost)
@@ -43,7 +48,7 @@ def add_machine(machine_type, machines, player):
 			game_over()
 	else:
 		feedback_message('no machine of this type available')
-	
+
 	return machines
 
 
