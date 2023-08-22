@@ -1,8 +1,15 @@
 from materials import *
 import copy
-from network import print_message, game_over
+# from network import print_message, game_over
 
-class Connection():
+
+def print_message():
+	print('placeholder')
+
+def game_over():
+	print('placeholder')
+
+class Connection(object):
 	def __init__(self, source, dest, conn_id):
 		self.source = source
 		self.dest = dest
@@ -55,13 +62,13 @@ class Connection():
 			print_message("pipe was not removed -- couldn't find source machine")
 
 
-class Machine:
+class Machine(object):
 	def __init__(self):
 		self.outflow = []
 		self.can_remove = True
 		self.description = "You don't know much about this machine"
 
-class Organ:
+class Organ(object):
 	def __init__(self):
 		self.outflow = []
 		self.alive = True
