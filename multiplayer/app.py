@@ -4,6 +4,7 @@ from flask import Flask, render_template, session, request, \
 from flask_socketio import SocketIO, emit, join_room, leave_room, \
     close_room, rooms, disconnect
 from components import *
+import network
 import json
 
 # Set this variable to "threading", "eventlet" or "gevent" to test the
@@ -17,17 +18,13 @@ socketio = SocketIO(app, async_mode=async_mode)
 thread = None
 thread_lock = Lock()
 machines = []
+connections = []
 machine_number = 0
-
-def machine_num():
-    global machine_number
-    machine_number += 1
-    return str(machine_number)
 
 def initialise_grid():
     global machines
-    machines.append(inlet(machine_num(), 'inlet'))
-    output = outlet(machine_num(), 'outlet')
+    machines.append(inlet(network.machine_num(), 'inlet'))
+    output = outlet(network.machine_num(), 'outlet')
     machines.append(output)
 
     return machines, output  
@@ -51,7 +48,7 @@ def index():
 def create_core():
     # global machines
     session['receive_count'] = session.get('receive_count', 0) + 1
-    new_core = core(machine_num(), request.sid, 'you', initial_energy=300)
+    new_core = core(network.machine_num(), request.sid, 'you', initial_energy=300)
     machines.append(new_core)
     print('created core', new_core.machine_id)
     emit('core_info',
