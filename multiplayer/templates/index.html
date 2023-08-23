@@ -11,6 +11,7 @@
 
             socket.on('connect', function() {
                 socket.emit('create_core');
+                console.log('session id is', socket.io.engine.id)
             });
 
             socket.on('chat_msg', function(msg, cb) {
@@ -27,7 +28,13 @@
                $('#septic_tank').text('')
 
                world_state.machines.forEach((machine, i) => {
-                  machine_name = $('<li/>').html(machine.name + ' with id: ' + machine.machine_id)
+                  let machine_name = machine.name
+
+                  if (machine_name === 'you') {
+                     if(machine.session_id !== socket.id) machine_name = 'some other poor asshole'
+                  }
+
+                  machine_element = $('<li/>').html(machine_name + ' with id: ' + machine.machine_id)
                   in_list = $('<ul/>')
                   out_list = $('<ul/>')
 
@@ -38,9 +45,9 @@
                      if(outflow !== false) out_list.append($('<li/>').text('output ' + i + ': ' + outflow.amount + ' ' + outflow.material.name))
                   })
 
-                  machine_name.append(in_list)
-                  machine_name.append(out_list)
-                  $('#machines').append(machine_name)
+                  machine_element.append(in_list)
+                  machine_element.append(out_list)
+                  $('#machines').append(machine_element)
                });
                
                world_state.connections.forEach((conn, i) => $('#connections').append( $('<li/>').text('from ' + conn.source + ' to ' + conn.dest + ' with id: ' + conn.conn_id)));
@@ -111,8 +118,6 @@
          <ul id="player_state"></ul>
       </div>
     <div id="log"></div>
-   </div>
-
 
     <h2>modify grid</h2>
     <form id="add_machine" method="POST" action='#'>
@@ -149,6 +154,7 @@
         <input type="submit" value="chat">
         <input type="text" name="chat_msg" id="chat_msg" placeholder="make your opinion known">
     </form>
+ </div>
 
    <div>
     <h2>world state:</h2>
