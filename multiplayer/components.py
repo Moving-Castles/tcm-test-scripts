@@ -165,7 +165,7 @@ class core(Organ):
 		self.inputs = [False]
 		self.name = name
 		self.machine_id = machine_id
-		self.session_id = session_id
+		self.session_id = copy.deepcopy(session_id)
 		self.outputs = [False, False]
 		self.energy = initial_energy
 		self.description = "That’s you, how about you hook some pipes up to those nice stumps of yours and get to work?"

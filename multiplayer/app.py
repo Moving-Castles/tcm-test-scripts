@@ -21,17 +21,21 @@ thread_lock = Lock()
 machines = []
 connections = []
 machine_number = 0
+energy_delta = 1
 
 def fetch_player(player_id):
     player = next((x for x in machines if hasattr(x, 'session_id') and x.session_id == player_id), None)
     return player
 
-def update_player(player_id):
+def update_player(player_id, context='main'):
     player = fetch_player(player_id)
+    print('got here, player is', player.session_id, 'machines is', machines)
     player_state = player.__dict__
-    emit('player_state', {'data': json.dumps(player_state)}, to=player_id)
+    if context=='main': emit('player_state', {'data': json.dumps(player_state)}, to=player_id)
+    else: socketio.emit('player_state', {'data': json.dumps(player_state)}, to=player_id)
 
-def update_world():
+def update_world(context='main'):
+    print('no issues so far')
     resolved_machines = network.resolve_network(machines)
     world_state = {'machines': [], 'connections': [], 'pool': []}
 
@@ -69,21 +73,34 @@ def update_world():
     for connection in connections:
         world_state['connections'].append(connection.__dict__)
 
-    emit('world_state', {'data': json.dumps(world_state)}, broadcast=True)
+    if context == 'main': emit('world_state', {'data': json.dumps(world_state)}, broadcast=True)
+    else: socketio.emit('world_state', {'data': json.dumps(world_state)}, broadcast=True)
 
 def initialise_grid():
     machines.append(inlet(str(network.machine_num()), 'inlet'))
     output = outlet(str(network.machine_num()), 'outlet')
     machines.append(output) 
 
+def tick():
+    players = list(filter(lambda x: type(x).__name__ == 'core', machines))
+    print('players is', players)
+    for player in players:
+        player.update_energy(-1*energy_delta)
+        update_player(player.session_id, context='thread')
+    print('got through all players')
+
 def background_thread():
+    # from flask import request
     # each tick, recalculate and send world state
+    global machines
     count = 0
-    while True:
-        socketio.sleep(10)
-        count += 1
-        socketio.emit('my_response',
-                      {'data': 'another tick', 'count': count})
+    with app.test_request_context():
+        while True:
+            socketio.sleep(2)
+            count += 1
+            tick()
+            print('done tick')
+            update_world( context='thread')
 
 def remove_player(player_id):
     rm_player = fetch_player(player_id)
