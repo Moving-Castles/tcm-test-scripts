@@ -1,0 +1,8 @@
+#cols {
+	display: flex;
+	flex-direction: row;
+}
+
+#cols > div {
+	width: 45vw;
+}

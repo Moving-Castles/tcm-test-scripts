@@ -22,9 +22,14 @@ machines = []
 connections = []
 machine_number = 0
 
-def fetch_player(id):
-    player = next((x for x in machines if hasattr(x, 'session_id') and x.session_id == request.sid), None)
+def fetch_player(player_id):
+    player = next((x for x in machines if hasattr(x, 'session_id') and x.session_id == player_id), None)
     return player
+
+def update_player(player_id):
+    player = fetch_player(player_id)
+    player_state = player.__dict__
+    emit('player_state', {'data': json.dumps(player_state)}, to=player_id)
 
 def update_world():
     resolved_machines = network.resolve_network(machines)
@@ -103,10 +108,12 @@ def create_core():
     new_core = core(str(network.machine_num()), request.sid, 'you', initial_energy=300)
     machines.append(new_core)
     print('created core', new_core.machine_id)
-    emit('core_info',
-         {'data': json.dumps(new_core.__dict__)})
     update_world()
+    update_player(request.sid)
 
+@socketio.event
+def request_status():
+    player = update_player(request.sid)
 
 @socketio.event
 def connect():

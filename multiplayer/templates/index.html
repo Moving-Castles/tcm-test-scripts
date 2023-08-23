@@ -2,18 +2,13 @@
 <html>
 <head>
     <title>THIS CURSED MACHINE</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"/>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js" integrity="sha512-aMGMvNYu8Ue4G+fHa359jcPb1u+ytAF+P2SCb+PxrjCdO3n3ZTxJ30zuH39rimUggmTwmh2u7wvQsDTHESnmfQ==" crossorigin="anonymous"></script>
     <script type="text/javascript" charset="utf-8">
         $(document).ready(function() {
-            // Connect to the Socket.IO server.
-            // The connection URL has the following format, relative to the current page:
-            //     http[s]://<domain>:<port>[/<namespace>]
             var socket = io();
 
-            // Event handler for new connections.
-            // The callback function is invoked when a connection with the
-            // server is established.
             socket.on('connect', function() {
                 socket.emit('create_core');
             });
@@ -30,7 +25,8 @@
                $('#machines').text('')
                $('#connections').text('')
                $('#septic_tank').text('')
-                world_state.machines.forEach((machine, i) => {
+
+               world_state.machines.forEach((machine, i) => {
                   machine_name = $('<li/>').html(machine.name + ' with id: ' + machine.machine_id)
                   in_list = $('<ul/>')
                   out_list = $('<ul/>')
@@ -46,11 +42,27 @@
                   machine_name.append(out_list)
                   $('#machines').append(machine_name)
                });
-                world_state.connections.forEach((conn, i) => $('#connections').append( $('<li/>').text('from ' + conn.source + ' to ' + conn.dest + ' with id: ' + conn.conn_id)));
-                world_state.pool.forEach((material, i) => $('#septic_tank').append( $('<li/>').text(material.amount + ' ' + material.material.name)));
+               
+               world_state.connections.forEach((conn, i) => $('#connections').append( $('<li/>').text('from ' + conn.source + ' to ' + conn.dest + ' with id: ' + conn.conn_id)));
+               
+               world_state.pool.forEach((material, i) => $('#septic_tank').append( $('<li/>').text(material.amount + ' ' + material.material.name)));
+
+               socket.emit('request_status')
 
                 if (cb)
                     cb();
+            });
+
+            socket.on('player_state', function (msg, cb)  {
+               const player = JSON.parse(msg.data)
+               console.log('got player state', player)
+
+               $('#player_state').text('')
+
+               if (player.alive) $('#player_state').append($('<li/>').text("good news is, you're still alive"))
+               else $('#player_state').append($('<li/>').text("well shit, you're dead"))
+
+                $('#player_state').append($('<li/>').text("you have " + player.energy + " energy remaining"))
             });
 
             socket.on('disconnect', function() {
@@ -91,6 +103,17 @@
 </head>
 <body>
     <h1>THIS CURSED MACHINE</h1>
+
+    <div id='cols'>
+    <div>
+      <div>
+         <h2>player status:</h2>
+         <ul id="player_state"></ul>
+      </div>
+    <div id="log"></div>
+   </div>
+
+
     <h2>modify grid</h2>
     <form id="add_machine" method="POST" action='#'>
         <input type="submit" value="Add Machine">
@@ -127,6 +150,7 @@
         <input type="text" name="chat_msg" id="chat_msg" placeholder="make your opinion known">
     </form>
 
+   <div>
     <h2>world state:</h2>
       <div>
          <h3>machines</h3>
@@ -140,8 +164,8 @@
          <h3>septic tank</h3>
          <ul id="septic_tank"></ul>
       </div>
-    <h2>player status:</h2>`
 
-    <div id="log"></div>
+   </div>
+</div>
 </body>
 </html>
