@@ -30,7 +30,22 @@
                $('#machines').text('')
                $('#connections').text('')
                $('#septic_tank').text('')
-                world_state.machines.forEach((machine, i) => $('#machines').append( $('<li/>').text(machine.name + ' with id: ' + machine.machine_id)));
+                world_state.machines.forEach((machine, i) => {
+                  machine_name = $('<li/>').html(machine.name + ' with id: ' + machine.machine_id)
+                  in_list = $('<ul/>')
+                  out_list = $('<ul/>')
+
+                  machine.inputs.forEach((input, i) => {
+                     if(input !== false) in_list.append($('<li/>').text('input ' + i + ': ' + input.amount + ' ' + input.material.name))
+                  })
+                  machine.outflow.forEach((outflow, i) => {
+                     if(outflow !== false) out_list.append($('<li/>').text('output ' + i + ': ' + outflow.amount + ' ' + outflow.material.name))
+                  })
+
+                  machine_name.append(in_list)
+                  machine_name.append(out_list)
+                  $('#machines').append(machine_name)
+               });
                 world_state.connections.forEach((conn, i) => $('#connections').append( $('<li/>').text('from ' + conn.source + ' to ' + conn.dest + ' with id: ' + conn.conn_id)));
                 world_state.pool.forEach((material, i) => $('#septic_tank').append( $('<li/>').text(material.amount + ' ' + material.material.name)));
 
