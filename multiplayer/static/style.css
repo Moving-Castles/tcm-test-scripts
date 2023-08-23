@@ -5,4 +5,16 @@
 
 #cols > div {
 	width: 45vw;
+	min-width: 400px;
 }
+
+#chat_log, #player_state {
+	list-style-type: none;
+	padding-left: 0;
+}
+
+
+
+/* ul {
+	list-style-type: none;
+}*/

@@ -153,7 +153,8 @@ def vote(conn_id):
 
 @socketio.event
 def chat(message):
-    emit('chat_msg', {'data': message['data']}, broadcast=True)
+    player = fetch_player(request.sid)
+    emit('chat_msg', {'data': message['data'], 'sender': request.sid, 'machine_id': player.machine_id}, broadcast=True)
 
 @socketio.on('disconnect')
 def test_disconnect():

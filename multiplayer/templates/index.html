@@ -15,9 +15,13 @@
             });
 
             socket.on('chat_msg', function(msg, cb) {
-                $('#chat_log').append( $('<li/>').text(msg.data));
-                if (cb)
-                    cb();
+               let chat_from = 'player ' + msg.machine_id
+               if(msg.sender === socket.id) chat_from = 'you'
+
+               $('#chat_log').append( $('<li/>').text(chat_from + ': ' + msg.data));
+               
+               if (cb)
+                  cb();
             });
 
            socket.on('world_state', function(msg, cb) {
