@@ -24,11 +24,7 @@ class Connection(object):
 	def draw(self, machines):
 		# check if there's space on the input of source
 		# and on the output of dest. if not then
-		for machine in machines:
-			print(machine.machine_id, self.source, self.dest, type(machine.machine_id), type(self.source))
-
 		machine = next((m for m in machines if m.machine_id == self.source), None)
-		print('machine is', machine)
 		if machine is not None:
 			# check if you can actually put it on the output
 			try:

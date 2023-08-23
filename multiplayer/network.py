@@ -1,12 +1,16 @@
 from components import *
 import components
-from app import machine_number
+from app import machine_number, connection_number
 
 def machine_num():
 	global machine_number
 	machine_number +=1
 	return machine_number
 
+def connection_num():
+	global connection_number
+	connection_number +=1
+	return connection_number
 
 def get_info(machine_type):
 	machineClass = getattr(components, machine_type, None)
@@ -86,7 +90,7 @@ def remove_connection(conn_id, machines, connections):
 		conn.remove_conn(machines)
 		connections.remove(conn)
 	else:
-		feedback_message('no connection with this id to remove')
+		print('no connection with this id to remove')
 
 	return machines, connections
 
@@ -97,6 +101,9 @@ def reset_network(machines):
 		if node.name != "inlet":
 			for i, node_in in enumerate(node.inputs):
 				node.inputs[i] = False
+
+		else:
+			node.inputs = [{'amount': 1.0, 'material': Pellet()}]
 
 		for i, node_out in enumerate(node.outflow):
 			node.outflow[i] = False

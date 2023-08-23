@@ -21,6 +21,7 @@ thread_lock = Lock()
 machines = []
 connections = []
 machine_number = 0
+connection_number = 0
 energy_delta = 1
 
 def fetch_player(player_id):
@@ -29,13 +30,11 @@ def fetch_player(player_id):
 
 def update_player(player_id, context='main'):
     player = fetch_player(player_id)
-    print('got here, player is', player.session_id, 'machines is', machines)
     player_state = player.__dict__
     if context=='main': emit('player_state', {'data': json.dumps(player_state)}, to=player_id)
     else: socketio.emit('player_state', {'data': json.dumps(player_state)}, to=player_id)
 
 def update_world(context='main'):
-    print('no issues so far')
     resolved_machines = network.resolve_network(machines)
     world_state = {'machines': [], 'connections': [], 'pool': []}
 
@@ -46,14 +45,12 @@ def update_world(context='main'):
         if hasattr(machine, 'outflow'):
             for i, outflow in enumerate(machine.outflow):
                 if outflow is not False:
-                    print('machine out is', outflow)
                     machine_json['outflow'][i] = {'amount': outflow['amount'], 'material': outflow['material'].__dict__}
 
         # again i am filled with remorse
         if hasattr(machine, 'inputs'):
             for i, machine_in in enumerate(machine.inputs):
                 if machine_in is not False:
-                    print('machine in is', machine_in)
                     machine_json['inputs'][i] = {'amount': machine_in['amount'], 'material': machine_in['material'].__dict__}
 
         # screaming, crying, throwing up
@@ -73,6 +70,7 @@ def update_world(context='main'):
     for connection in connections:
         world_state['connections'].append(connection.__dict__)
 
+    # this is a hack to deal with the threading context.
     if context == 'main': emit('world_state', {'data': json.dumps(world_state)}, broadcast=True)
     else: socketio.emit('world_state', {'data': json.dumps(world_state)}, broadcast=True)
 
@@ -83,23 +81,17 @@ def initialise_grid():
 
 def tick():
     players = list(filter(lambda x: type(x).__name__ == 'core', machines))
-    print('players is', players)
     for player in players:
         player.update_energy(-1*energy_delta)
         update_player(player.session_id, context='thread')
-    print('got through all players')
 
 def background_thread():
-    # from flask import request
-    # each tick, recalculate and send world state
-    global machines
     count = 0
     with app.test_request_context():
         while True:
             socketio.sleep(2)
             count += 1
             tick()
-            print('done tick')
             update_world( context='thread')
 
 def remove_player(player_id):
@@ -135,7 +127,6 @@ def request_status():
 @socketio.event
 def connect():
     global thread
-    print('server')
     with thread_lock:
         if thread is None:
             thread = socketio.start_background_task(background_thread)
@@ -143,25 +134,24 @@ def connect():
 @socketio.event
 def add_machine(data):
     global machines
-    print('adding machine', data, request.sid)
     player = fetch_player(request.sid)
     machines, player = network.add_machine(data['machine_type'], machines, player)
     if not player.alive:
         game_over(player.session_id)
-    print('machines is now', machines)
     update_world()
 
 @socketio.event
 def add_connection(conn_data):
     global machines, connections
-    print('adding connection', json.dumps(conn_data), request.sid)
     player = fetch_player(request.sid)
-    machines, connections, player = network.add_connection(conn_data['source'], conn_data['dest'], machines, connections, player)
+    machines, connections, player = network.add_connection(str(network.connection_num()), conn_data['dest'], machines, connections, player)
     update_world()
 
 @socketio.event
-def rm_connection(conn_id):
-    print('removing connection', conn_id, request.sid)
+def rm_connection(data):
+    global machines, connections
+    print('removing connection', data['conn_id'], request.sid)
+    machines, connections = network.remove_connection(data['conn_id'], machines, connections)
     update_world()
 
 @socketio.event
