@@ -26,10 +26,14 @@
 
            socket.on('world_state', function(msg, cb) {
                const world_state = JSON.parse(msg.data)
+               console.log('got world state', world_state)
                $('#machines').text('')
                $('#connections').text('')
+               $('#septic_tank').text('')
                 world_state.machines.forEach((machine, i) => $('#machines').append( $('<li/>').text(machine.name + ' with id: ' + machine.machine_id)));
                 world_state.connections.forEach((conn, i) => $('#connections').append( $('<li/>').text('from ' + conn.source + ' to ' + conn.dest + ' with id: ' + conn.conn_id)));
+                world_state.pool.forEach((material, i) => $('#septic_tank').append( $('<li/>').text(material.amount + ' ' + material.material.name)));
+
                 if (cb)
                     cb();
             });
@@ -111,10 +115,16 @@
     <h2>world state:</h2>
       <div>
          <h3>machines</h3>
-         <ul id="machines"></ul></div>
+         <ul id="machines"></ul>
+      </div>
       <div>
          <h3>connections</h3>
-         <ul id="connections"></ul></div>
+         <ul id="connections"></ul>
+      </div>
+      <div>
+         <h3>septic tank</h3>
+         <ul id="septic_tank"></ul>
+      </div>
     <h2>player status:</h2>`
 
     <div id="log"></div>

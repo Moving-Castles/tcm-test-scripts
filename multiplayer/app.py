@@ -28,7 +28,7 @@ def fetch_player(id):
 
 def update_world():
     resolved_machines = network.resolve_network(machines)
-    world_state = {'machines': [], 'connections': []}
+    world_state = {'machines': [], 'connections': [], 'pool': []}
 
     for machine in resolved_machines:
         machine_json = copy.deepcopy(machine).__dict__
@@ -50,7 +50,17 @@ def update_world():
         # screaming, crying, throwing up
         if hasattr(machine, 'recipes'): del machine_json['recipes']
 
+        if hasattr(machine, 'pool'):
+            # move the pool to its own thing
+            del machine_json['pool']
+
+            for material_type in machine.pool:
+                if material_type is not False:
+                    world_state['pool'].append({'amount': material_type['amount'], 'material': material_type['material'].__dict__})
+
         world_state['machines'].append(machine_json)
+
+
     for connection in connections:
         world_state['connections'].append(connection.__dict__)
 
