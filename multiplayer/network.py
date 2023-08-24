@@ -35,7 +35,7 @@ def get_info(machine_type):
 		input('[ENTER]')
 
 	else:
-		feedback_message("couldn't find a machine with this name")
+		print("couldn't find a machine with this name")
 
 def add_machine(machine_type, machines, player):
 	machineClass = getattr(components, machine_type, None)
@@ -47,7 +47,7 @@ def add_machine(machine_type, machines, player):
 		if(player.alive):
 			machines.append(new_machine)
 	else:
-		feedback_message('no machine of this type available')
+		print('no machine of this type available')
 
 	return machines, player
 
@@ -62,20 +62,19 @@ def remove_machine(machine_id, connections):
 			if connection.source == machine_id or connection.dest == machine_id:
 				remove_connection(connection.conn_id)
 	else:
-		feedback_message('no machine with this id to remove')
+		print('no machine with this id to remove')
 	
 	return machines, connections
 
 
-def add_connection(source, dest, machines, connections, player):
-	new_conn = Connection(source, dest, str(len(connections)))
+def add_connection(conn_id, source, dest, machines, connections, player):
+	new_conn = Connection(source, dest, conn_id)
 
 	# try drawing the connection
 	if new_conn.draw(machines):
 		if(player.alive):
 			player.update_energy(-new_conn.cost)
 			connections.append(new_conn)
-			print('gets here')
 		else:
 			game_over()
 
@@ -139,7 +138,7 @@ def resolve_network(machines):
 			counter+=1
 
 			if counter == len(machines)*2:
-				# feedback_message('network currently incomplete. try adding some pipes?')
+				# print('network currently incomplete. try adding some pipes?')
 				break
 
 		return machines

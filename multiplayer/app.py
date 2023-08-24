@@ -30,9 +30,23 @@ def fetch_player(player_id):
 
 def update_player(player_id, context='main'):
     player = fetch_player(player_id)
-    player_state = player.__dict__
-    if context=='main': emit('player_state', {'data': json.dumps(player_state)}, to=player_id)
-    else: socketio.emit('player_state', {'data': json.dumps(player_state)}, to=player_id)
+    player_json = copy.deepcopy(player).__dict__
+
+    # this is disgusting. rasmus if you are reading this I'm sorry.
+    if hasattr(player, 'outflow'):
+        for i, outflow in enumerate(player.outflow):
+            if outflow is not False:
+                player_json['outflow'][i] = {'amount': outflow['amount'], 'material': outflow['material'].__dict__}
+
+    # again i am filled with remorse
+    if hasattr(player, 'inputs'):
+        for i, player_in in enumerate(player.inputs):
+            if player_in is not False:
+                player_json['inputs'][i] = {'amount': player_in['amount'], 'material': player_in['material'].__dict__}
+
+
+    if context=='main': emit('player_state', {'data': json.dumps(player_json)}, to=player_id)
+    else: socketio.emit('player_state', {'data': json.dumps(player_json)}, to=player_id)
 
 def update_world(context='main'):
     resolved_machines = network.resolve_network(machines)
@@ -144,7 +158,7 @@ def add_machine(data):
 def add_connection(conn_data):
     global machines, connections
     player = fetch_player(request.sid)
-    machines, connections, player = network.add_connection(str(network.connection_num()), conn_data['dest'], machines, connections, player)
+    machines, connections, player = network.add_connection(str(network.connection_num()), conn_data['source'], conn_data['dest'], machines, connections, player)
     update_world()
 
 @socketio.event
