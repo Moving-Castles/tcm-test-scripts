@@ -1,181 +1,275 @@
 <!DOCTYPE HTML>
 <html>
+
 <head>
-    <title>THIS CURSED MACHINE</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"/>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js" integrity="sha512-aMGMvNYu8Ue4G+fHa359jcPb1u+ytAF+P2SCb+PxrjCdO3n3ZTxJ30zuH39rimUggmTwmh2u7wvQsDTHESnmfQ==" crossorigin="anonymous"></script>
-    <script type="text/javascript" charset="utf-8">
-        $(document).ready(function() {
-            var socket = io();
+  <title>THIS CURSED MACHINE</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"
+    integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg=="
+    crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js"
+    integrity="sha512-aMGMvNYu8Ue4G+fHa359jcPb1u+ytAF+P2SCb+PxrjCdO3n3ZTxJ30zuH39rimUggmTwmh2u7wvQsDTHESnmfQ=="
+    crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leader-line/1.0.3/leader-line.min.js"
+    integrity="sha512-aFBNsI3+D6ObLLtyKwdZPZzDbcCC6+Bh+2UNV8HC0R95BpcBT+dmmZ5NMpJi/Ic8uO0W7FGcg33IfuHg+7Ryew=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script>
+    // You can choose to have an element with the class "window-top" inside of your draggable window that will act as the "handle" for the window or it will attach to the element itself
 
-            socket.on('connect', function() {
-                socket.emit('create_core');
-                console.log('session id is', socket.io.engine.id)
-            });
+    function makeDraggable (elmnt) {
+      // Make an element draggable (or if it has a .window-top class, drag based on the .window-top element)
+      let currentPosX = 0, currentPosY = 0, previousPosX = 0, previousPosY = 0;
 
-            socket.on('chat_msg', function(msg, cb) {
-               let chat_from = 'player ' + msg.machine_id
-               if(msg.sender === socket.id) chat_from = 'you'
+      // If there is a window-top classed element, attach to that element instead of full window
+      if (elmnt.querySelector('.window-top')) {
+        // If present, the window-top element is where you move the parent element from
+        elmnt.querySelector('.window-top').onmousedown = dragMouseDown;
+      }
+      else {
+        // Otherwise, move the element itself
+        elmnt.onmousedown = dragMouseDown;
+      }
 
-               $('#chat_log').append( $('<li/>').text(chat_from + ': ' + msg.data));
-               
-               if (cb)
-                  cb();
-            });
+      function dragMouseDown (e) {
+        // Prevent any default action on this element (you can remove if you need this element to perform its default action)
+        // e.preventDefault();
+        // Get the mouse cursor position and set the initial previous positions to begin
+        previousPosX = e.clientX;
+        previousPosY = e.clientY;
+        // When the mouse is let go, call the closing event
+        document.onmouseup = closeDragElement;
+        // call a function whenever the cursor moves
+        document.onmousemove = elementDrag;
+      }
 
-           socket.on('world_state', function(msg, cb) {
-               const world_state = JSON.parse(msg.data)
-               console.log('got world state', world_state)
-               $('#machines').text('')
-               $('#connections').text('')
-               $('#septic_tank').text('')
+      function elementDrag (e) {
+        // Prevent any default action on this element (you can remove if you need this element to perform its default action)
+        // e.preventDefault();
+        // Calculate the new cursor position by using the previous x and y positions of the mouse
+        currentPosX = previousPosX - e.clientX;
+        currentPosY = previousPosY - e.clientY;
+        // Replace the previous positions with the new x and y positions of the mouse
+        previousPosX = e.clientX;
+        previousPosY = e.clientY;
+        // Set the element's new position
+        elmnt.style.top = (elmnt.offsetTop - currentPosY) + 'px';
+        elmnt.style.left = (elmnt.offsetLeft - currentPosX) + 'px';
+      }
 
-               world_state.machines.forEach((machine, i) => {
-                  let machine_name = machine.name
+      function closeDragElement () {
+        // Stop moving when mouse button is released and release events
+        document.onmouseup = null;
+        document.onmousemove = null;
+      }
+    }
 
-                  if (machine_name === 'you') {
-                     if(machine.session_id !== socket.id) machine_name = 'some other poor asshole'
-                  }
+    // Make myWindow and myWindow2 draggable in different ways...
 
-                  machine_element = $('<li/>').html(machine_name + ' with id: ' + machine.machine_id)
-                  in_list = $('<ul/>')
-                  out_list = $('<ul/>')
+    $(document).ready(function () {
+      makeDraggable(document.querySelector('.terminal'));
+    })
+    // myWindow will only be able to be moved via the top bar (.window-top element). The main element does nothing on mouse down.
 
-                  machine.inputs.forEach((input, i) => {
-                     if(input !== false) in_list.append($('<li/>').text('input ' + i + ': ' + input.amount + ' ' + input.material.name))
-                  })
-                  machine.outflow.forEach((outflow, i) => {
-                     if(outflow !== false) out_list.append($('<li/>').text('output ' + i + ': ' + outflow.amount + ' ' + outflow.material.name))
-                  })
+// myWindow2 will be able to moved by grabbing the entire element
 
-                  machine_element.append(in_list)
-                  machine_element.append(out_list)
-                  $('#machines').append(machine_element)
-               });
-               
-               world_state.connections.forEach((conn, i) => $('#connections').append( $('<li/>').text('from ' + conn.source + ' to ' + conn.dest + ' with id: ' + conn.conn_id)));
-               
-               world_state.pool.forEach((material, i) => $('#septic_tank').append( $('<li/>').text(material.amount + ' ' + material.material.name)));
+  </script>
+  <script type="text/javascript" charset="utf-8">
+    $(document).ready(function () {
+      var socket = io();
 
-               socket.emit('request_status')
+      socket.on('connect', function () {
+        socket.emit('create_core');
+        console.log('session id is', socket.io.engine.id)
 
-                if (cb)
-                    cb();
-            });
+        $("#spawn-msg").css("opacity", "1")
+        $("#spawn-msg").click(function () { $(this).css("opacity", "0").css("pointer-events", "none") })
+      });
 
-            socket.on('player_state', function (msg, cb)  {
-               const player = JSON.parse(msg.data)
-               console.log('got player state', player)
+      socket.on('chat_msg', function (msg, cb) {
+        let chat_from = 'player ' + msg.machine_id
+        if (msg.sender === socket.id) chat_from = 'you'
 
-               $('#player_state').text('')
+        $('#chat_log').append($('<li/>').text(chat_from + ': ' + msg.data));
 
-               if (player.alive) $('#player_state').append($('<li/>').text("good news is, you're still alive"))
-               else $('#player_state').append($('<li/>').text("well shit, you're dead"))
+        if (cb)
+          cb();
+      });
 
-                $('#player_state').append($('<li/>').text("you have " + player.energy + " energy remaining"))
-            });
+      socket.on('world_state', function (msg, cb) {
+        const world_state = JSON.parse(msg.data)
+        console.log('got world state', world_state)
+        $('#machines').text('')
+        $('#connections').text('')
+        $('#septic_tank').text('')
 
-            socket.on('disconnect', function() {
-                socket.disconnect();
-            });
+        world_state.machines.forEach((machine, i) => {
+          let machine_name = machine.name
 
-            socket.on('die', function(){
-               console.log('you died lol')
-            })
+          if (machine_name === 'you') {
+            if (machine.session_id !== socket.id) machine_name = 'some other poor asshole'
+          }
 
-            $('form#add_machine').submit(function(event) {
-                socket.emit('add_machine', {machine_type: $('#machine_type').val()});
-                return false;
-            });
+          machine_element = $('<li/>').html(machine_name + ' with id: ' + machine.machine_id)
+          in_list = $('<ul/>')
+          out_list = $('<ul/>')
 
-            $('form#add_connection').submit(function(event) {
-                socket.emit('add_connection', {source: $('#source').val(), dest: $('#dest').val()});
-                return false;
-            });
+          machine.inputs.forEach((input, i) => {
+            if (input !== false) in_list.append($('<li/>').text('input ' + i + ': ' + input.amount + ' ' + input.material.name))
+          })
+          machine.outflow.forEach((outflow, i) => {
+            if (outflow !== false) out_list.append($('<li/>').text('output ' + i + ': ' + outflow.amount + ' ' + outflow.material.name))
+          })
 
-            $('form#rm_connection').submit(function(event) {
-                socket.emit('rm_connection', {conn_id: $('#rm_conn_id').val()});
-                return false;
-            });
-
-            $('form#vote').submit(function(event) {
-                socket.emit('vote', {conn_id: $('#vote_conn_id').val()});
-                return false;
-            });
-
-            $('form#chat').submit(function(event) {
-                socket.emit('chat', {data: $('#chat_msg').val()});
-                return false;
-            });
-
+          machine_element.append(in_list)
+          machine_element.append(out_list)
+          $('#machines').append(machine_element)
         });
-    </script>
-</head>
-<body>
-    <h1>THIS CURSED MACHINE</h1>
 
-    <div id='cols'>
+        world_state.connections.forEach((conn, i) => $('#connections').append($('<li/>').text('from ' + conn.source + ' to ' + conn.dest + ' with id: ' + conn.conn_id)));
+
+        world_state.pool.forEach((material, i) => $('#septic_tank').append($('<li/>').text(material.amount + ' ' + material.material.name)));
+
+        socket.emit('request_status')
+
+        if (cb)
+          cb();
+      });
+
+      socket.on('player_state', function (msg, cb) {
+        const player = JSON.parse(msg.data)
+        console.log('got player state', player)
+
+        $('#player_state').text('')
+
+        if (player.alive) $('#player_state').append($('<li/>').text("good news is, you're still alive"))
+        else $('#player_state').append($('<li/>').text("well shit, you're dead"))
+
+        $('#player_state').append($('<li/>').text("you have " + player.energy + " energy remaining"))
+      });
+
+      socket.on('disconnect', function () {
+        socket.disconnect();
+      });
+
+      socket.on('die', function () {
+        // $("#dead").show()
+      })
+
+      $('form#add_machine').submit(function (event) {
+        socket.emit('add_machine', { machine_type: $('#machine_type').val() });
+        return false;
+      });
+
+      $('form#add_connection').submit(function (event) {
+        socket.emit('add_connection', { source: $('#source').val(), dest: $('#dest').val() });
+        return false;
+      });
+
+      $('form#rm_connection').submit(function (event) {
+        socket.emit('rm_connection', { conn_id: $('#rm_conn_id').val() });
+        return false;
+      });
+
+      $('form#vote').submit(function (event) {
+        socket.emit('vote', { conn_id: $('#vote_conn_id').val() });
+        return false;
+      });
+
+      $('form#chat').submit(function (event) {
+        socket.emit('chat', { data: $('#chat_msg').val() });
+        return false;
+      });
+
+      $(".chat-toggle").each(function () {
+        $(this).click(function () { $(".terminal").toggle() })
+      })
+
+    });
+  </script>
+</head>
+
+<body>
+  <!-- <h1 id="spawn-msg">
+    WELCOME PLAYER
+  </h1> -->
+  <h1 id="dead">
+    YOU DIED
+  </h1>
+  <h1>THIS CURSED MACHINE</h1>
+
+  <div id='cols'>
     <div>
       <div>
-         <h2>player status:</h2>
-         <ul id="player_state"></ul>
+        <h2>player status:</h2>
+        <ul id="player_state"></ul>
       </div>
-    <div id="log"></div>
+      <div id="log"></div>
 
-    <h2>modify world</h2>
-    <form id="add_machine" method="POST" action='#'>
+      <h2>modify world</h2>
+      <form id="add_machine" method="POST" action='#'>
         <input type="submit" value="Add Machine">
-      <!-- <label>add machine</label> -->
-      <select name="machine_type" id="machine_type">
-        <option value="blender">blender</option>
-        <option value="scorcher">scorcher</option>
-        <option value="splitter">splitter</option>`
-        <option value="wetter">wetter</option>
-        <option value="parcher">parcher</option>
-      </select>
-    </form>
+        <!-- <label>add machine</label> -->
+        <select name="machine_type" id="machine_type">
+          <option value="blender">blender</option>
+          <option value="scorcher">scorcher</option>
+          <option value="splitter">splitter</option>`
+          <option value="wetter">wetter</option>
+          <option value="parcher">parcher</option>
+        </select>
+      </form>
 
-    <form id="add_connection" method="POST" action='#'>
+      <form id="add_connection" method="POST" action='#'>
         <input type="submit" value="Add Connection">
         <input type="text" name="source" id="source" placeholder="source machine id">
         <input type="text" name="dest" id="dest" placeholder="target machine id">
-    </form>
+      </form>
 
-    <form id="rm_connection" method="POST" action='#'>
+      <form id="rm_connection" method="POST" action='#'>
         <input type="submit" value="Remove Connection">
         <input type="text" name="rm_conn_id" id="rm_conn_id" placeholder="connection id to remove">
-    </form>
+      </form>
 
-    <form id="vote" method="POST" action='#'>
+      <form id="vote" method="POST" action='#'>
         <input type="submit" value="Vote To Remove Connection">
         <input type="text" name="vote_conn_id" id="vote_conn_id" placeholder="connection id to remove">
-    </form>
+      </form>
 
-    <h2>chat:</h2>
-    <div><ul id="chat_log"></ul></div>
-    <form id="chat" method="POST" action='#'>
+      <button clas="chat-toggle">Chat</button>
+    </div>
+
+    <div>
+      <h2>world state:</h2>
+      <div>
+        <h3>machines</h3>
+        <ul id="machines"></ul>
+      </div>
+      <div>
+        <h3>connections</h3>
+        <ul id="connections"></ul>
+      </div>
+      <div>
+        <h3>septic tank</h3>
+        <ul id="septic_tank"></ul>
+      </div>
+
+    </div>
+
+    <div class="terminal">
+      <div class="close-terminal chat-toggle">X</div>
+      <div class="terminal-output">
+        <p class="output-content">
+        <div>
+          <ul id="chat_log"></ul>
+        </div>
+        </p>
+      </div>
+
+      <form id="chat" method="POST" action='#'>
         <input type="submit" value="chat">
-        <input type="text" name="chat_msg" id="chat_msg" placeholder="make your opinion known">
-    </form>
- </div>
-
-   <div>
-    <h2>world state:</h2>
-      <div>
-         <h3>machines</h3>
-         <ul id="machines"></ul>
-      </div>
-      <div>
-         <h3>connections</h3>
-         <ul id="connections"></ul>
-      </div>
-      <div>
-         <h3>septic tank</h3>
-         <ul id="septic_tank"></ul>
-      </div>
-
-   </div>
-</div>
+        <input type="text" class="terminal-input" name="chat_msg" id="chat_msg" placeholder="make your opinion known">
+      </form>
+    </div>
+  </div>
 </body>
+
 </html>
