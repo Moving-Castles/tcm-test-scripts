@@ -11,7 +11,7 @@ import copy
 # Set this variable to "threading", "eventlet" or "gevent" to test the
 # different async modes, or leave it set to None for the application to choose
 # the best option based on installed packages.
-async_mode = None
+async_mode = "eventlet"
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
@@ -94,6 +94,7 @@ def initialise_grid():
     machines.append(output) 
 
 def tick():
+    print('ticking')
     players = list(filter(lambda x: type(x).__name__ == 'core', machines))
     for player in players:
         player.update_energy(-1*energy_delta)
