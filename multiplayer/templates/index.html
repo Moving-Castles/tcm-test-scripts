@@ -63,7 +63,13 @@
                   $('#machines').append(machine_element)
                });
                
-               world_state.connections.forEach((conn, i) => $('#connections').append( $('<li/>').text('from ' + conn.source + ' to ' + conn.dest + ' with id: ' + conn.conn_id)));
+               world_state.connections.forEach((conn, i) => {
+                  let conn_el;
+
+                  if (conn.voting == false) conn_el = $('<li/>').text('connection from ' + conn.source + ' to ' + conn.dest + ' with id: ' + conn.conn_id)
+                  else conn_el = $('<li/>').text('voting connection from ' + conn.source + ' to ' + conn.dest + ' with id: ' + conn.conn_id)
+
+                  $('#connections').append(conn_el)});
                
                world_state.pool.forEach((material, i) => $('#septic_tank').append( $('<li/>').text(material.amount + ' ' + material.material.name)));
 
