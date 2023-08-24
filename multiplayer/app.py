@@ -34,9 +34,27 @@ win_state = [{
     'done': False
 }]
 
+def log_event(event):
+    print('logging', event)
+    socketio.emit('log_event', {'data': event})
+
 def victory(context='main'):
     if context=='main': emit('victory', broadcast=True)
-    else: socketio.emit('victory')   
+    else: socketio.emit('victory')
+
+    log_event('the box has been won')
+
+def game_over(player, context='main'):
+    player_id = player.session_id
+    remove_player(player_id)
+    if context=='main':
+        emit('die')
+        disconnect(player_id)
+    else: 
+        socketio.emit('die', to=player_id)   
+        disconnect(player_id)
+
+    log_event('core ' + player.machine_id + ' has died :(')
 
 def check_win_state(world_state, context='main'):
     global win_state
@@ -136,7 +154,7 @@ def tick():
         player.update_energy(-1*energy_delta)
         update_player(player.session_id, context='thread')
         if not player.alive:
-            game_over(player.session_id, context='thread')
+            game_over(player, context='thread')
 
 def background_thread():
     count = 0
@@ -152,15 +170,6 @@ def remove_player(player_id):
     if rm_player is not None: 
         machines.remove(rm_player)
         print('removed core', rm_player.machine_id)
-
-def game_over(player_id, context='main'):
-    remove_player(player_id)
-    if context=='main':
-        emit('die')
-        disconnect(player_id)
-    else: 
-        socketio.emit('die', to=player_id)   
-        socketio.disconnect(player_id)
 
 @app.route('/')
 def index():
@@ -194,7 +203,7 @@ def add_machine(data):
     player = fetch_player(request.sid)
     machines, player = network.add_machine(data['machine_type'], machines, player)
     if not player.alive:
-        game_over(player.session_id)
+        game_over(player)
     update_world()
 
 @socketio.event
@@ -203,7 +212,7 @@ def add_connection(conn_data):
     player = fetch_player(request.sid)
     machines, connections, player = network.add_connection(str(network.connection_num()), conn_data['source'], conn_data['dest'], machines, connections, player)
     if not player.alive:
-        game_over(player.session_id)
+        game_over(player)
     update_world()
 
 @socketio.event

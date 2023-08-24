@@ -1,6 +1,6 @@
 from components import *
 import components
-from app import machine_number, connection_number
+from app import machine_number, connection_number, log_event
 
 def machine_num():
 	global machine_number
@@ -46,6 +46,7 @@ def add_machine(machine_type, machines, player):
 
 		if(player.alive):
 			machines.append(new_machine)
+			log_event('core ' + player.machine_id + ' added machine ' + new_machine.name)
 	else:
 		print('no machine of this type available')
 

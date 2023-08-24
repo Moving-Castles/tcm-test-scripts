@@ -14,6 +14,15 @@
                 console.log('session id is', socket.io.engine.id)
             });
 
+
+            socket.on('log_event', function(msg, cb) {
+               $('#chat_log').append( $('<li/>').html('<i>' + msg.data + '</i>'));
+               
+               if (cb)
+                  cb();
+            });
+
+
             socket.on('chat_msg', function(msg, cb) {
                let chat_from = 'player ' + msg.machine_id
                if(msg.sender === socket.id) chat_from = 'you'
