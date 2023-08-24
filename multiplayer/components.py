@@ -7,11 +7,12 @@ def print_message(message):
 	print(message)
 
 class Connection(object):
-	def __init__(self, source, dest, conn_id):
+	def __init__(self, source, dest, conn_id, voting=False):
 		self.source = source
 		self.dest = dest
 		self.cost = 6
 		self.vote_cost = 10
+		self.voting = voting
 		self.votes = []
 		self.conn_id = conn_id
 		self.description = "Pumping your vile fluids from A to B."
@@ -60,9 +61,11 @@ class Connection(object):
 				source_machine.outputs[in_idx] = False
 			except:
 				print_message("pipe was not removed -- couldn't find target machine")
-				return
 		else:
 			print_message("pipe was not removed -- couldn't find source machine")
+			return machines
+
+		return machines
 
 
 class Machine(object):

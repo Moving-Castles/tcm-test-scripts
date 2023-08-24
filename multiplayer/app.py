@@ -210,7 +210,8 @@ def add_machine(data):
 def add_connection(conn_data):
     global machines, connections
     player = fetch_player(request.sid)
-    machines, connections, player = network.add_connection(str(network.connection_num()), conn_data['source'], conn_data['dest'], machines, connections, player)
+    print('adding connection, voting is', conn_data)
+    machines, connections, player = network.add_connection(str(network.connection_num()), conn_data['source'], conn_data['dest'], conn_data['voting'], machines, connections, player)
     if not player.alive:
         game_over(player)
     update_world()
@@ -218,8 +219,16 @@ def add_connection(conn_data):
 @socketio.event
 def rm_connection(data):
     global machines, connections
-    print('removing connection', data['conn_id'], request.sid)
-    machines, connections = network.remove_connection(data['conn_id'], machines, connections)
+    conn = next((x for x in connections if x.conn_id == data['conn_id']), None)
+    if conn is not None:
+        if not conn.voting:
+            machines, connections = network.remove_connection(conn, machines, connections)
+            print('removing connection', data['conn_id'], request.sid)
+        else:
+            print('you have to vote')
+
+    else: print('could not find connection with id')
+
     update_world()
 
 @socketio.event
@@ -235,7 +244,7 @@ def vote(data):
     print(conn.votes, current_ids, shared)
 
     if(len(shared) >= len(current_ids)/2):
-        network.remove_connection(conn_id, machines, connections)
+        network.remove_connection(conn, machines, connections)
         log_event('connection ' + conn_id + ' was removed by popular vote')
 
     # check the votes against players still in game

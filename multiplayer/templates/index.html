@@ -105,7 +105,8 @@
             });
 
             $('form#add_connection').submit(function(event) {
-                socket.emit('add_connection', {source: $('#source').val(), dest: $('#dest').val()});
+               console.log('voting is',  $('#voting').is(':checked') )
+                socket.emit('add_connection', {source: $('#source').val(), dest: $('#dest').val(), voting: $('#voting').is(':checked') });
                 return false;
             });
 
@@ -155,6 +156,8 @@
         <input type="submit" value="Add Connection">
         <input type="text" name="source" id="source" placeholder="source machine id">
         <input type="text" name="dest" id="dest" placeholder="target machine id">
+        <input type="checkbox" id="voting" name="voting" value="voting">
+        <label for="voting">voting?</label><br>
     </form>
 
     <form id="rm_connection" method="POST" action='#'>

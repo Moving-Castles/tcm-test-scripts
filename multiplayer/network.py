@@ -53,7 +53,7 @@ def add_machine(machine_type, machines, player):
 	return machines, player
 
 
-def remove_machine(machine_id, connections):
+def remove_machine(machine_id, machines, connections):
 	machine = next((x for x in machines if x.machine_id == machine_id), None)
 	if machine is not None:
 		if getattr(machine, "remove_machine", None) is not None:
@@ -61,15 +61,15 @@ def remove_machine(machine_id, connections):
 		if machine.can_remove: machines.remove(machine)
 		for connection in connections:
 			if connection.source == machine_id or connection.dest == machine_id:
-				remove_connection(connection.conn_id)
+				remove_connection(connection, machines, connections)
 	else:
 		print('no machine with this id to remove')
 	
 	return machines, connections
 
 
-def add_connection(conn_id, source, dest, machines, connections, player):
-	new_conn = Connection(source, dest, conn_id)
+def add_connection(conn_id, source, dest, voting, machines, connections, player):
+	new_conn = Connection(source, dest, conn_id, voting)
 
 	# try drawing the connection
 	if new_conn.draw(machines):
@@ -84,13 +84,9 @@ def add_connection(conn_id, source, dest, machines, connections, player):
 
 	return machines, connections, player
 
-def remove_connection(conn_id, machines, connections):
-	conn = next((x for x in connections if x.conn_id == conn_id), None)
-	if conn is not None:
-		conn.remove_conn(machines)
-		connections.remove(conn)
-	else:
-		print('no connection with this id to remove')
+def remove_connection(conn, machines, connections):
+	machines = conn.remove_conn(machines)
+	connections.remove(conn)
 
 	return machines, connections
 
