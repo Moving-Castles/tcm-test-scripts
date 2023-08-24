@@ -85,7 +85,7 @@ def update_world(context='main'):
         world_state['connections'].append(connection.__dict__)
 
     # this is a hack to deal with the threading context.
-    if context == 'main': emit('world_state', {'data': json.dumps(world_state)})
+    if context == 'main': emit('world_state', {'data': json.dumps(world_state)}, broadcast=True)
     else: socketio.emit('world_state', {'data': json.dumps(world_state)})
 
 def initialise_grid():
@@ -94,7 +94,6 @@ def initialise_grid():
     machines.append(output) 
 
 def tick():
-    print('ticking')
     players = list(filter(lambda x: type(x).__name__ == 'core', machines))
     for player in players:
         player.update_energy(-1*energy_delta)
@@ -176,7 +175,7 @@ def vote(conn_id):
 @socketio.event
 def chat(message):
     player = fetch_player(request.sid)
-    emit('chat_msg', {'data': message['data'], 'sender': request.sid, 'machine_id': player.machine_id})
+    emit('chat_msg', {'data': message['data'], 'sender': request.sid, 'machine_id': player.machine_id}, broadcast=True)
 
 @socketio.on('disconnect')
 def test_disconnect():
