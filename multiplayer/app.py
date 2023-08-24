@@ -34,6 +34,24 @@ win_state = [{
     'done': False
 }]
 
+def victory(context='main'):
+    if context=='main': emit('victory', broadcast=True)
+    else: socketio.emit('victory')   
+
+def check_win_state(world_state, context='main'):
+    global win_state
+
+    for win_material in win_state:
+        pool_material = next((o for o in world_state['pool'] if o['material']['name'] == win_material['material_name']), None)
+        if pool_material is not None:
+            if pool_material['amount'] >= win_material['amount']:
+                print('you got enough ' + win_material['material_name'] + '!')
+                win_state.remove(win_material)
+
+    if len(win_state) == 0:
+        victory(context)
+
+
 def fetch_player(player_id):
     player = next((x for x in machines if hasattr(x, 'session_id') and x.session_id == player_id), None)
     return player
@@ -62,7 +80,7 @@ def update_player(player_id, context='main'):
 
 def update_world(context='main'):
     resolved_machines = network.resolve_network(machines)
-    world_state = {'machines': [], 'connections': [], 'pool': []}
+    world_state = {'machines': [], 'connections': [], 'pool': [], 'win_state': json.dumps(win_state)}
 
     for machine in resolved_machines:
         machine_json = copy.deepcopy(machine).__dict__
@@ -90,15 +108,18 @@ def update_world(context='main'):
             # move the pool to its own thing
             del machine_json['pool']
 
-            for material_type in machine.pool:
+            for i, material_type in enumerate(machine.pool):
                 if material_type is not False:
-                    world_state['pool'].append({'amount': material_type['amount'], 'material': material_type['material'].__dict__})
+                    world_state['pool'].append({'amount': material_type['amount'], 'material': copy.deepcopy(material_type['material'].__dict__)})
+                    world_state['pool'][i]['material']['name'] = material_type['material'].get_name()
 
         world_state['machines'].append(machine_json)
 
 
     for connection in connections:
         world_state['connections'].append(connection.__dict__)
+
+    check_win_state(world_state, context)
 
     # this is a hack to deal with the threading context.
     if context == 'main': emit('world_state', {'data': json.dumps(world_state)}, broadcast=True)

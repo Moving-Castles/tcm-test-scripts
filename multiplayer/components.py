@@ -112,6 +112,26 @@ class parcher(Machine):
 		self.outflow = [{'material': material, 'amount': self.inputs[0]['amount']}]
 		return [{'material': material, 'amount': self.inputs[0]['amount']}]
 
+class wetter(Machine):
+	def __init__(self, machine_id, name):
+		super().__init__()
+		self.inputs = [False]
+		self.name = name
+		self.machine_id = machine_id
+		self.outputs = [False]
+		self.cost = 20
+		self.description = "Floods, pumps and spurts until the material is fully soaked."
+
+	def process(self):
+		material = self.inputs[0]['material']
+		if getattr(material, "wet", None) is not None:
+			material = material.wet()
+		else: print('cannot wet')
+		
+		self.outflow = [{'material': material, 'amount': self.inputs[0]['amount']}]		
+		return [{'material': material, 'amount': self.inputs[0]['amount']}]
+
+
 class splitter(Machine):
 	def __init__(self, machine_id, name):
 		super().__init__()

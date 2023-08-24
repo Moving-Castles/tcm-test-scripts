@@ -84,6 +84,10 @@
                console.log('you died lol')
             })
 
+            socket.on('victory', function(){
+               console.log('wahoo!')
+            })
+
             $('form#add_machine').submit(function(event) {
                 socket.emit('add_machine', {machine_type: $('#machine_type').val()});
                 return false;
