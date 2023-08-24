@@ -135,6 +135,8 @@ def tick():
     for player in players:
         player.update_energy(-1*energy_delta)
         update_player(player.session_id, context='thread')
+        if not player.alive:
+            game_over(player.session_id, context='thread')
 
 def background_thread():
     count = 0
@@ -151,10 +153,14 @@ def remove_player(player_id):
         machines.remove(rm_player)
         print('removed core', rm_player.machine_id)
 
-def game_over(player_id):
+def game_over(player_id, context='main'):
     remove_player(player_id)
-    emit('die')
-    disconnect(player_id)
+    if context=='main':
+        emit('die')
+        disconnect(player_id)
+    else: 
+        socketio.emit('die', to=player_id)   
+        socketio.disconnect(player_id)
 
 @app.route('/')
 def index():
@@ -196,6 +202,8 @@ def add_connection(conn_data):
     global machines, connections
     player = fetch_player(request.sid)
     machines, connections, player = network.add_connection(str(network.connection_num()), conn_data['source'], conn_data['dest'], machines, connections, player)
+    if not player.alive:
+        game_over(player.session_id)
     update_world()
 
 @socketio.event

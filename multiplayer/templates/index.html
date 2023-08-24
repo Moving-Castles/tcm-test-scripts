@@ -82,10 +82,12 @@
 
             socket.on('die', function(){
                console.log('you died lol')
+               alert('you died lol rip')
             })
 
             socket.on('victory', function(){
                console.log('wahoo!')
+               alert("you all won, congratulations, here's a sticker")
             })
 
             $('form#add_machine').submit(function(event) {
