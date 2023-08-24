@@ -70,11 +70,13 @@ def remove_machine(machine_id, machines, connections):
 
 def add_connection(conn_id, source, dest, voting, machines, connections, player):
 	new_conn = Connection(source, dest, conn_id, voting)
+	cost = new_conn.cost
+	if voting: cost = cost + new_conn.vote_cost
 
 	# try drawing the connection
 	if new_conn.draw(machines):
 		if(player.alive):
-			player.update_energy(-new_conn.cost)
+			player.update_energy(-1*cost)
 			connections.append(new_conn)
 		else:
 			game_over()
