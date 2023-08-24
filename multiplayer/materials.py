@@ -7,6 +7,7 @@ class Material(object):
 		self.description = "You don't know much about this material"
 
 	def change_temp(self, amount):
+		print('heating')
 		material = copy.deepcopy(self)
 		material.temp = material.temp + amount
 

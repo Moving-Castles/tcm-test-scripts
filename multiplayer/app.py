@@ -23,6 +23,16 @@ connections = []
 machine_number = 0
 connection_number = 0
 energy_delta = 1
+win_state = [{
+    'material_name': 'hot teeth',
+    'amount': 10,
+    'done': False
+},
+{
+    'material_name': 'sand',
+    'amount': 20,
+    'done': False
+}]
 
 def fetch_player(player_id):
     player = next((x for x in machines if hasattr(x, 'session_id') and x.session_id == player_id), None)
@@ -36,13 +46,15 @@ def update_player(player_id, context='main'):
     if hasattr(player, 'outflow'):
         for i, outflow in enumerate(player.outflow):
             if outflow is not False:
-                player_json['outflow'][i] = {'amount': outflow['amount'], 'material': outflow['material'].__dict__}
+                player_json['outflow'][i] = {'amount': outflow['amount'], 'material': copy.deepcopy(outflow['material'].__dict__)}
+                player_json['outflow'][i]['material']['name'] = outflow['material'].get_name()
 
     # again i am filled with remorse
     if hasattr(player, 'inputs'):
         for i, player_in in enumerate(player.inputs):
             if player_in is not False:
-                player_json['inputs'][i] = {'amount': player_in['amount'], 'material': player_in['material'].__dict__}
+                player_json['inputs'][i] = {'amount': player_in['amount'], 'material': copy.deepcopy(player_in['material'].__dict__)}
+                player_json['inputs'][i]['material']['name'] = player_in['material'].get_name()
 
 
     if context=='main': emit('player_state', {'data': json.dumps(player_json)}, to=player_id)
@@ -59,13 +71,17 @@ def update_world(context='main'):
         if hasattr(machine, 'outflow'):
             for i, outflow in enumerate(machine.outflow):
                 if outflow is not False:
-                    machine_json['outflow'][i] = {'amount': outflow['amount'], 'material': outflow['material'].__dict__}
+                    machine_json['outflow'][i] = {'amount': outflow['amount'], 'material': copy.deepcopy(outflow['material'].__dict__)}
+                    machine_json['outflow'][i]['material']['name'] = outflow['material'].get_name()
+
 
         # again i am filled with remorse
         if hasattr(machine, 'inputs'):
             for i, machine_in in enumerate(machine.inputs):
                 if machine_in is not False:
-                    machine_json['inputs'][i] = {'amount': machine_in['amount'], 'material': machine_in['material'].__dict__}
+                    machine_json['inputs'][i] = {'amount': machine_in['amount'], 'material': copy.deepcopy(machine_in['material'].__dict__)}
+                    machine_json['inputs'][i]['material']['name'] = machine_in['material'].get_name()
+
 
         # screaming, crying, throwing up
         if hasattr(machine, 'recipes'): del machine_json['recipes']
