@@ -223,8 +223,23 @@ def rm_connection(data):
     update_world()
 
 @socketio.event
-def vote(conn_id):
-    print('voting', conn_id, request.sid)
+def vote(data):
+    conn_id = data['conn_id']
+    print('voting', data['conn_id'], request.sid)
+    conn = next((x for x in connections if x.conn_id == conn_id), None)
+    conn.votes.append(request.sid)
+
+    players = list(filter(lambda x: type(x).__name__ == 'core', machines))
+    current_ids = list(map(lambda x:x.session_id, players))
+    shared = list(set(current_ids).intersection(conn.votes))
+    print(conn.votes, current_ids, shared)
+
+    if(len(shared) >= len(current_ids)/2):
+        network.remove_connection(conn_id, machines, connections)
+        log_event('connection ' + conn_id + ' was removed by popular vote')
+
+    # check the votes against players still in game
+
 
 @socketio.event
 def chat(message):
