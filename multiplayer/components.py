@@ -1,10 +1,6 @@
 from materials import *
 import copy
-# from network import print_message, game_over
-
-
-def print_message(message):
-	print(message)
+from network import feedback_message
 
 class Connection(object):
 	def __init__(self, source, dest, conn_id, voting=False):
@@ -22,7 +18,7 @@ class Connection(object):
 	def vote(self, voter_id):
 		self.votes.append(voter_id)
 
-	def draw(self, machines):
+	def draw(self, machines, player):
 		# check if there's space on the input of source
 		# and on the output of dest. if not then
 		machine = next((m for m in machines if m.machine_id == self.source), None)
@@ -32,7 +28,7 @@ class Connection(object):
 				in_idx = machine.outputs.index(False)
 				machine.outputs[in_idx] = self.dest
 			except:
-				print_message("pipe was not added -- no available outputs on source machine")
+				feedback_message("pipe was not added -- no available outputs on source machine", player.session_id)
 				return False
 
 			# now check if you can find the target
@@ -41,14 +37,14 @@ class Connection(object):
 				try:
 					in_idx = rx_node.inputs.index(False)
 				except:
-					print_message("pipe was not added -- no available inputs on target machine")
+					feedback_message("pipe was not added -- no available inputs on target machine", player.session_id)
 					return False
 			else:
-				print_message("pipe was not added -- couldn't find target machine")
+				feedback_message("pipe was not added -- couldn't find target machine", player.session_id)
 				return False
 
 		else:
-			print_message("pipe was not added -- couldn't find source machine")
+			feedback_message("pipe was not added -- couldn't find source machine", player.session_id)
 			return False
 
 		return True

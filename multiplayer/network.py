@@ -1,6 +1,6 @@
 from components import *
 import components
-from app import machine_number, connection_number, log_event
+from app import machine_number, connection_number, log_event, feedback_message
 
 def machine_num():
 	global machine_number
@@ -12,6 +12,8 @@ def connection_num():
 	connection_number +=1
 	return connection_number
 
+
+# redo this function
 def get_info(machine_type):
 	machineClass = getattr(components, machine_type, None)
 	if machineClass is not None:
@@ -48,41 +50,23 @@ def add_machine(machine_type, machines, player):
 			machines.append(new_machine)
 			log_event('core ' + player.machine_id + ' added machine ' + new_machine.name)
 	else:
-		print('no machine of this type available')
+		feedback_message('no machine of this type available', player.session_id)
 
 	return machines, player
 
 
-def remove_machine(machine_id, machines, connections):
-	machine = next((x for x in machines if x.machine_id == machine_id), None)
-	if machine is not None:
-		if getattr(machine, "remove_machine", None) is not None:
-			machine.remove_machine()
-		if machine.can_remove: machines.remove(machine)
-		for connection in connections:
-			if connection.source == machine_id or connection.dest == machine_id:
-				remove_connection(connection, machines, connections)
-	else:
-		print('no machine with this id to remove')
-	
-	return machines, connections
-
-
 def add_connection(conn_id, source, dest, voting, machines, connections, player):
-	new_conn = Connection(source, dest, conn_id, voting)
+	new_conn = components.Connection(source, dest, conn_id, voting)
 	cost = new_conn.cost
 	if voting: cost = cost + new_conn.vote_cost
 
 	# try drawing the connection
-	if new_conn.draw(machines):
+	if new_conn.draw(machines, player):
 		if(player.alive):
 			player.update_energy(-1*cost)
 			connections.append(new_conn)
 		else:
 			game_over()
-
-	else:
-		print('im here now')
 
 	return machines, connections, player
 

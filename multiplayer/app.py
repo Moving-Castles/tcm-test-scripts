@@ -63,12 +63,15 @@ def check_win_state(world_state, context='main'):
         pool_material = next((o for o in world_state['pool'] if o['material']['name'] == win_material['material_name']), None)
         if pool_material is not None:
             if pool_material['amount'] >= win_material['amount']:
-                print('you got enough ' + win_material['material_name'] + '!')
+                log_event('you got enough ' + win_material['material_name'] + '!')
                 win_state.remove(win_material)
 
     if len(win_state) == 0:
         victory(context)
 
+def feedback_message(message, player_id, context='main'):
+    if context=='main': emit('feedback_message', {'data': message }, to=player_id)
+    else: socketio.emit('feedback_message', {'data': message }, to=player_id)
 
 def fetch_player(player_id):
     player = next((x for x in machines if hasattr(x, 'session_id') and x.session_id == player_id), None)
@@ -146,7 +149,7 @@ def update_world(context='main'):
 def initialise_grid():
     machines.append(inlet(str(network.machine_num()), 'inlet'))
     output = outlet(str(network.machine_num()), 'outlet')
-    machines.append(output) 
+    machines.append(output)
 
 def tick():
     players = list(filter(lambda x: type(x).__name__ == 'core', machines))
@@ -169,6 +172,7 @@ def remove_player(player_id):
     rm_player = fetch_player(player_id)
     if rm_player is not None: 
         machines.remove(rm_player)
+        log_event('core ' + rm_player.machine_id + ' has fled the box')
         print('removed core', rm_player.machine_id)
 
 @app.route('/')
@@ -225,9 +229,9 @@ def rm_connection(data):
             machines, connections = network.remove_connection(conn, machines, connections)
             print('removing connection', data['conn_id'], request.sid)
         else:
-            print('you have to vote')
+            feedback_message('you have to vote to remove this connection', request.sid)
 
-    else: print('could not find connection with id')
+    else: feedback_message('could not find connection with id', request.sid)
 
     update_world()
 
