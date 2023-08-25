@@ -1,6 +1,6 @@
 from components import *
 import components
-from app import machine_number, connection_number
+from app import machine_number, connection_number, log_event, feedback_message
 
 def machine_num():
 	global machine_number
@@ -12,6 +12,8 @@ def connection_num():
 	connection_number +=1
 	return connection_number
 
+
+# redo this function
 def get_info(machine_type):
 	machineClass = getattr(components, machine_type, None)
 	if machineClass is not None:
@@ -46,50 +48,31 @@ def add_machine(machine_type, machines, player):
 
 		if(player.alive):
 			machines.append(new_machine)
+			log_event('core ' + player.machine_id + ' added machine ' + new_machine.name)
 	else:
-		print('no machine of this type available')
+		feedback_message('no machine of this type available', player.session_id)
 
 	return machines, player
 
 
-def remove_machine(machine_id, connections):
-	machine = next((x for x in machines if x.machine_id == machine_id), None)
-	if machine is not None:
-		if getattr(machine, "remove_machine", None) is not None:
-			machine.remove_machine()
-		if machine.can_remove: machines.remove(machine)
-		for connection in connections:
-			if connection.source == machine_id or connection.dest == machine_id:
-				remove_connection(connection.conn_id)
-	else:
-		print('no machine with this id to remove')
-	
-	return machines, connections
-
-
-def add_connection(conn_id, source, dest, machines, connections, player):
-	new_conn = Connection(source, dest, conn_id)
+def add_connection(conn_id, source, dest, voting, machines, connections, player):
+	new_conn = components.Connection(source, dest, conn_id, voting)
+	cost = new_conn.cost
+	if voting: cost = cost + new_conn.vote_cost
 
 	# try drawing the connection
-	if new_conn.draw(machines):
+	if new_conn.draw(machines, player):
 		if(player.alive):
-			player.update_energy(-new_conn.cost)
+			player.update_energy(-1*cost)
 			connections.append(new_conn)
 		else:
 			game_over()
 
-	else:
-		print('im here now')
-
 	return machines, connections, player
 
-def remove_connection(conn_id, machines, connections):
-	conn = next((x for x in connections if x.conn_id == conn_id), None)
-	if conn is not None:
-		conn.remove_conn(machines)
-		connections.remove(conn)
-	else:
-		print('no connection with this id to remove')
+def remove_connection(conn, machines, connections, player):
+	machines = conn.remove_conn(machines, player)
+	connections.remove(conn)
 
 	return machines, connections
 
@@ -118,16 +101,19 @@ def resolve_network(machines):
 			for node in machines:
 				if False not in node.inputs and node.machine_id not in resolved_nodes:
 					resolved_nodes.append(node.machine_id)
-					outputs = node.process()
+					outflows = node.process()
 
 					for i, rx in enumerate(node.outputs):
+						outflows[i]['material'] = outflows[i]['material'].change_temp(0)
+
 						if rx != False:
+							# propagate temp changes -- inelegant sorry!
 							rx_node = next((x for x in machines if x.machine_id == rx), None)
 
 							if rx_node is not None:
 								try:
 									in_idx = rx_node.inputs.index(False)
-									rx_node.inputs[in_idx] = outputs[i]
+									rx_node.inputs[in_idx] = outflows[i]
 								except:
 									# do we want a feedback message here?
 									print('')

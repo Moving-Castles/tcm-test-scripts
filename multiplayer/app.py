@@ -34,6 +34,45 @@ win_state = [{
     'done': False
 }]
 
+def log_event(event):
+    print('logging', event)
+    socketio.emit('log_event', {'data': event})
+
+def victory(context='main'):
+    if context=='main': emit('victory', broadcast=True)
+    else: socketio.emit('victory')
+
+    log_event('the box has been won')
+
+def game_over(player, context='main'):
+    player_id = player.session_id
+    remove_player(player_id)
+    if context=='main':
+        emit('die')
+        disconnect(player_id)
+    else: 
+        socketio.emit('die', to=player_id)   
+        disconnect(player_id, namespace='/')
+
+    log_event('core ' + player.machine_id + ' has died :(')
+
+def check_win_state(world_state, context='main'):
+    global win_state
+
+    for win_material in win_state:
+        pool_material = next((o for o in world_state['pool'] if o['material']['name'] == win_material['material_name']), None)
+        if pool_material is not None:
+            if pool_material['amount'] >= win_material['amount']:
+                log_event('you got enough ' + win_material['material_name'] + '!')
+                win_state.remove(win_material)
+
+    if len(win_state) == 0:
+        victory(context)
+
+def feedback_message(message, player_id, context='main'):
+    if context=='main': emit('feedback_message', {'data': message }, to=player_id)
+    else: socketio.emit('feedback_message', {'data': message }, to=player_id)
+
 def fetch_player(player_id):
     player = next((x for x in machines if hasattr(x, 'session_id') and x.session_id == player_id), None)
     return player
@@ -46,6 +85,7 @@ def update_player(player_id, context='main'):
     if hasattr(player, 'outflow'):
         for i, outflow in enumerate(player.outflow):
             if outflow is not False:
+                # outflow['material'].change_temp(0)
                 player_json['outflow'][i] = {'amount': outflow['amount'], 'material': copy.deepcopy(outflow['material'].__dict__)}
                 player_json['outflow'][i]['material']['name'] = outflow['material'].get_name()
 
@@ -53,6 +93,7 @@ def update_player(player_id, context='main'):
     if hasattr(player, 'inputs'):
         for i, player_in in enumerate(player.inputs):
             if player_in is not False:
+                # player_in['material'].change_temp(0)
                 player_json['inputs'][i] = {'amount': player_in['amount'], 'material': copy.deepcopy(player_in['material'].__dict__)}
                 player_json['inputs'][i]['material']['name'] = player_in['material'].get_name()
 
@@ -62,7 +103,7 @@ def update_player(player_id, context='main'):
 
 def update_world(context='main'):
     resolved_machines = network.resolve_network(machines)
-    world_state = {'machines': [], 'connections': [], 'pool': []}
+    world_state = {'machines': [], 'connections': [], 'pool': [], 'win_state': json.dumps(win_state)}
 
     for machine in resolved_machines:
         machine_json = copy.deepcopy(machine).__dict__
@@ -71,6 +112,7 @@ def update_world(context='main'):
         if hasattr(machine, 'outflow'):
             for i, outflow in enumerate(machine.outflow):
                 if outflow is not False:
+                    # outflow['material'].change_temp(0)
                     machine_json['outflow'][i] = {'amount': outflow['amount'], 'material': copy.deepcopy(outflow['material'].__dict__)}
                     machine_json['outflow'][i]['material']['name'] = outflow['material'].get_name()
 
@@ -79,6 +121,7 @@ def update_world(context='main'):
         if hasattr(machine, 'inputs'):
             for i, machine_in in enumerate(machine.inputs):
                 if machine_in is not False:
+                    # machine_in['material'].change_temp(0)
                     machine_json['inputs'][i] = {'amount': machine_in['amount'], 'material': copy.deepcopy(machine_in['material'].__dict__)}
                     machine_json['inputs'][i]['material']['name'] = machine_in['material'].get_name()
 
@@ -90,15 +133,18 @@ def update_world(context='main'):
             # move the pool to its own thing
             del machine_json['pool']
 
-            for material_type in machine.pool:
+            for i, material_type in enumerate(machine.pool):
                 if material_type is not False:
-                    world_state['pool'].append({'amount': material_type['amount'], 'material': material_type['material'].__dict__})
+                    world_state['pool'].append({'amount': material_type['amount'], 'material': copy.deepcopy(material_type['material'].__dict__)})
+                    world_state['pool'][i]['material']['name'] = material_type['material'].get_name()
 
         world_state['machines'].append(machine_json)
 
 
     for connection in connections:
         world_state['connections'].append(connection.__dict__)
+
+    check_win_state(world_state, context)
 
     # this is a hack to deal with the threading context.
     if context == 'main': emit('world_state', {'data': json.dumps(world_state)}, broadcast=True)
@@ -107,13 +153,15 @@ def update_world(context='main'):
 def initialise_grid():
     machines.append(inlet(str(network.machine_num()), 'inlet'))
     output = outlet(str(network.machine_num()), 'outlet')
-    machines.append(output) 
+    machines.append(output)
 
 def tick():
     players = list(filter(lambda x: type(x).__name__ == 'core', machines))
     for player in players:
         player.update_energy(-1*energy_delta)
         update_player(player.session_id, context='thread')
+        if not player.alive:
+            game_over(player, context='thread')
 
 def background_thread():
     count = 0
@@ -128,12 +176,7 @@ def remove_player(player_id):
     rm_player = fetch_player(player_id)
     if rm_player is not None: 
         machines.remove(rm_player)
-        print('removed core', rm_player.machine_id)
-
-def game_over(player_id):
-    remove_player(player_id)
-    emit('die')
-    disconnect(player_id)
+        if rm_player.alive: log_event('core ' + rm_player.machine_id + ' has fled the box')
 
 @app.route('/')
 def index():
@@ -167,26 +210,54 @@ def add_machine(data):
     player = fetch_player(request.sid)
     machines, player = network.add_machine(data['machine_type'], machines, player)
     if not player.alive:
-        game_over(player.session_id)
+        game_over(player)
     update_world()
 
 @socketio.event
 def add_connection(conn_data):
     global machines, connections
     player = fetch_player(request.sid)
-    machines, connections, player = network.add_connection(str(network.connection_num()), conn_data['source'], conn_data['dest'], machines, connections, player)
+    print('adding connection, voting is', conn_data)
+    machines, connections, player = network.add_connection(str(network.connection_num()), conn_data['source'], conn_data['dest'], conn_data['voting'], machines, connections, player)
+    if not player.alive:
+        game_over(player)
     update_world()
 
 @socketio.event
 def rm_connection(data):
     global machines, connections
-    print('removing connection', data['conn_id'], request.sid)
-    machines, connections = network.remove_connection(data['conn_id'], machines, connections)
+    conn = next((x for x in connections if x.conn_id == data['conn_id']), None)
+    if conn is not None:
+        if not conn.voting:
+            player = fetch_player(request.sid)
+            machines, connections = network.remove_connection(conn, machines, connections, player)
+            print('removing connection', data['conn_id'], request.sid)
+            log_event('connection ' + data['conn_id'] + ' was removed by core ' + player.machine_id)
+        else:
+            feedback_message('you have to vote to remove this connection', request.sid)
+
+    else: feedback_message('could not find connection with id', request.sid)
+
     update_world()
 
 @socketio.event
-def vote(conn_id):
-    print('voting', conn_id, request.sid)
+def vote(data):
+    conn_id = data['conn_id']
+    print('voting', data['conn_id'], request.sid)
+    conn = next((x for x in connections if x.conn_id == conn_id), None)
+    conn.votes.append(request.sid)
+
+    players = list(filter(lambda x: type(x).__name__ == 'core', machines))
+    current_ids = list(map(lambda x:x.session_id, players))
+    shared = list(set(current_ids).intersection(conn.votes))
+    print(conn.votes, current_ids, shared)
+
+    if(len(shared) >= len(current_ids)/2):
+        network.remove_connection(conn, machines, connections, fetch_player(request.sid))
+        log_event('connection ' + conn_id + ' was removed by popular vote')
+
+    # check the votes against players still in game
+
 
 @socketio.event
 def chat(message):

@@ -7,7 +7,6 @@ class Material(object):
 		self.description = "You don't know much about this material"
 
 	def change_temp(self, amount):
-		print('heating')
 		material = copy.deepcopy(self)
 		material.temp = material.temp + amount
 
@@ -24,16 +23,20 @@ class Material(object):
 
 		if material.temp >= material.hot_temp:
 			material.temp_state = "hot"
+			self.temp_state = "hot"
 		
 		elif material.temp <= material.cold_temp:
 			material.temp_state = "cold"
+			self.temp_state = "cold"
 		
 		else:
 			material.temp_state = ""
+			self.temp_state = ''
 
 		return material
 
 	def get_name(self):
+		material = self.change_temp(0)
 		return (self.temp_state + " " + self.name).strip()
 
 
@@ -119,10 +122,32 @@ class Blood(Liquid):
 	def __init__(self, base_temp=20, name='blood'):
 		super().__init__(base_temp)
 		self.name = name
+		self.is_food = True
 		self.description = "Warm liquid gore. Is it yours? Is it theirs? At this point, who cares."
 
 	def dry(self):
 		return Scab(base_temp = self.temp)
+
+
+class Vomit(Liquid):
+	def __init__(self, base_temp=20, name='vomit'):
+		super().__init__(base_temp)
+		self.name = name
+		self.description = "What a waste. You could have made good use of those pellets"
+
+	def dry(self):
+		return Pellet(base_temp = self.temp)
+
+
+class Gruel(Liquid):
+	def __init__(self, base_temp=20, name='gruel'):
+		super().__init__(base_temp)
+		self.name = name
+		self.description = "You don't like this as much as you like the pellets. But it's OK. Softer. Easier on your tired teeth."
+		self.is_food = True
+
+	def dry(self):
+		return Pellet(base_temp = self.temp)
 
 class Teeth(Solid):
 	def __init__(self, base_temp=20, name='teeth'):
@@ -136,6 +161,10 @@ class Pellet(Solid):
 		self.name = name
 		self.is_food = True
 		self.description = "God you love the pellets, don’t you? Crunch crunch crunch basic foodstuff, eh? Wouldn’t this be nice with a cold beer? Some piss? ha ha ha."
+
+	def wet(self):
+		return Gruel(base_temp = self.temp)
+
 
 recipes = []
 recipes.append(Recipe({'piss', 'blood'}, Teeth()))

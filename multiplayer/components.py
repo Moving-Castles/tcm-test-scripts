@@ -1,17 +1,14 @@
 from materials import *
 import copy
-# from network import print_message, game_over
-
-
-def print_message(message):
-	print(message)
+from network import feedback_message
 
 class Connection(object):
-	def __init__(self, source, dest, conn_id):
+	def __init__(self, source, dest, conn_id, voting=False):
 		self.source = source
 		self.dest = dest
 		self.cost = 6
 		self.vote_cost = 10
+		self.voting = voting
 		self.votes = []
 		self.conn_id = conn_id
 		self.description = "Pumping your vile fluids from A to B."
@@ -21,7 +18,7 @@ class Connection(object):
 	def vote(self, voter_id):
 		self.votes.append(voter_id)
 
-	def draw(self, machines):
+	def draw(self, machines, player):
 		# check if there's space on the input of source
 		# and on the output of dest. if not then
 		machine = next((m for m in machines if m.machine_id == self.source), None)
@@ -31,7 +28,7 @@ class Connection(object):
 				in_idx = machine.outputs.index(False)
 				machine.outputs[in_idx] = self.dest
 			except:
-				print_message("pipe was not added -- no available outputs on source machine")
+				feedback_message("pipe was not added -- no available outputs on source machine", player.session_id)
 				return False
 
 			# now check if you can find the target
@@ -40,29 +37,31 @@ class Connection(object):
 				try:
 					in_idx = rx_node.inputs.index(False)
 				except:
-					print_message("pipe was not added -- no available inputs on target machine")
+					feedback_message("pipe was not added -- no available inputs on target machine", player.session_id)
 					return False
 			else:
-				print_message("pipe was not added -- couldn't find target machine")
+				feedback_message("pipe was not added -- couldn't find target machine", player.session_id)
 				return False
 
 		else:
-			print_message("pipe was not added -- couldn't find source machine")
+			feedback_message("pipe was not added -- couldn't find source machine", player.session_id)
 			return False
 
 		return True
 
-	def remove_conn(self, machines):
+	def remove_conn(self, machines, player):
 		source_machine = next((m for m in machines if m.machine_id == self.source), None)
 		if source_machine is not None:
 			try:
 				in_idx = source_machine.outputs.index(self.dest)
 				source_machine.outputs[in_idx] = False
 			except:
-				print_message("pipe was not removed -- couldn't find target machine")
-				return
+				feedback_message("pipe was not removed -- couldn't find target machine", player.session_id)
 		else:
-			print_message("pipe was not removed -- couldn't find source machine")
+			feedback_message("pipe was not removed -- couldn't find source machine", player.session_id)
+			return machines
+
+		return machines
 
 
 class Machine(object):
@@ -111,6 +110,26 @@ class parcher(Machine):
 		else: print('cannot dry')
 		self.outflow = [{'material': material, 'amount': self.inputs[0]['amount']}]
 		return [{'material': material, 'amount': self.inputs[0]['amount']}]
+
+class wetter(Machine):
+	def __init__(self, machine_id, name):
+		super().__init__()
+		self.inputs = [False]
+		self.name = name
+		self.machine_id = machine_id
+		self.outputs = [False]
+		self.cost = 20
+		self.description = "Floods, pumps and spurts until the material is fully soaked."
+
+	def process(self):
+		material = self.inputs[0]['material']
+		if getattr(material, "wet", None) is not None:
+			material = material.wet()
+		else: print('cannot wet')
+		
+		self.outflow = [{'material': material, 'amount': self.inputs[0]['amount']}]		
+		return [{'material': material, 'amount': self.inputs[0]['amount']}]
+
 
 class splitter(Machine):
 	def __init__(self, machine_id, name):
@@ -169,13 +188,16 @@ class core(Organ):
 	def process(self):
 		if self.inputs[0]['material'].is_food:
 			self.update_energy(self.inputs[0]['amount']*0.2)
-			self.outflow = [{ 'material': Piss(), 'amount': self.inputs[0]['amount']*0.4}, 
-				{ 'material': Blood(), 'amount': self.inputs[0]['amount']*0.4}]
-			return [{ 'material': Piss(), 'amount': self.inputs[0]['amount']*0.4}, 
-				{ 'material': Blood(), 'amount': self.inputs[0]['amount']*0.4}]
+			self.outflow = [{ 'material': Piss(base_temp=35), 'amount': self.inputs[0]['amount']*0.4}, 
+				{ 'material': Blood(base_temp=35), 'amount': self.inputs[0]['amount']*0.4}]
+			return [{ 'material': Piss(base_temp=35), 'amount': self.inputs[0]['amount']*0.4}, 
+				{ 'material': Blood(base_temp=35), 'amount': self.inputs[0]['amount']*0.4}]
+			feedback_message('mmmm, delicious ' + self.inputs[0]['material'].get_name())
 		else:
-			print('ugh! not food!')
-			self.outflow = copy.deepcopy(self.inputs)
+			feedback_message('the ' + self.inputs[0]['material'].get_name() + ' makes you feel ill', self.session_id, context='thread')
+			self.update_energy(-5)
+			self.outflow = [{ 'material': Vomit(base_temp=35), 'amount': round(self.inputs[0]['amount']*0.8, 2)}]
+			return  [{ 'material': Vomit(base_temp=35), 'amount': round(self.inputs[0]['amount']*0.8, 2)}]
 			return self.inputs
 
 	def update_energy(self, amount):
@@ -184,7 +206,7 @@ class core(Organ):
 			self.die()
 
 	def remove_machine(self):
-		print_message("nice try, asshole")
+		feedback_message("nice try, asshole -- you're not getting out of here that fast", self.session_id)
 		# self.die()
 
 	def die(self):
