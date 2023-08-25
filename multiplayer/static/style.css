@@ -4,6 +4,10 @@
   --terminal-border: 1px dashed black;
 }
 
+body {
+  overflow: hidden;
+}
+
 body,
 input,
 h1,
@@ -22,12 +26,52 @@ select {
   border: var(--terminal-border);
 }
 
+input[type=submit] {
+  display: block;
+  height: 40px;
+}
+
+#machine_spawn {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  background: rgba(0,0,0,0.8);
+  color: white;
+  display: none;
+  pointer-events: none;
+}
+
+#col_left,
+#col_right {
+  height: 85vh;
+  border: 1px solid black;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  box-sizing: border-box;
+  padding: 0 1rem;
+}
+
+#col_left {
+  transform-origin: 100% 0;
+  transform: skew(0, -6deg);
+}
+
+#col_right {
+  transform-origin: 0 0;
+  transform: skew(0, 11deg);
+}
+
 #add_machine,
 #add_connection,
 #rm_connection,
 #vote {
   display: grid;
+  grid-template-columns: 70% 1fr;
   margin-bottom: 2rem;
+}
+
+.w-full {
+  width: 100%;
 }
 
 #spawn-msg {
@@ -51,26 +95,35 @@ select {
   color: white;
   margin: 0;
   transition: all 0.2s ease;
-  font-size: 20rem;
   text-align: center;
+  display: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-flow: column nowrap;
   display: none;
 }
 
 #cols {
-	display: flex;
-	flex-direction: row;
-  gap: 0.5rem;
+	display: grid;
+	grid-template-columns: 500px 1fr;
+  gap: 0;
 }
 
-#cols > div {
-	width: 45vw;
-	min-width: 400px;
+#cols div {
+	min-width: 500px;
 }
 
 #chat_log, #player_state {
 	list-style-type: none;
 	padding-left: 0;
   margin: 0;
+}
+
+#player_state {
+  aspect-ratio: 3 / 2;
+  background: beige;
+  padding: 1rem;
 }
 
 #chat {

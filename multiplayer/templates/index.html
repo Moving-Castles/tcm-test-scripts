@@ -65,137 +65,170 @@
 
     // Make myWindow and myWindow2 draggable in different ways...
 
-  </script>
-    
-    <script type="text/javascript" charset="utf-8">
-      $(document).ready(function () {
+    $(document).ready(function () {
+      let lastState = {}
+
       makeDraggable(document.querySelector('.terminal'));
 
-      var socket = io();
+            var socket = io();
 
-      socket.on('connect', function () {
-        socket.emit('create_core');
-        console.log('session id is', socket.io.engine.id)
-
-        $("#spawn-msg").css("opacity", "1")
-        $("#spawn-msg").click(function () { $(this).css("opacity", "0").css("pointer-events", "none") })
-      });
-
-      socket.on('chat_msg', function (msg, cb) {
-        let chat_from = 'player ' + msg.machine_id
-        if (msg.sender === socket.id) chat_from = 'you'
-
-        $('#chat_log').append($('<li/>').text(chat_from + ': ' + msg.data));
-
-        if (cb)
-          cb();
-      });
-
-      socket.on('world_state', function (msg, cb) {
-        const world_state = JSON.parse(msg.data)
-        console.log('got world state', world_state)
-        $('#win_state').text('')
-        $('#machines').text('')
-        $('#connections').text('')
-        $('#septic_tank').text('')
-
-        world_state.win_state.forEach((task, i) => {
-          const win_el = $('<li/>').html(task.amount + ' ' + task.material_name)
-          $('#win_state').append(win_el)
-        })
-
-        world_state.machines.forEach((machine, i) => {
-          let machine_name = machine.name
-        })
+            socket.on('connect', function() {
+                socket.emit('create_core');
+                console.log('session id is', socket.io.engine.id)
+            });
 
 
-        world_state.machines.forEach((machine, i) => {
-          let machine_name = machine.name
+            socket.on('log_event', function(msg, cb) {
+               $('#chat_log').append( $('<li/>').html('<i>' + msg.data + '</i>'));
+               
+               if (cb)
+                  cb();
+            });
 
-          if (machine_name === 'you') {
-            if (machine.session_id !== socket.id) machine_name = 'some other poor asshole'
-          }
 
-          machine_element = $('<li/>').html(machine_name + ' with id: ' + machine.machine_id)
-          in_list = $('<ul/>')
-          out_list = $('<ul/>')
+            socket.on('chat_msg', function(msg, cb) {
+               let chat_from = 'player ' + msg.machine_id
+               if(msg.sender === socket.id) chat_from = 'you'
 
-          machine.inputs.forEach((input, i) => {
-            if (input !== false) in_list.append($('<li/>').text('input ' + i + ': ' + input.amount + ' ' + input.material.name))
-          })
-          machine.outflow.forEach((outflow, i) => {
-            if (outflow !== false) out_list.append($('<li/>').text('output ' + i + ': ' + outflow.amount + ' ' + outflow.material.name))
-          })
+               if($(".terminal").not(":visible")) $('.terminal').show()
 
-          machine_element.append(in_list)
-          machine_element.append(out_list)
-          $('#machines').append(machine_element)
+               $('#chat_log').append( $('<li/>').text(chat_from + ': ' + msg.data));
+               
+               if (cb)
+                  cb();
+            });
+
+           socket.on('world_state', function(msg, cb) {
+               const world_state = JSON.parse(msg.data)
+               console.log('got world state', world_state)
+               $('#win_state').text('')
+               $('#machines').text('')
+               $('#connections').text('')
+               $('#septic_tank').text('')
+
+               world_state.win_state.forEach((task, i) => {
+                  const win_el = $('<li/>').html(task.amount + ' ' + task.material_name)
+                  $('#win_state').append(win_el)
+               })
+
+               world_state.machines.forEach((machine, i) => {
+                  let machine_name = machine.name
+
+                  if (machine_name === 'you') {
+                     if(machine.session_id !== socket.id) machine_name = 'some other poor asshole'
+                  }
+
+                  machine_element = $('<li/>').html(machine_name + ' with id: ' + machine.machine_id)
+                  in_list = $('<ul/>')
+                  out_list = $('<ul/>')
+
+                  machine.inputs.forEach((input, i) => {
+                     if(input !== false) in_list.append($('<li/>').text('input ' + i + ': ' + input.amount + ' ' + input.material.name))
+                  })
+                  machine.outflow.forEach((outflow, i) => {
+                     if(outflow !== false) out_list.append($('<li/>').text('output ' + i + ': ' + outflow.amount + ' ' + outflow.material.name))
+                  })
+
+                  machine_element.append(in_list)
+                  machine_element.append(out_list)
+
+                  $('#machines').append(machine_element)
+
+                  if (lastState.machines && world_state.machines.length !== lastState?.machines.length) {
+                    $('#machine_spawn').show()
+                    $('#machine_spawn').empty()
+                    $('#machine_spawn').append(machine_name + ' (id: ' + machine.machine_id + ") was thrown into the box")
+                    setTimeout(() => {
+                      $('#machine_spawn').hide()
+                    }, 1000)
+                  }
+
+               });
+               
+               world_state.connections.forEach((conn, i) => {
+                  let conn_el;
+
+                  if (conn.voting == false) conn_el = $('<li/>').text('connection from ' + conn.source + ' to ' + conn.dest + ' with id: ' + conn.conn_id)
+                  else conn_el = $('<li/>').text('voting connection from ' + conn.source + ' to ' + conn.dest + ' with id: ' + conn.conn_id)
+
+                  $('#connections').append(conn_el)});
+               
+               world_state.pool.forEach((material, i) => $('#septic_tank').append( $('<li/>').text(material.amount + ' ' + material.material.name)));
+
+               socket.emit('request_status')
+
+                if (cb)
+                    cb();
+
+              lastState = { ...world_state }
+            });
+
+            socket.on('player_state', function (msg, cb)  {
+               const player = JSON.parse(msg.data)
+               console.log('got player state', player)
+
+               $('#player_state').text('')
+
+               if (player.alive) $('#player_state').append($('<li/>').text("good news is, you're still alive"))
+               else $('#player_state').append($('<li/>').text("well shit, you're dead"))
+
+                $('#player_state').append($('<li/>').text("you have " + player.energy + " energy remaining"))
+            });
+
+            socket.on('disconnect', function() {
+                socket.disconnect();
+            });
+
+            socket.on('die', function(){
+               $("#dead").toggle()
+               alert('you died lol rip')
+            })
+
+            socket.on('feedback_message', function(msg, callback){
+               console.log(msg)
+               alert(msg.data)
+            })
+
+            socket.on('victory', function(){
+               console.log('wahoo!')
+               alert("you all won, congratulations, here's a sticker")
+            })
+
+            $('form#add_machine').submit(function(event) {
+                socket.emit('add_machine', {machine_type: $('#machine_type').val()});
+                return false;
+            });
+
+            $('form#add_connection').submit(function(event) {
+               console.log('voting is',  $('#voting').is(':checked') )
+                socket.emit('add_connection', {source: $('#source').val(), dest: $('#dest').val(), voting: $('#voting').is(':checked') });
+                return false;
+            });
+
+            $('form#rm_connection').submit(function(event) {
+                socket.emit('rm_connection', {conn_id: $('#rm_conn_id').val()});
+                return false;
+            });
+
+            $('form#vote').submit(function(event) {
+                socket.emit('vote', {conn_id: $('#vote_conn_id').val()});
+                return false;
+            });
+
+            $('form#chat').submit(function(event) {
+                socket.emit('chat', {data: $('#chat_msg').val()});
+                return false;
+            });
+
+            $(".chat-toggle").click(function() {
+              $(".terminal").toggle()
+            })
+
+            $("#dead").click(function() {
+              $(this).toggle()
+            })
+
         });
-
-        world_state.connections.forEach((conn, i) => $('#connections').append($('<li/>').text('from ' + conn.source + ' to ' + conn.dest + ' with id: ' + conn.conn_id)));
-
-        world_state.pool.forEach((material, i) => $('#septic_tank').append($('<li/>').text(material.amount + ' ' + material.material.name)));
-
-        socket.emit('request_status')
-
-        if (cb)
-          cb();
-      });
-
-      socket.on('player_state', function (msg, cb) {
-        const player = JSON.parse(msg.data)
-        console.log('got player state', player)
-
-        $('#player_state').text('')
-
-        if (player.alive) $('#player_state').append($('<li/>').text("good news is, you're still alive"))
-        else $('#player_state').append($('<li/>').text("well shit, you're dead"))
-
-        $('#player_state').append($('<li/>').text("you have " + player.energy + " energy remaining"))
-      });
-
-      socket.on('disconnect', function () {
-        socket.disconnect();
-      });
-
-      socket.on('die', function () {
-        // $("#dead").show()
-      })
-
-      $('form#add_machine').submit(function (event) {
-        socket.emit('add_machine', { machine_type: $('#machine_type').val() });
-        return false;
-      });
-
-      $('form#add_connection').submit(function (event) {
-        socket.emit('add_connection', { source: $('#source').val(), dest: $('#dest').val() });
-        return false;
-      });
-
-      $('form#rm_connection').submit(function (event) {
-        socket.emit('rm_connection', { conn_id: $('#rm_conn_id').val() });
-        return false;
-      });
-
-      $('form#vote').submit(function (event) {
-        socket.emit('vote', { conn_id: $('#vote_conn_id').val() });
-        return false;
-      });
-
-      $('form#chat').submit(function (event) {
-        socket.emit('chat', { data: $('#chat_msg').val() });
-        return false;
-      });
-
-      $(".chat-toggle").each(function () {
-        $(this).click(function () { $(".terminal").toggle() })
-      })
-
-      $("#dead").click(function () {
-        $(this).toggle()
-      })
-
-    });
   </script>
 </head>
 
@@ -204,20 +237,23 @@
     WELCOME PLAYER
   </h1> -->
   <h1 id="dead">
-    YOU DIED
+    <span style="font-size: 20rem; line-height: 20rem">
+      YOU DIED
+    </span>
+    <span style="font-size: 12px; line-height: 12px;"><br>lol rip</span>
   </h1>
 
   <h1>THIS CURSED MACHINE</h1>
 
   <div id='cols'>
-    <div>
+    <div id="col_left">
       <div>
         <h2>player status:</h2>
         <ul id="player_state"></ul>
       </div>
       <div id="log"></div>
 
-      <h2>modify world</h2>
+      <h2>machines</h2>
 
       <form id="add_machine" method="POST" action='#'>
         <!-- <label>add machine</label> -->
@@ -231,26 +267,33 @@
         <input type="submit" value="Add Machine">
       </form>
 
+      <h2>connections</h2>
+
       <form id="add_connection" method="POST" action='#'>
-        <input type="text" name="source" id="source" placeholder="source machine id">
-        <input type="text" name="dest" id="dest" placeholder="target machine id">
+        <div>
+          <div><span style="width: 60px; display: inline-block;">From:</span> <input type="text" name="source" id="source" placeholder="source machine id"></div>
+          <div><span style="width: 60px; display: inline-block;">To:</span> <input type="text" name="dest" id="dest" placeholder="target machine id"><br></div>
+          <div><span style="width: 60px; display: inline-block;">Vote?</span> <input type="checkbox" id="voting" name="voting" value="voting"><br><br></div>
+        </div>
         <input type="submit" value="Add Connection">
       </form>
 
       <form id="rm_connection" method="POST" action='#'>
         <input type="text" name="rm_conn_id" id="rm_conn_id" placeholder="connection id to remove">
-        <input type="submit" value="Remove Connection">
+        <input type="submit" value="Remove">
       </form>
 
       <form id="vote" method="POST" action='#'>
         <input type="text" name="vote_conn_id" id="vote_conn_id" placeholder="connection id to remove">
-        <input type="submit" value="Vote To Remove Connection">
+        <input type="submit" value="Vote To Remove">
       </form>
 
-      <button class="chat-toggle">Chat</button>
+      <div class="w-full">
+        <button class="chat-toggle">Chat</button>
+      </div>
     </div>
 
-    <div>
+    <div id="col_right">
       <h2>world state:</h2>
       <div>
          <h3>to win, you need:</h3>
@@ -270,6 +313,8 @@
 
     </div>
 
+    <div id="machine_spawn"></div>
+
     <div class="terminal">
       <div class="close-terminal chat-toggle">X</div>
       <div class="terminal-output">
@@ -280,6 +325,8 @@
         </p>
       </div>
 
+    <h2>chat:</h2>
+    <div><ul id="chat_log"></ul></div>
       <form id="chat" method="POST" action='#'>
         <input type="text" class="terminal-input" name="chat_msg" id="chat_msg" placeholder="make your opinion known">
         <input type="submit" value="SEND IT">
