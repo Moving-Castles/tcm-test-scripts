@@ -22,6 +22,14 @@ select {
   border: var(--terminal-border);
 }
 
+#add_machine,
+#add_connection,
+#rm_connection,
+#vote {
+  display: grid;
+  margin-bottom: 2rem;
+}
+
 #spawn-msg {
   position: fixed;
   inset: 0;
@@ -51,6 +59,7 @@ select {
 #cols {
 	display: flex;
 	flex-direction: row;
+  gap: 0.5rem;
 }
 
 #cols > div {
