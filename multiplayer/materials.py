@@ -86,6 +86,13 @@ class Sand(Solid):
 	def wet(self):
 		return Dirt(base_temp = self.temp)
 
+
+class Concrete(Solid):
+	def __init__(self, base_temp=20, name='sand'):
+		super().__init__(base_temp)
+		self.name = name
+		self.description = "Hard and unforgiving."
+
 class Scab(Solid):
 	def __init__(self, base_temp=20, name='scab'):
 		super().__init__(base_temp)
@@ -166,5 +173,8 @@ class Pellet(Solid):
 		return Gruel(base_temp = self.temp)
 
 
-recipes = []
-recipes.append(Recipe({'piss', 'blood'}, Teeth()))
+
+recipes = [
+	Recipe({'piss', 'blood'}, Teeth()), 
+	Recipe({'hot vomit', 'sand'}, Concrete())
+]

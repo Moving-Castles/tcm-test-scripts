@@ -1,6 +1,6 @@
 from components import *
 import components
-from app import machine_number, connection_number, log_event, feedback_message
+from app import machine_number, connection_number, log_event, feedback_message, status_message
 
 def machine_num():
 	global machine_number
@@ -114,8 +114,8 @@ def resolve_network(machines):
 									rx_node.inputs[in_idx] = outflows[i]
 								except:
 									# do we want a feedback message here?
-									print('')
-									# print('no available inlets for', node.machine_id)
+									# print('')
+									print('no available inlets for', node.machine_id)
 
 			# if we have to go over the network more than twice the size of the network
 			# then we know it's not solvable (is this true?!)

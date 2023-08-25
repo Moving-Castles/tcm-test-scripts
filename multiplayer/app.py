@@ -24,13 +24,8 @@ machine_number = 0
 connection_number = 0
 energy_delta = 1
 win_state = [{
-    'material_name': 'hot teeth',
+    'material_name': 'hot concrete',
     'amount': 10,
-    'done': False
-},
-{
-    'material_name': 'sand',
-    'amount': 20,
     'done': False
 }]
 
@@ -68,6 +63,12 @@ def check_win_state(world_state, context='main'):
 
     if len(win_state) == 0:
         victory(context)
+
+
+def status_message(message, player_id, context='main'):
+    if context=='main': emit('status_message', {'data': message }, to=player_id, namespace='/')
+    else: socketio.emit('status_message', {'data': message }, to=player_id, namespace='/')
+
 
 def feedback_message(message, player_id, context='main'):
     if context=='main': emit('feedback_message', {'data': message }, to=player_id, namespace='/')
