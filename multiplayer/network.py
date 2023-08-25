@@ -101,16 +101,19 @@ def resolve_network(machines):
 			for node in machines:
 				if False not in node.inputs and node.machine_id not in resolved_nodes:
 					resolved_nodes.append(node.machine_id)
-					outputs = node.process()
+					outflows = node.process()
 
 					for i, rx in enumerate(node.outputs):
+						outflows[i]['material'] = outflows[i]['material'].change_temp(0)
+
 						if rx != False:
+							# propagate temp changes -- inelegant sorry!
 							rx_node = next((x for x in machines if x.machine_id == rx), None)
 
 							if rx_node is not None:
 								try:
 									in_idx = rx_node.inputs.index(False)
-									rx_node.inputs[in_idx] = outputs[i]
+									rx_node.inputs[in_idx] = outflows[i]
 								except:
 									# do we want a feedback message here?
 									print('')

@@ -85,6 +85,7 @@ def update_player(player_id, context='main'):
     if hasattr(player, 'outflow'):
         for i, outflow in enumerate(player.outflow):
             if outflow is not False:
+                # outflow['material'].change_temp(0)
                 player_json['outflow'][i] = {'amount': outflow['amount'], 'material': copy.deepcopy(outflow['material'].__dict__)}
                 player_json['outflow'][i]['material']['name'] = outflow['material'].get_name()
 
@@ -92,6 +93,7 @@ def update_player(player_id, context='main'):
     if hasattr(player, 'inputs'):
         for i, player_in in enumerate(player.inputs):
             if player_in is not False:
+                # player_in['material'].change_temp(0)
                 player_json['inputs'][i] = {'amount': player_in['amount'], 'material': copy.deepcopy(player_in['material'].__dict__)}
                 player_json['inputs'][i]['material']['name'] = player_in['material'].get_name()
 
@@ -110,6 +112,7 @@ def update_world(context='main'):
         if hasattr(machine, 'outflow'):
             for i, outflow in enumerate(machine.outflow):
                 if outflow is not False:
+                    # outflow['material'].change_temp(0)
                     machine_json['outflow'][i] = {'amount': outflow['amount'], 'material': copy.deepcopy(outflow['material'].__dict__)}
                     machine_json['outflow'][i]['material']['name'] = outflow['material'].get_name()
 
@@ -118,6 +121,7 @@ def update_world(context='main'):
         if hasattr(machine, 'inputs'):
             for i, machine_in in enumerate(machine.inputs):
                 if machine_in is not False:
+                    # machine_in['material'].change_temp(0)
                     machine_json['inputs'][i] = {'amount': machine_in['amount'], 'material': copy.deepcopy(machine_in['material'].__dict__)}
                     machine_json['inputs'][i]['material']['name'] = machine_in['material'].get_name()
 

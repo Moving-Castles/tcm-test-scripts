@@ -188,16 +188,16 @@ class core(Organ):
 	def process(self):
 		if self.inputs[0]['material'].is_food:
 			self.update_energy(self.inputs[0]['amount']*0.2)
-			self.outflow = [{ 'material': Piss(), 'amount': self.inputs[0]['amount']*0.4}, 
-				{ 'material': Blood(), 'amount': self.inputs[0]['amount']*0.4}]
-			return [{ 'material': Piss(), 'amount': self.inputs[0]['amount']*0.4}, 
-				{ 'material': Blood(), 'amount': self.inputs[0]['amount']*0.4}]
+			self.outflow = [{ 'material': Piss(base_temp=35), 'amount': self.inputs[0]['amount']*0.4}, 
+				{ 'material': Blood(base_temp=35), 'amount': self.inputs[0]['amount']*0.4}]
+			return [{ 'material': Piss(base_temp=35), 'amount': self.inputs[0]['amount']*0.4}, 
+				{ 'material': Blood(base_temp=35), 'amount': self.inputs[0]['amount']*0.4}]
 			feedback_message('mmmm, delicious ' + self.inputs[0]['material'].get_name())
 		else:
 			feedback_message('the ' + self.inputs[0]['material'].get_name() + ' makes you feel ill', self.session_id, context='thread')
 			self.update_energy(-5)
-			self.outflow = [{ 'material': Vomit(), 'amount': round(self.inputs[0]['amount']*0.8, 2)}]
-			return  [{ 'material': Vomit(), 'amount': round(self.inputs[0]['amount']*0.8, 2)}]
+			self.outflow = [{ 'material': Vomit(base_temp=35), 'amount': round(self.inputs[0]['amount']*0.8, 2)}]
+			return  [{ 'material': Vomit(base_temp=35), 'amount': round(self.inputs[0]['amount']*0.8, 2)}]
 			return self.inputs
 
 	def update_energy(self, amount):

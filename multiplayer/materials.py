@@ -23,16 +23,20 @@ class Material(object):
 
 		if material.temp >= material.hot_temp:
 			material.temp_state = "hot"
+			self.temp_state = "hot"
 		
 		elif material.temp <= material.cold_temp:
 			material.temp_state = "cold"
+			self.temp_state = "cold"
 		
 		else:
 			material.temp_state = ""
+			self.temp_state = ''
 
 		return material
 
 	def get_name(self):
+		material = self.change_temp(0)
 		return (self.temp_state + " " + self.name).strip()
 
 
@@ -134,6 +138,17 @@ class Vomit(Liquid):
 	def dry(self):
 		return Pellet(base_temp = self.temp)
 
+
+class Gruel(Liquid):
+	def __init__(self, base_temp=20, name='gruel'):
+		super().__init__(base_temp)
+		self.name = name
+		self.description = "You don't like this as much as you like the pellets. But it's OK. Softer. Easier on your tired teeth."
+		self.is_food = True
+
+	def dry(self):
+		return Pellet(base_temp = self.temp)
+
 class Teeth(Solid):
 	def __init__(self, base_temp=20, name='teeth'):
 		super().__init__(base_temp)
@@ -146,6 +161,10 @@ class Pellet(Solid):
 		self.name = name
 		self.is_food = True
 		self.description = "God you love the pellets, don’t you? Crunch crunch crunch basic foodstuff, eh? Wouldn’t this be nice with a cold beer? Some piss? ha ha ha."
+
+	def wet(self):
+		return Gruel(base_temp = self.temp)
+
 
 recipes = []
 recipes.append(Recipe({'piss', 'blood'}, Teeth()))
