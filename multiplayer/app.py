@@ -70,8 +70,8 @@ def check_win_state(world_state, context='main'):
         victory(context)
 
 def feedback_message(message, player_id, context='main'):
-    if context=='main': emit('feedback_message', {'data': message }, to=player_id)
-    else: socketio.emit('feedback_message', {'data': message }, to=player_id)
+    if context=='main': emit('feedback_message', {'data': message }, to=player_id, namespace='/')
+    else: socketio.emit('feedback_message', {'data': message }, to=player_id, namespace='/')
 
 def fetch_player(player_id):
     player = next((x for x in machines if hasattr(x, 'session_id') and x.session_id == player_id), None)
@@ -103,7 +103,7 @@ def update_player(player_id, context='main'):
 
 def update_world(context='main'):
     resolved_machines = network.resolve_network(machines)
-    world_state = {'machines': [], 'connections': [], 'pool': [], 'win_state': json.dumps(win_state)}
+    world_state = {'machines': [], 'connections': [], 'pool': [], 'win_state': win_state}
 
     for machine in resolved_machines:
         machine_json = copy.deepcopy(machine).__dict__

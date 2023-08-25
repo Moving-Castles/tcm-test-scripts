@@ -161,10 +161,12 @@ class blender(Machine):
 
 	def process(self):
 		ingredients = {self.inputs[1]['material'].name, self.inputs[0]['material'].name}
+		av_temp = round((self.inputs[1]['material'].temp + self.inputs[0]['material'].temp)/2, 2)
 		result = Dirt()
 		for recipe in self.recipes:
 			if recipe.ingredients == ingredients:
 				result = recipe.result
+				result.temp = av_temp
 
 		if self.inputs[0]['amount'] > self.inputs[1]['amount']:
 			self.outflow = [{'material': result, 'amount': self.inputs[1]['amount']*2}]
@@ -187,12 +189,12 @@ class core(Organ):
 
 	def process(self):
 		if self.inputs[0]['material'].is_food:
+			feedback_message('mmmm, delicious ' + self.inputs[0]['material'].get_name(), self.session_id, context='thread')
 			self.update_energy(self.inputs[0]['amount']*0.2)
 			self.outflow = [{ 'material': Piss(base_temp=35), 'amount': self.inputs[0]['amount']*0.4}, 
 				{ 'material': Blood(base_temp=35), 'amount': self.inputs[0]['amount']*0.4}]
 			return [{ 'material': Piss(base_temp=35), 'amount': self.inputs[0]['amount']*0.4}, 
 				{ 'material': Blood(base_temp=35), 'amount': self.inputs[0]['amount']*0.4}]
-			feedback_message('mmmm, delicious ' + self.inputs[0]['material'].get_name())
 		else:
 			feedback_message('the ' + self.inputs[0]['material'].get_name() + ' makes you feel ill', self.session_id, context='thread')
 			self.update_energy(-5)
