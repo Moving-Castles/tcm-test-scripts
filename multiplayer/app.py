@@ -52,7 +52,7 @@ def game_over(player, context='main'):
         disconnect(player_id)
     else: 
         socketio.emit('die', to=player_id)   
-        disconnect(player_id)
+        disconnect(player_id, namespace='/')
 
     log_event('core ' + player.machine_id + ' has died :(')
 
@@ -172,8 +172,7 @@ def remove_player(player_id):
     rm_player = fetch_player(player_id)
     if rm_player is not None: 
         machines.remove(rm_player)
-        log_event('core ' + rm_player.machine_id + ' has fled the box')
-        print('removed core', rm_player.machine_id)
+        if rm_player.alive: log_event('core ' + rm_player.machine_id + ' has fled the box')
 
 @app.route('/')
 def index():
@@ -226,8 +225,10 @@ def rm_connection(data):
     conn = next((x for x in connections if x.conn_id == data['conn_id']), None)
     if conn is not None:
         if not conn.voting:
-            machines, connections = network.remove_connection(conn, machines, connections)
+            player = fetch_player(request.sid)
+            machines, connections = network.remove_connection(conn, machines, connections, player)
             print('removing connection', data['conn_id'], request.sid)
+            log_event('connection ' + data['conn_id'] + ' was removed by core ' + player.machine_id)
         else:
             feedback_message('you have to vote to remove this connection', request.sid)
 
@@ -248,7 +249,7 @@ def vote(data):
     print(conn.votes, current_ids, shared)
 
     if(len(shared) >= len(current_ids)/2):
-        network.remove_connection(conn, machines, connections)
+        network.remove_connection(conn, machines, connections, fetch_player(request.sid))
         log_event('connection ' + conn_id + ' was removed by popular vote')
 
     # check the votes against players still in game

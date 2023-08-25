@@ -49,16 +49,16 @@ class Connection(object):
 
 		return True
 
-	def remove_conn(self, machines):
+	def remove_conn(self, machines, player):
 		source_machine = next((m for m in machines if m.machine_id == self.source), None)
 		if source_machine is not None:
 			try:
 				in_idx = source_machine.outputs.index(self.dest)
 				source_machine.outputs[in_idx] = False
 			except:
-				print_message("pipe was not removed -- couldn't find target machine")
+				feedback_message("pipe was not removed -- couldn't find target machine", player.session_id)
 		else:
-			print_message("pipe was not removed -- couldn't find source machine")
+			feedback_message("pipe was not removed -- couldn't find source machine", player.session_id)
 			return machines
 
 		return machines
@@ -192,9 +192,12 @@ class core(Organ):
 				{ 'material': Blood(), 'amount': self.inputs[0]['amount']*0.4}]
 			return [{ 'material': Piss(), 'amount': self.inputs[0]['amount']*0.4}, 
 				{ 'material': Blood(), 'amount': self.inputs[0]['amount']*0.4}]
+			feedback_message('mmmm, delicious ' + self.inputs[0]['material'].get_name())
 		else:
-			print('ugh! not food!')
-			self.outflow = copy.deepcopy(self.inputs)
+			feedback_message('the ' + self.inputs[0]['material'].get_name() + ' makes you feel ill', self.session_id, context='thread')
+			self.update_energy(-5)
+			self.outflow = [{ 'material': Vomit(), 'amount': round(self.inputs[0]['amount']*0.8, 2)}]
+			return  [{ 'material': Vomit(), 'amount': round(self.inputs[0]['amount']*0.8, 2)}]
 			return self.inputs
 
 	def update_energy(self, amount):
@@ -203,7 +206,7 @@ class core(Organ):
 			self.die()
 
 	def remove_machine(self):
-		print_message("nice try, asshole")
+		feedback_message("nice try, asshole -- you're not getting out of here that fast", self.session_id)
 		# self.die()
 
 	def die(self):

@@ -70,8 +70,8 @@ def add_connection(conn_id, source, dest, voting, machines, connections, player)
 
 	return machines, connections, player
 
-def remove_connection(conn, machines, connections):
-	machines = conn.remove_conn(machines)
+def remove_connection(conn, machines, connections, player):
+	machines = conn.remove_conn(machines, player)
 	connections.remove(conn)
 
 	return machines, connections

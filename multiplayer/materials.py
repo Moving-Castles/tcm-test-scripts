@@ -7,7 +7,6 @@ class Material(object):
 		self.description = "You don't know much about this material"
 
 	def change_temp(self, amount):
-		print('heating')
 		material = copy.deepcopy(self)
 		material.temp = material.temp + amount
 
@@ -119,10 +118,21 @@ class Blood(Liquid):
 	def __init__(self, base_temp=20, name='blood'):
 		super().__init__(base_temp)
 		self.name = name
+		self.is_food = True
 		self.description = "Warm liquid gore. Is it yours? Is it theirs? At this point, who cares."
 
 	def dry(self):
 		return Scab(base_temp = self.temp)
+
+
+class Vomit(Liquid):
+	def __init__(self, base_temp=20, name='vomit'):
+		super().__init__(base_temp)
+		self.name = name
+		self.description = "What a waste. You could have made good use of those pellets"
+
+	def dry(self):
+		return Pellet(base_temp = self.temp)
 
 class Teeth(Solid):
 	def __init__(self, base_temp=20, name='teeth'):
