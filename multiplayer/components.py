@@ -2,6 +2,8 @@ from materials import *
 import copy
 from network import feedback_message, status_message
 
+energy_material_multiplier=10
+
 class Connection(object):
 	def __init__(self, source, dest, conn_id, voting=False):
 		self.source = source
@@ -80,6 +82,22 @@ class Organ(object):
 		self.alive = True
 		self.can_remove = False
 		self.description = "You don't know much about this organ"
+
+class refrigerator(Machine):
+	def __init__(self, machine_id, name):
+		super().__init__()
+		self.inputs = [False]
+		self.name = name
+		self.machine_id = machine_id
+		self.outputs = [False]
+		self.heating_power = -30
+		self.cost = 30
+		self.description = "Drains the heat from materials."
+
+	def process(self):
+		material = self.inputs[0]['material'].change_temp(self.heating_power)
+		self.outflow =  [{'material': material, 'amount': self.inputs[0]['amount']}]
+		return [{'material': material, 'amount': self.inputs[0]['amount']}]
 
 class scorcher(Machine):
 	def __init__(self, machine_id, name):
@@ -164,7 +182,7 @@ class blender(Machine):
 		self.description = "Crunching and mashing into a uniform pulp. Results may vary."
 
 	def process(self):
-		ingredients = {self.inputs[1]['material'].name, self.inputs[0]['material'].name}
+		ingredients = {self.inputs[1]['material'].get_name(), self.inputs[0]['material'].get_name()}
 		av_temp = round((self.inputs[1]['material'].temp + self.inputs[0]['material'].temp)/2, 2)
 		result = Dirt()
 		for recipe in self.recipes:
@@ -194,7 +212,7 @@ class core(Organ):
 	def process(self):
 		if self.inputs[0]['material'].is_food:
 			status_message('mmmm, delicious ' + self.inputs[0]['material'].get_name(), self.session_id)
-			self.update_energy(self.inputs[0]['amount']*0.2)
+			self.update_energy(self.inputs[0]['amount']*0.2*energy_material_multiplier)
 			self.outflow = [{ 'material': Piss(base_temp=35), 'amount': self.inputs[0]['amount']*0.4}, 
 				{ 'material': Blood(base_temp=35), 'amount': self.inputs[0]['amount']*0.4}]
 			return [{ 'material': Piss(base_temp=35), 'amount': self.inputs[0]['amount']*0.4}, 
