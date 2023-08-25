@@ -53,14 +53,14 @@ input[type=submit] {
 
 #col_left {
   transform-origin: 100% 0;
-  transform: skew(0, -6deg);
+  transform: skew(0, -3deg);
 }
 
 #col_right {
   display: grid;
-  grid-template-columns: 400px 1fr;
+  grid-template-columns: 600px 1fr;
   transform-origin: 0 0;
-  transform: skew(0, 7deg);
+  transform: skew(0, 3deg);
 }
 
 #add_machine,
@@ -220,10 +220,11 @@ input[type=submit] {
   height: 100%;
   overflow-y: scroll;
   position: relative;
+  background: white;
 }
 
 .core {
-  height: 80px;
+  height: 20px;
   animation: 3s ease-in infinite reverse both running rotaterrrr;
 }
 
