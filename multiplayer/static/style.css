@@ -57,8 +57,10 @@ input[type=submit] {
 }
 
 #col_right {
+  display: grid;
+  grid-template-columns: 400px 1fr;
   transform-origin: 0 0;
-  transform: skew(0, 11deg);
+  transform: skew(0, 7deg);
 }
 
 #add_machine,
@@ -201,6 +203,35 @@ input[type=submit] {
   right: 0;
   top: 0;
   padding: 1rem;
+}
+
+.cores {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  display: flex;
+  gap: 20px;
+  margin-bottom: 12px;;
+}
+
+.core {
+  height: 80px;
+  animation: 3s ease-in infinite reverse both running rotaterrrr;
+}
+
+@keyframes rotaterrrr {
+  from {
+    transform: rotate3d(0, 0, 0, 360deg);
+  }
+  to {
+    transform: rotate3d(0, 1, 0, 360deg);
+  }
+}
+
+#feedback {
+  position: fixed;
+  bottom: 100px;
+  left: 0;
 }
 
 

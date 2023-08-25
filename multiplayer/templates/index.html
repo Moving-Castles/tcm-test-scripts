@@ -67,8 +67,9 @@
 
     $(document).ready(function () {
       let lastState = {}
+      let coreIndex = 0
 
-      makeDraggable(document.querySelector('.terminal'));
+      // makeDraggable(document.querySelector('.terminal'));
 
             var socket = io();
 
@@ -99,6 +100,8 @@
             });
 
            socket.on('world_state', function(msg, cb) {
+              coreIndex = 1
+              $(".cores").empty()
                const world_state = JSON.parse(msg.data)
                // console.log('got world state', world_state)
                $('#win_state').text('')
@@ -110,7 +113,7 @@
                   const win_el = $('<li/>').html(task.amount + ' ' + task.material_name)
                   $('#win_state').append(win_el)
                })
-
+               
                world_state.machines.forEach((machine, i) => {
                   let machine_name = machine.name
 
@@ -133,6 +136,11 @@
                   machine_element.append(out_list)
 
                   $('#machines').append(machine_element)
+
+                  if (machine_name === "you" || machine_name === "some other poor asshole") {
+                    $(".cores").append(`<img src="/static/cores/core0000${coreIndex}.png" class="core">`)
+                    coreIndex++
+                  }
 
                   if (lastState.machines && world_state.machines.length !== lastState?.machines.length) {
                     $('#machine_spawn').show()
@@ -258,9 +266,6 @@
         <h2>player status:</h2>
         <ul id="player_state"></ul>
       </div>
-      <div id="feedback">
-
-      </div>
       <div id="log"></div>
 
       <h2>machines</h2>
@@ -298,34 +303,45 @@
         <input type="submit" value="Vote To Remove">
       </form>
 
-      <div class="w-full">
+      <!-- <div class="w-full">
         <button class="chat-toggle">Chat</button>
-      </div>
+      </div> -->
     </div>
 
     <div id="col_right">
-      <h2>world state:</h2>
       <div>
-         <h3>to win, you need:</h3>
-         <ul id="win_state"></ul>
-         <h3>septic tank</h3>
-         <ul id="septic_tank"></ul>
+        <h2>world state:</h2>
+        <div>
+           <h3>to win, you need:</h3>
+           <ul id="win_state"></ul>
+           <h3>septic tank</h3>
+           <ul id="septic_tank"></ul>
+        </div>
+  
+        <div>
+           <h3>machines</h3>
+           <ul id="machines"></ul>
+        </div>
+        <div>
+          <h3>connections</h3>
+          <ul id="connections"></ul>
+        </div>
       </div>
 
-      <div>
-         <h3>machines</h3>
-         <ul id="machines"></ul>
-      </div>
-      <div>
-        <h3>connections</h3>
-        <ul id="connections"></ul>
-      </div>
+      <div class="chat">
+        <h2>chat:</h2>
+        <ul id="chat_log"></ul>
 
+        <form id="chat" method="POST" action='#'>
+          <input type="text" class="terminal-input" name="chat_msg" id="chat_msg" placeholder="make your opinion known">
+          <input type="submit" value="SEND IT">
+        </form>
+      </div>
     </div>
 
     <div id="machine_spawn"></div>
 
-    <div class="terminal">
+    <!-- <div class="terminal">
       <div class="close-terminal chat-toggle">X</div>
       <div class="terminal-output">
         <p class="output-content">
@@ -335,12 +351,18 @@
         </p>
       </div>
 
-    <h2>chat:</h2>
-    <div><ul id="chat_log"></ul></div>
+    <div></div>
       <form id="chat" method="POST" action='#'>
         <input type="text" class="terminal-input" name="chat_msg" id="chat_msg" placeholder="make your opinion known">
         <input type="submit" value="SEND IT">
       </form>
+    </div> -->
+    
+    <div id="feedback"></div>
+    <div class="cores">
+      <!-- <img class="core" src="/static/cores/core00002.png" >
+      <img class="core" src="/static/cores/core00003.png" >
+      <img class="core" src="/static/cores/core00004.png" > -->
     </div>
   </div>
 </body>
