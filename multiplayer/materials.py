@@ -88,7 +88,7 @@ class Sand(Solid):
 
 
 class Concrete(Solid):
-	def __init__(self, base_temp=20, name='sand'):
+	def __init__(self, base_temp=20, name='concrete'):
 		super().__init__(base_temp)
 		self.name = name
 		self.description = "Hard and unforgiving."

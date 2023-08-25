@@ -81,6 +81,22 @@ class Organ(object):
 		self.can_remove = False
 		self.description = "You don't know much about this organ"
 
+class refrigerator(Machine):
+	def __init__(self, machine_id, name):
+		super().__init__()
+		self.inputs = [False]
+		self.name = name
+		self.machine_id = machine_id
+		self.outputs = [False]
+		self.heating_power = -30
+		self.cost = 30
+		self.description = "Drains the heat from materials."
+
+	def process(self):
+		material = self.inputs[0]['material'].change_temp(self.heating_power)
+		self.outflow =  [{'material': material, 'amount': self.inputs[0]['amount']}]
+		return [{'material': material, 'amount': self.inputs[0]['amount']}]
+
 class scorcher(Machine):
 	def __init__(self, machine_id, name):
 		super().__init__()
@@ -164,7 +180,7 @@ class blender(Machine):
 		self.description = "Crunching and mashing into a uniform pulp. Results may vary."
 
 	def process(self):
-		ingredients = {self.inputs[1]['material'].name, self.inputs[0]['material'].name}
+		ingredients = {self.inputs[1]['material'].get_name(), self.inputs[0]['material'].get_name()}
 		av_temp = round((self.inputs[1]['material'].temp + self.inputs[0]['material'].temp)/2, 2)
 		result = Dirt()
 		for recipe in self.recipes:

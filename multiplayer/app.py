@@ -168,7 +168,7 @@ def background_thread():
     count = 0
     with app.test_request_context():
         while True:
-            socketio.sleep(2)
+            socketio.sleep(5)
             count += 1
             tick()
             update_world( context='thread')
