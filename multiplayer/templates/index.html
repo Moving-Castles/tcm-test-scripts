@@ -65,34 +65,12 @@
 
     // Make myWindow and myWindow2 draggable in different ways...
 
-<<<<<<< HEAD
-    $(document).ready(function () {
-      makeDraggable(document.querySelector('.terminal'));
-    })
-    // myWindow will only be able to be moved via the top bar (.window-top element). The main element does nothing on mouse down.
-
-// myWindow2 will be able to moved by grabbing the entire element
-=======
-           socket.on('world_state', function(msg, cb) {
-               const world_state = JSON.parse(msg.data)
-               console.log('got world state', world_state)
-               $('#win_state').text('')
-               $('#machines').text('')
-               $('#connections').text('')
-               $('#septic_tank').text('')
-
-               world_state.win_state.forEach((task, i) => {
-                  const win_el = $('<li/>').html(task.amount + ' ' + task.material_name)
-                  $('#win_state').append(win_el)
-               })
-
-               world_state.machines.forEach((machine, i) => {
-                  let machine_name = machine.name
->>>>>>> d4852d43920ef8193ad957af10f0fb3c5b9855a3
-
   </script>
-  <script type="text/javascript" charset="utf-8">
-    $(document).ready(function () {
+    
+    <script type="text/javascript" charset="utf-8">
+      $(document).ready(function () {
+      makeDraggable(document.querySelector('.terminal'));
+
       var socket = io();
 
       socket.on('connect', function () {
@@ -116,9 +94,20 @@
       socket.on('world_state', function (msg, cb) {
         const world_state = JSON.parse(msg.data)
         console.log('got world state', world_state)
+        $('#win_state').text('')
         $('#machines').text('')
         $('#connections').text('')
         $('#septic_tank').text('')
+
+        world_state.win_state.forEach((task, i) => {
+          const win_el = $('<li/>').html(task.amount + ' ' + task.material_name)
+          $('#win_state').append(win_el)
+        })
+
+        world_state.machines.forEach((machine, i) => {
+          let machine_name = machine.name
+        })
+
 
         world_state.machines.forEach((machine, i) => {
           let machine_name = machine.name
