@@ -24,7 +24,7 @@ machine_number = 0
 connection_number = 0
 energy_delta = 1
 win_state = [{
-    'material_name': 'hot concrete',
+    'material_name': 'concrete',
     'amount': 10,
     'done': False
 }]
