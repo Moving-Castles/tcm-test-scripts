@@ -23,6 +23,7 @@ connections = []
 machine_number = 0
 connection_number = 0
 energy_delta = 1
+initial_energy = 400
 win_state = [{
     'material_name': 'concrete',
     'amount': 10,
@@ -188,7 +189,7 @@ def index():
 def create_core():
     # global machines
     session['receive_count'] = session.get('receive_count', 0) + 1
-    new_core = core(str(network.machine_num()), request.sid, 'you', initial_energy=300)
+    new_core = core(str(network.machine_num()), request.sid, 'you', initial_energy=initial_energy)
     machines.append(new_core)
     print('created core', new_core.machine_id)
     update_world()

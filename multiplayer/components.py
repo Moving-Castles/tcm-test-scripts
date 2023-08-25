@@ -2,6 +2,8 @@ from materials import *
 import copy
 from network import feedback_message, status_message
 
+energy_material_multiplier=10
+
 class Connection(object):
 	def __init__(self, source, dest, conn_id, voting=False):
 		self.source = source
@@ -210,7 +212,7 @@ class core(Organ):
 	def process(self):
 		if self.inputs[0]['material'].is_food:
 			status_message('mmmm, delicious ' + self.inputs[0]['material'].get_name(), self.session_id)
-			self.update_energy(self.inputs[0]['amount']*0.2)
+			self.update_energy(self.inputs[0]['amount']*0.2*energy_material_multiplier)
 			self.outflow = [{ 'material': Piss(base_temp=35), 'amount': self.inputs[0]['amount']*0.4}, 
 				{ 'material': Blood(base_temp=35), 'amount': self.inputs[0]['amount']*0.4}]
 			return [{ 'material': Piss(base_temp=35), 'amount': self.inputs[0]['amount']*0.4}, 
