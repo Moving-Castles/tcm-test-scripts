@@ -96,7 +96,7 @@
 
            socket.on('world_state', function(msg, cb) {
                const world_state = JSON.parse(msg.data)
-               console.log('got world state', world_state)
+               // console.log('got world state', world_state)
                $('#win_state').text('')
                $('#machines').text('')
                $('#connections').text('')
@@ -148,7 +148,7 @@
 
             socket.on('player_state', function (msg, cb)  {
                const player = JSON.parse(msg.data)
-               console.log('got player state', player)
+               // console.log('got player state', player)
 
                $('#player_state').text('')
 
@@ -169,7 +169,14 @@
 
             socket.on('feedback_message', function(msg, callback){
                console.log(msg)
+               // $('#feedback').html('<b>' + msg.data + '</b>')
                alert(msg.data)
+            })
+
+            socket.on('status_message', function(msg, callback){
+               console.log(msg)
+               $('#feedback').html('<b>' + msg.data + '</b>')
+               // alert(msg.data)
             })
 
             socket.on('victory', function(){
@@ -222,6 +229,9 @@
       <div>
         <h2>player status:</h2>
         <ul id="player_state"></ul>
+      </div>
+      <div id="feedback">
+
       </div>
       <div id="log"></div>
 

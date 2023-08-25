@@ -1,6 +1,6 @@
 from materials import *
 import copy
-from network import feedback_message
+from network import feedback_message, status_message
 
 class Connection(object):
 	def __init__(self, source, dest, conn_id, voting=False):
@@ -28,6 +28,7 @@ class Connection(object):
 				in_idx = machine.outputs.index(False)
 				machine.outputs[in_idx] = self.dest
 			except:
+				print("pipe was not added -- no available outputs on source machine")
 				feedback_message("pipe was not added -- no available outputs on source machine", player.session_id)
 				return False
 
@@ -37,13 +38,16 @@ class Connection(object):
 				try:
 					in_idx = rx_node.inputs.index(False)
 				except:
+					print("pipe was not added -- no available inputs on target machine")
 					feedback_message("pipe was not added -- no available inputs on target machine", player.session_id)
 					return False
 			else:
+				print("pipe was not added -- couldn't find target machine")
 				feedback_message("pipe was not added -- couldn't find target machine", player.session_id)
 				return False
 
 		else:
+			print("pipe was not added -- couldn't find source machine")
 			feedback_message("pipe was not added -- couldn't find source machine", player.session_id)
 			return False
 
@@ -189,14 +193,14 @@ class core(Organ):
 
 	def process(self):
 		if self.inputs[0]['material'].is_food:
-			feedback_message('mmmm, delicious ' + self.inputs[0]['material'].get_name(), self.session_id, context='thread')
+			status_message('mmmm, delicious ' + self.inputs[0]['material'].get_name(), self.session_id)
 			self.update_energy(self.inputs[0]['amount']*0.2)
 			self.outflow = [{ 'material': Piss(base_temp=35), 'amount': self.inputs[0]['amount']*0.4}, 
 				{ 'material': Blood(base_temp=35), 'amount': self.inputs[0]['amount']*0.4}]
 			return [{ 'material': Piss(base_temp=35), 'amount': self.inputs[0]['amount']*0.4}, 
 				{ 'material': Blood(base_temp=35), 'amount': self.inputs[0]['amount']*0.4}]
 		else:
-			feedback_message('the ' + self.inputs[0]['material'].get_name() + ' makes you feel ill', self.session_id, context='thread')
+			status_message('the ' + self.inputs[0]['material'].get_name() + ' makes you feel ill', self.session_id)
 			self.update_energy(-5)
 			self.outflow = [{ 'material': Vomit(base_temp=35), 'amount': round(self.inputs[0]['amount']*0.8, 2)}]
 			return  [{ 'material': Vomit(base_temp=35), 'amount': round(self.inputs[0]['amount']*0.8, 2)}]
