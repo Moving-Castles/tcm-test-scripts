@@ -36,9 +36,15 @@
            socket.on('world_state', function(msg, cb) {
                const world_state = JSON.parse(msg.data)
                console.log('got world state', world_state)
+               $('#win_state').text('')
                $('#machines').text('')
                $('#connections').text('')
                $('#septic_tank').text('')
+
+               world_state.win_state.forEach((task, i) => {
+                  const win_el = $('<li/>').html(task.amount + ' ' + task.material_name)
+                  $('#win_state').append(win_el)
+               })
 
                world_state.machines.forEach((machine, i) => {
                   let machine_name = machine.name
@@ -192,16 +198,19 @@
    <div>
     <h2>world state:</h2>
       <div>
+         <h3>to win, you need:</h3>
+         <ul id="win_state"></ul>
+         <h3>septic tank</h3>
+         <ul id="septic_tank"></ul>
+      </div>
+
+      <div>
          <h3>machines</h3>
          <ul id="machines"></ul>
       </div>
       <div>
          <h3>connections</h3>
          <ul id="connections"></ul>
-      </div>
-      <div>
-         <h3>septic tank</h3>
-         <ul id="septic_tank"></ul>
       </div>
 
    </div>

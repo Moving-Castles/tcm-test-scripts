@@ -104,8 +104,6 @@ def resolve_network(machines):
 					outflows = node.process()
 
 					for i, rx in enumerate(node.outputs):
-						outflows[i]['material'] = outflows[i]['material'].change_temp(0)
-
 						if rx != False:
 							# propagate temp changes -- inelegant sorry!
 							rx_node = next((x for x in machines if x.machine_id == rx), None)
