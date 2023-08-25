@@ -109,12 +109,16 @@
 
                world_state.machines.forEach((machine, i) => {
                   let machine_name = machine.name
+                  let energy_info = ''
 
                   if (machine_name === 'you') {
-                     if(machine.session_id !== socket.id) machine_name = 'some other poor asshole'
+                     if(machine.session_id !== socket.id) { 
+                        machine_name = 'some other poor asshole'
+                        energy_info = ' and energy: ' + machine.energy
+                     }
                   }
 
-                  machine_element = $('<li/>').html(machine_name + ' with id: ' + machine.machine_id)
+                  machine_element = $('<li/>').html(machine_name + ' with id: ' + machine.machine_id + energy_info)
                   in_list = $('<ul/>')
                   out_list = $('<ul/>')
 
@@ -124,7 +128,6 @@
                   machine.outflow.forEach((outflow, i) => {
                      if(outflow !== false) out_list.append($('<li/>').text('output ' + i + ': ' + outflow.amount + ' ' + outflow.material.name))
                   })
-
                   machine_element.append(in_list)
                   machine_element.append(out_list)
                   $('#machines').append(machine_element)
