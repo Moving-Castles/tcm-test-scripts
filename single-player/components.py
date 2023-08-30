@@ -251,8 +251,8 @@ class compressor(Machine):
 	def process(self):
 		material = copy.deepcopy(self.inputs[0]['material'])
 		if hasattr(material, "compress"):
-			self.outflow = [{'material': material.grind(), 'amount': self.inputs[0]['amount']}]
-			return [{'material': material.grind(), 'amount': self.inputs[0]['amount']}] 
+			self.outflow = [{'material': material.compress(), 'amount': self.inputs[0]['amount']}]
+			return [{'material': material.compress(), 'amount': self.inputs[0]['amount']}] 
 
 		else:
 			self.outflow = [{'material': material, 'amount': self.inputs[0]['amount']}]			
@@ -271,7 +271,7 @@ class wetter(Machine):
 		material = copy.deepcopy(self.inputs[0]['material'])
 		if hasattr(material, "wet"):
 			self.outflow = [{'material': material.wet(), 'amount': self.inputs[0]['amount']}]
-			return [{'material': material.grind(), 'amount': self.inputs[0]['amount']}] 
+			return [{'material': material.wet(), 'amount': self.inputs[0]['amount']}] 
 
 		else:
 			self.outflow = [{'material': material, 'amount': self.inputs[0]['amount']}]			
