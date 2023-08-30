@@ -351,12 +351,9 @@ def add_connection(source, dest):
 		if(player.alive):
 			player.update_energy(-new_conn.cost)
 			connections.append(new_conn)
-			print('gets here')
 		else:
 			game_over()
 
-	else:
-		print('im here now')
 
 def remove_connection(conn_id):
 	conn = next((x for x in connections if x.conn_id == conn_id), None)

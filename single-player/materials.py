@@ -298,6 +298,7 @@ class Sweat(Liquid):
 		self.name = name
 
 	def centrifuge(self):
+		print('centrifuging in material')
 		return Ammonia(), Ketamine(), Salt()
 
 class Ammonia(Liquid):

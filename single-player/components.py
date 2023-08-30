@@ -231,9 +231,11 @@ class grinder(Machine):
 	def process(self):
 		material = copy.deepcopy(self.inputs[0]['material'])
 		if hasattr(self.inputs[0]['material'], "grind"):
+			self.outflow = [{'material': material.grind(), 'amount': self.inputs[0]['amount']}] 
 			return [{'material': material.grind(), 'amount': self.inputs[0]['amount']}] 
 
 		else:
+			self.outflow = [{'material': Slurry(), 'amount': self.inputs[0]['amount']}]
 			return [{'material': Slurry(), 'amount': self.inputs[0]['amount']}]
 
 
@@ -249,9 +251,11 @@ class compressor(Machine):
 	def process(self):
 		material = copy.deepcopy(self.inputs[0]['material'])
 		if hasattr(material, "compress"):
+			self.outflow = [{'material': material.grind(), 'amount': self.inputs[0]['amount']}]
 			return [{'material': material.grind(), 'amount': self.inputs[0]['amount']}] 
 
 		else:
+			self.outflow = [{'material': material.grind(), 'amount': self.inputs[0]['amount']}]			
 			return [{'material': Slurry(), 'amount': self.inputs[0]['amount']}]
 
 
@@ -270,7 +274,11 @@ class centrifuge(Machine):
 
 		if hasattr(material, "centrifuge"):
 			out1, out2, out3 = material.centrifuge()
+			print('centrifuging', out1, out2, out3)
 			# one primary and 2 secondary materials
+			self.outflow = [{'material': out1, 'amount': round(self.inputs[0]['amount']/2, 2)},
+				{'material': out2, 'amount': round(self.inputs[0]['amount']/4, 2)},
+				{'material': out3, 'amount': round(self.inputs[0]['amount']/4, 2)}]
 			return [{'material': out1, 'amount': round(self.inputs[0]['amount']/2, 2)},
 				{'material': out2, 'amount': round(self.inputs[0]['amount']/4, 2)},
 				{'material': out3, 'amount': round(self.inputs[0]['amount']/4, 2)}]
@@ -293,6 +301,9 @@ class distillation_column(Machine):
 		material = copy.deepcopy(self.inputs[0]['material'])
 		if hasattr(material, "distil"):
 			out1, out2, out3 = material.distil()
+			self.outflow = [{'material': out1, 'amount': round(self.inputs[0]['amount']*0.1, 2)},
+				{'material': out2, 'amount': round(self.inputs[0]['amount']*0.4, 2)},
+				{'material': out3, 'amount': round(self.inputs[0]['amount']*0.5, 2)}]
 			return [{'material': out1, 'amount': round(self.inputs[0]['amount']*0.1, 2)},
 				{'material': out2, 'amount': round(self.inputs[0]['amount']*0.4, 2)},
 				{'material': out3, 'amount': round(self.inputs[0]['amount']*0.5, 2)}]
