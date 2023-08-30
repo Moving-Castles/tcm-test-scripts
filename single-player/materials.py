@@ -289,8 +289,9 @@ class MCat(Solid):
 	def psychoactive_effect(player):
 		player.dignity = player.dignity - 10
 
-	def distil(self):
+	def centrifuge(self):
 		return SyntheticCannabinoid(), Prozac(), GrowthHormone()
+
 
 class Sweat(Liquid):
 	def __init__(self, base_temp=20, name='sweat'):
