@@ -413,12 +413,12 @@ if __name__ == '__main__':
 	connections = []
 	# messages = []
 	win_state = [{
-		'material_name': 'growth hormone',
+		'material_name': 'stuxnet',
 		'amount': 5,
 		'done': False
 	},
 	{
-		'material_name': 'synthetic cannabinoid',
+		'material_name': 'mayonnaise',
 		'amount': 10,
 		'done': False
 	}]

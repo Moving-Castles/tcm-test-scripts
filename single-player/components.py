@@ -290,7 +290,7 @@ class centrifuge(Machine):
 
 	def process(self):
 		material = copy.deepcopy(self.inputs[0]['material'])
-		if material.name == 'uranium': self.stuxnet() # shouldn't just be a property on uranium as need to propagate
+		# if material.name == 'uranium': self.stuxnet() # shouldn't just be a property on uranium as need to propagate
 
 		if hasattr(material, "centrifuge"):
 			out1, out2, out3 = material.centrifuge()
@@ -304,8 +304,8 @@ class centrifuge(Machine):
 				{'material': out3, 'amount': round(self.inputs[0]['amount']/4, 2)}]
 
 
-	def stuxnet(self):
-		feedback_message('o shit')
+	# def stuxnet(self):
+	# 	feedback_message('o shit stuxnet')
 
 
 class distillation_column(Machine):

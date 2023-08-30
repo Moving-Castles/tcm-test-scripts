@@ -478,7 +478,7 @@ class IceCream(Solid):
 
 	def heat(self):
 		return Milk()
-	
+
 
 class Milk(Liquid):
 	def __init__(self, base_temp=20, name='milk'):
@@ -511,11 +511,29 @@ class Mayonnaise(Colloid):
 	def centrifuge(self):
 		return ReconstitutedEgg(), Oil(), Salt()
 
+class Uranium(Solid):
+	def __init__(self, base_temp=20, name='uranium'):
+		super().__init__(base_temp)
+		self.name = name
+
+	def centrifuge(self):
+		feedback_message('oh no stuxnet')
+		return Stuxnet(), Stuxnet(), Stuxnet()
+
+class Stuxnet(Gas):
+	def __init__(self, base_temp=20, name='stuxnet'):
+		super().__init__(base_temp)
+		self.name = name
+
+
 class Vape(Solid):
 	def __init__(self, base_temp=20, name='growth hormone'):
 		super().__init__(base_temp)
 		self.name = name
 		self.description="I strongly advise against giving any living creature, including rats, access to vaping devices or substances. Vaping involves inhaling aerosolized chemicals, which can be harmful to both humans and animals. \nRats have smaller respiratory systems and are more sensitive to airborne particles than humans, so exposing them to vaping aerosols could lead to serious health issues. There is a lack of research on the specific effects of vaping on rats, but it's reasonable to assume that it would be harmful to their health, just as it is for humans.\nIf you're concerned about the health and well-being of your rats or any animals, it's important to provide them with a safe and appropriate environment and avoid exposing them to potentially harmful substances. If you suspect that an animal has been exposed to something harmful, it's best to consult a veterinarian."
+
+	def centrifuge():
+		return Uranium(), SunsetYellow(), FastGreen()
 
 class FlaminHotCheeto(Solid):
 	def __init__(self, base_temp=20, name='Flamin Hot Cheeto'):
@@ -572,4 +590,5 @@ recipes = [
 	Recipe({'ketamine', 'MSG'}, MCat()),
 	Recipe({'foam', 'MSG'}, FlaminHotCheeto()),
 	Recipe({'hot bugs', 'MSG'}, Nugget()),
+	Recipe({'synthetic cannabinoid', 'Flamin Hot Cheeto'}, Vomit()),	
 ]
