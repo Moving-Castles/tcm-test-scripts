@@ -338,6 +338,13 @@ class core(Organ):
 			material.psychoactive_effect(self)
 
 		## need to add special functions for vape, cigarette, growth hormone, neuron, prion
+		if material.name in self.can_eat and material.temp_state == 'hot':
+			self.update_energy(self.inputs[0]['amount']*0.2)
+			self.outflow = [{ 'material': Sweat(base_temp=35), 'amount': self.inputs[0]['amount']*0.4}, 
+				{ 'material': Blood(base_temp=35), 'amount': self.inputs[0]['amount']*0.4}]
+			return [{ 'material': Sweat(base_temp=35), 'amount': self.inputs[0]['amount']*0.4}, 
+				{ 'material': Blood(base_temp=35), 'amount': self.inputs[0]['amount']*0.4}]
+
 		if material.name in self.can_eat:
 			self.update_energy(self.inputs[0]['amount']*0.2)
 			self.outflow = [{ 'material': Piss(base_temp=35), 'amount': self.inputs[0]['amount']*0.4}, 
