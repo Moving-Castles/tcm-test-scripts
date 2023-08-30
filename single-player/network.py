@@ -416,13 +416,13 @@ if __name__ == '__main__':
 	connections = []
 	# messages = []
 	win_state = [{
-		'material_name': 'hot teeth',
-		'amount': 10,
+		'material_name': 'growth hormone',
+		'amount': 5,
 		'done': False
 	},
 	{
-		'material_name': 'sand',
-		'amount': 20,
+		'material_name': 'synthetic cannabinoid',
+		'amount': 10,
 		'done': False
 	}]
 
@@ -461,7 +461,7 @@ if __name__ == '__main__':
 
 		if opt == "m":
 			# print("available machines: [heater, mixer, dryer, split_gate]")
-			new_machine = input('name of new machine (choose from [splitter, scorcher, blender, parcher]): \n> ')
+			new_machine = input('name of new machine (choose from [splitter, scorcher, blender, parcher, refrigerator,  grinder, compressor, centrifuge, distillation_column, rat, cow]): \n> ')
 			add_machine(new_machine)
 
 		elif opt == "p":
@@ -478,5 +478,5 @@ if __name__ == '__main__':
 			remove_connection(rp)
 
 		elif opt == "i":
-			info = input('\ntype the name of one of the following machines:\n[inlet, outlet, core, splitter, scorcher, blender, parcher]\n> ') #\n\nor one of the following materials: [piss, blood, dirt, muck, sand, teeth, pellet]'
+			info = input('\ntype the name of one of the following machines:\n[inlet, outlet, core, splitter, scorcher, blender, parcher, refrigerator,  grinder, compressor, centrifuge, distillation_column, rat, cow]\n> ') #\n\nor one of the following materials: [piss, blood, dirt, muck, sand, teeth, pellet]'
 			get_info(info)

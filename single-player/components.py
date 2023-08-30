@@ -58,6 +58,7 @@ class Connection():
 class Machine:
 	def __init__(self):
 		self.outflow = []
+		self.cost = 50
 		self.can_remove = True
 		self.description = "You don't know much about this machine"
 
@@ -225,6 +226,7 @@ class grinder(Machine):
 		self.name = name
 		self.machine_id = machine_id
 		self.outputs = [False]
+		self.cost = 50
 
 	def process(self):
 		material = copy.deepcopy(self.inputs[0]['material'])
@@ -242,6 +244,7 @@ class compressor(Machine):
 		self.name = name
 		self.machine_id = machine_id
 		self.outputs = [False]
+		self.cost = 40
 
 	def process(self):
 		material = copy.deepcopy(self.inputs[0]['material'])
@@ -259,6 +262,7 @@ class centrifuge(Machine):
 		self.name = name
 		self.machine_id = machine_id
 		self.outputs = [False, False, False]
+		self.cost = 150
 
 	def process(self):
 		material = copy.deepcopy(self.inputs[0]['material'])
@@ -283,6 +287,7 @@ class distillation_column(Machine):
 		self.name = name
 		self.machine_id = machine_id
 		self.outputs = [False, False, False]
+		self.cost = 200
 
 	def process(self):
 		material = copy.deepcopy(self.inputs[0]['material'])
@@ -369,7 +374,7 @@ class rat(Organ):
 		super().__init__()
 		self.inputs = [False]
 		self.name = name
-		self.cost = 100
+		self.cost = 50
 		self.machine_id = machine_id
 		self.outputs = [False, False]
 		self.energy = initial_energy
