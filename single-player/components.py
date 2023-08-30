@@ -339,7 +339,7 @@ class Organ:
 		self.description = "You don't know much about this organ"
 		self.dignity = 0
 		self.morale = 0
-		self.neurotoxins = ['prion', 'neuron']
+		self.neurotoxins = ['prion', 'neuron', 'uranium']
 
 	def update_energy(self, amount):
 		self.energy = round(self.energy + amount, 1)
