@@ -359,7 +359,7 @@ class core(Organ):
 		self.machine_id = machine_id
 		self.outputs = [False, False]
 		self.energy = initial_energy
-		self.can_eat = ['bug', 'pellet', 'nuggets', 'Doritos Cool Original', 'jelly', 'Flamin Hot Cheetos']
+		self.can_eat = ['bug', 'pellet', 'nuggets', 'Doritos Cool Original', 'jelly', 'Flamin Hot Cheetos', 'ice cream']
 		self.description = "That’s you, how about you hook some pipes up to those nice stumps of yours and get to work?"
 
 	def process(self):

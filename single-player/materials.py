@@ -462,6 +462,35 @@ class FastGreen(Liquid):
 		super().__init__(base_temp)
 		self.name = name
 
+class MilkPowder(Solid):
+	def __init__(self, base_temp=20, name='milk powder'):
+		super().__init__(base_temp)
+		self.name = name
+
+	def dry(self):
+		return Milk()
+
+
+class IceCream(Solid):
+	def __init__(self, base_temp=-10, hot_temp=0, name='ice cream'):
+		super().__init__(base_temp)
+		self.name = name
+
+	def heat(self):
+		return Milk()
+	
+
+class Milk(Liquid):
+	def __init__(self, base_temp=20, name='milk'):
+		super().__init__(base_temp)
+		self.name = name
+
+	def dry(self):
+		return MilkPowder()
+
+	def freeze(self):
+		return IceCream()
+
 class GrowthHormone(Liquid):
 	def __init__(self, base_temp=20, name='growth hormone'):
 		super().__init__(base_temp)
