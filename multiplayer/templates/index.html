@@ -93,7 +93,7 @@
 
                if($(".terminal").not(":visible")) $('.terminal').show()
 
-               $('#chat_log').append( $('<li/>').text(chat_from + ': ' + msg.data));
+               $('#chat_log').append( $('<li/>').text(chat_from + ': ' + msg.data.substring(0, 160)));
                
                if (cb)
                   cb();
