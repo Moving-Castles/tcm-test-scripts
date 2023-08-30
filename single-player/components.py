@@ -61,12 +61,6 @@ class Machine:
 		self.can_remove = True
 		self.description = "You don't know much about this machine"
 
-class Organ:
-	def __init__(self):
-		self.outflow = []
-		self.alive = True
-		self.can_remove = False
-		self.description = "You don't know much about this organ"
 
 class scorcher(Machine):
 	def __init__(self, machine_id, name):
@@ -84,6 +78,23 @@ class scorcher(Machine):
 		self.outflow =  [{'material': material, 'amount': self.inputs[0]['amount']}]
 		return [{'material': material, 'amount': self.inputs[0]['amount']}]
 
+
+class refrigerator(Machine):
+	def __init__(self, machine_id, name):
+		super().__init__()
+		self.inputs = [False]
+		self.name = name
+		self.machine_id = machine_id
+		self.outputs = [False]
+		self.heating_power = -30
+		self.cost = 30
+		self.description = "Drains the heat from materials."
+
+	def process(self):
+		material = self.inputs[0]['material'].change_temp(self.heating_power)
+		self.outflow =  [{'material': material, 'amount': self.inputs[0]['amount']}]
+		return [{'material': material, 'amount': self.inputs[0]['amount']}]
+
 class parcher(Machine):
 	def __init__(self, machine_id, name):
 		super().__init__()
@@ -94,6 +105,8 @@ class parcher(Machine):
 		self.cost = 20
 		self.description = "Dessicates whatever enters its gaping maw."
 
+
+	# rework this
 	def process(self):
 		material = self.inputs[0]['material']
 		if getattr(material, "dry", None) is not None:
@@ -145,41 +158,6 @@ class blender(Machine):
 			self.outflow = [{'material': result, 'amount': self.inputs[0]['amount']*2}]
 			return [{'material': result, 'amount': self.inputs[0]['amount']*2}]
 
-class core(Organ):
-	def __init__(self, machine_id, name, initial_energy=100):
-		super().__init__()
-		self.inputs = [False]
-		self.name = name
-		self.machine_id = machine_id
-		self.outputs = [False, False]
-		self.energy = initial_energy
-		self.description = "That’s you, how about you hook some pipes up to those nice stumps of yours and get to work?"
-
-	def process(self):
-		if self.inputs[0]['material'].is_food:
-			self.update_energy(self.inputs[0]['amount']*0.2)
-			self.outflow = [{ 'material': Piss(), 'amount': self.inputs[0]['amount']*0.4}, 
-				{ 'material': Blood(), 'amount': self.inputs[0]['amount']*0.4}]
-			return [{ 'material': Piss(), 'amount': self.inputs[0]['amount']*0.4}, 
-				{ 'material': Blood(), 'amount': self.inputs[0]['amount']*0.4}]
-		else:
-			print('ugh! not food!')
-			self.outflow = copy.deepcopy(self.inputs)
-			return self.inputs
-
-	def update_energy(self, amount):
-		self.energy = round(self.energy + amount, 1)
-
-		if(self.energy <= 0):
-			self.die()
-
-	def remove_machine(self):
-		print_message("you idiot!!!!!")
-		self.die()
-
-	def die(self):
-		self.alive = False
-		game_over()
 
 class combi_gate(Machine):
 	def __init__(self, machine_id, name):
@@ -203,7 +181,7 @@ class combi_gate(Machine):
 class inlet(Machine):
 	def __init__(self, machine_id, name):
 		super().__init__()
-		self.inputs = [{'amount': 1.0, 'material': Pellet()}]
+		self.inputs = [{'amount': 10.0, 'material': Bug()}]
 		self.name = 'inlet'
 		self.machine_id = machine_id
 		self.outputs = [False]
@@ -215,6 +193,7 @@ class inlet(Machine):
 	def process(self):
 		self.outflow = copy.deepcopy(self.inputs)
 		return self.inputs
+
 
 class outlet(Machine):
 	def __init__(self, machine_id, name):
@@ -237,3 +216,228 @@ class outlet(Machine):
 				pool_material['amount'] = round(pool_material['amount'] + self.inputs[0]['amount'], 1)
 			else:
 				self.pool.append(self.inputs[0])
+
+
+class grinder(Machine):
+	def __init__(self, machine_id, name):
+		super().__init__()
+		self.inputs = [False]
+		self.name = name
+		self.machine_id = machine_id
+		self.outputs = [False]
+
+	def process(self):
+		material = copy.deepcopy(self.inputs[0]['material'])
+		if hasattr(self.inputs[0]['material'], "grind"):
+			return [{'material': material.grind(), 'amount': self.inputs[0]['amount']}] 
+
+		else:
+			return [{'material': Slurry(), 'amount': self.inputs[0]['amount']}]
+
+
+class compressor(Machine):
+	def __init__(self, machine_id, name):
+		super().__init__()
+		self.inputs = [False]
+		self.name = name
+		self.machine_id = machine_id
+		self.outputs = [False]
+
+	def process(self):
+		material = copy.deepcopy(self.inputs[0]['material'])
+		if hasattr(material, "compress"):
+			return [{'material': material.grind(), 'amount': self.inputs[0]['amount']}] 
+
+		else:
+			return [{'material': Slurry(), 'amount': self.inputs[0]['amount']}]
+
+
+class centrifuge(Machine):
+	def __init__(self, machine_id, name):
+		super().__init__()
+		self.inputs = [False]
+		self.name = name
+		self.machine_id = machine_id
+		self.outputs = [False, False, False]
+
+	def process(self):
+		material = copy.deepcopy(self.inputs[0]['material'])
+		if material.name == 'uranium': self.stuxnet() # shouldn't just be a property on uranium as need to propagate
+
+		if hasattr(material, "centrifuge"):
+			out1, out2, out3 = material.centrifuge()
+			# one primary and 2 secondary materials
+			return [{'material': out1, 'amount': round(self.inputs[0]['amount']/2, 2)},
+				{'material': out2, 'amount': round(self.inputs[0]['amount']/4, 2)},
+				{'material': out3, 'amount': round(self.inputs[0]['amount']/4, 2)}]
+
+
+	def stuxnet(self):
+		feedback_message('o shit')
+
+
+class distillation_column(Machine):
+	def __init__(self, machine_id, name):
+		super().__init__()
+		self.inputs = [False]
+		self.name = name
+		self.machine_id = machine_id
+		self.outputs = [False, False, False]
+
+	def process(self):
+		material = copy.deepcopy(self.inputs[0]['material'])
+		if hasattr(material, "distil"):
+			out1, out2, out3 = material.distil()
+			return [{'material': out1, 'amount': round(self.inputs[0]['amount']*0.1, 2)},
+				{'material': out2, 'amount': round(self.inputs[0]['amount']*0.4, 2)},
+				{'material': out3, 'amount': round(self.inputs[0]['amount']*0.5, 2)}]
+
+
+##### ORGANS
+class Organ:
+	def __init__(self):
+		self.outflow = []
+		self.can_eat = ['pellet']
+		self.alive = True
+		self.can_remove = False
+		self.description = "You don't know much about this organ"
+		self.dignity = 0
+		self.morale = 0
+		self.neurotoxins = ['prion', 'neuron']
+
+	def update_energy(self, amount):
+		self.energy = round(self.energy + amount, 1)
+
+		if(self.energy <= 0):
+			self.die()
+
+	def die(self):
+		self.alive = False
+
+
+class core(Organ):
+	def __init__(self, machine_id, name, initial_energy=100):
+		super().__init__()
+		self.inputs = [False]
+		self.name = name
+		self.machine_id = machine_id
+		self.outputs = [False, False]
+		self.energy = initial_energy
+		self.can_eat = ['bug', 'pellet', 'nuggets', 'Doritos Cool Original', 'jelly', 'Flamin Hot Cheetos']
+		self.description = "That’s you, how about you hook some pipes up to those nice stumps of yours and get to work?"
+
+	def process(self):
+		material = copy.deepcopy(self.inputs[0]['material'])
+
+		if hasattr(material, 'psychoactive_effect'):
+			material.psychoactive_effect(self)
+
+		## need to add special functions for vape, cigarette, growth hormone, neuron, prion
+		if material.name in self.can_eat:
+			self.update_energy(self.inputs[0]['amount']*0.2)
+			self.outflow = [{ 'material': Piss(base_temp=35), 'amount': self.inputs[0]['amount']*0.4}, 
+				{ 'material': Blood(base_temp=35), 'amount': self.inputs[0]['amount']*0.4}]
+			return [{ 'material': Piss(base_temp=35), 'amount': self.inputs[0]['amount']*0.4}, 
+				{ 'material': Blood(base_temp=35), 'amount': self.inputs[0]['amount']*0.4}]
+
+		elif material.name in self.neurotoxins:
+			feedback_message("Oops, that's a neurotoxin. Your brains start bubbling out of your ears")
+			self.update_energy(-50)
+			self.outflow = [{ 'material': Prion(base_temp=35), 'amount': round(self.inputs[0]['amount']*0.7, 2)},
+				{'material': Jelly(base_temp=35), 'amount': self.inputs[0]['amount']*0.1}]
+			return  [{ 'material': Prion(base_temp=35), 'amount': round(self.inputs[0]['amount']*0.7, 2)},
+				{'material': Jelly(base_temp=35), 'amount': self.inputs[0]['amount']*0.1}]
+
+		else:
+			self.update_energy(-5)
+			self.outflow = [{ 'material': Vomit(base_temp=35), 'amount': round(self.inputs[0]['amount']*0.7, 2)},
+				{'material': Blood(base_temp=35), 'amount': self.inputs[0]['amount']*0.1}]
+			return  [{ 'material': Vomit(base_temp=35), 'amount': round(self.inputs[0]['amount']*0.7, 2)},
+				{'material': Blood(base_temp=35), 'amount': self.inputs[0]['amount']*0.1}]
+
+	def remove_machine(self):
+		print_message("you idiot!!!!!")
+		self.die()
+
+	def die(self):
+		self.alive = False
+		game_over()
+
+
+class rat(Organ):
+	def __init__(self, machine_id, name, initial_energy=100):
+		super().__init__()
+		self.inputs = [False]
+		self.name = name
+		self.cost = 100
+		self.machine_id = machine_id
+		self.outputs = [False, False]
+		self.energy = initial_energy
+		self.can_eat = ['glue', 'M-CAT', 'ketamine', 'synthetic cannabinoid', 'scab']
+		self.description = "I think he's getting paid more than you..."
+
+	def process(self):
+		# special materials first
+		if self.inputs[0]['material'].name == 'vape':
+			self.outflow = [{ 'material': GrowthHormone(base_temp=35), 'amount': self.inputs[0]['amount']*0.4}, 
+				{ 'material': Ammonia(), 'amount': self.inputs[0]['amount']*0.4}]
+			return [{ 'material': GrowthHormone(base_temp=35), 'amount': self.inputs[0]['amount']*0.4}, 
+				{ 'material': Ammonia(), 'amount': self.inputs[0]['amount']*0.4}]
+
+		elif self.inputs[0]['material'].name in self.can_eat:
+			self.update_energy(self.inputs[0]['amount']*0.2)
+			self.outflow = [{ 'material': BabyRat(base_temp=35), 'amount': self.inputs[0]['amount']*0.4}, 
+				{ 'material': Ammonia(), 'amount': self.inputs[0]['amount']*0.4}]
+			return [{ 'material': BabyRat(base_temp=35), 'amount': self.inputs[0]['amount']*0.4}, 
+				{ 'material': Ammonia(), 'amount': self.inputs[0]['amount']*0.4}]
+
+		elif material.name in self.neurotoxins:
+			self.update_energy(-10)
+			self.outflow = [{ 'material': Prion(base_temp=35), 'amount': round(self.inputs[0]['amount']*0.7, 2)},
+				{'material': Jelly(base_temp=35), 'amount': self.inputs[0]['amount']*0.1}]
+			return  [{ 'material': Prion(base_temp=35), 'amount': round(self.inputs[0]['amount']*0.7, 2)},
+				{'material': Jelly(base_temp=35), 'amount': self.inputs[0]['amount']*0.1}]
+
+		else:
+			print("can't eat that")
+			self.update_energy(-5)
+			self.outflow = [{ 'material': Foam(), 'amount': self.inputs[0]['amount']*0.5}, 
+				{ 'material': Scab(), 'amount': self.inputs[0]['amount']*0.3}]
+			return [{ 'material': Foam(), 'amount': self.inputs[0]['amount']*0.5}, 
+				{ 'material': Scab(), 'amount': self.inputs[0]['amount']*0.3}]
+			return self.inputs
+
+
+class cow(Organ):
+	def __init__(self, machine_id, name, initial_energy=100):
+		super().__init__()
+		self.inputs = [False]
+		self.name = name
+		self.cost = 100
+		self.can_eat = ["slurry", "foam"]
+		self.machine_id = machine_id
+		self.outputs = [False, False]
+		self.energy = initial_energy
+		self.description = "ah, this must be who left the cowpat in the employee break room"
+
+	def process(self):
+		if self.inputs[0]['material'].name in self.can_eat:
+			self.update_energy(self.inputs[0]['amount']*0.2)
+			self.outflow = [{ 'material': Milk(base_temp=35), 'amount': self.inputs[0]['amount']*0.4}, 
+				{ 'material': Methane(base_temp=35), 'amount': self.inputs[0]['amount']*0.4}]
+			return [{ 'material': Milk(base_temp=35), 'amount': self.inputs[0]['amount']*0.4}, 
+				{ 'material': Methane(base_temp=35), 'amount': self.inputs[0]['amount']*0.4}]
+
+		elif material.name in self.neurotoxins:
+			self.update_energy(-10)
+			self.outflow = [{ 'material': Prion(base_temp=35), 'amount': round(self.inputs[0]['amount']*0.7, 2)},
+				{'material': Jelly(base_temp=35), 'amount': self.inputs[0]['amount']*0.1}]
+			return  [{ 'material': Prion(base_temp=35), 'amount': round(self.inputs[0]['amount']*0.7, 2)},
+				{'material': Jelly(base_temp=35), 'amount': self.inputs[0]['amount']*0.1}]
+
+		else:
+			self.update_energy(-5)
+			self.outflow = [{ 'material': Slurry(base_temp=35), 'amount': round(self.inputs[0]['amount']*0.7, 2)},
+				{'material': Methane(base_temp=35), 'amount': self.inputs[0]['amount']*0.1}]
+			return  [{ 'material': Slurry(base_temp=35), 'amount': round(self.inputs[0]['amount']*0.7, 2)},
+				{'material': Methane(base_temp=35), 'amount': self.inputs[0]['amount']*0.1}]

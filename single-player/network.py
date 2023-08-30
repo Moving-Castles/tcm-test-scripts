@@ -282,7 +282,7 @@ def initialise_grid():
 	# possibility for second input, hacky for now
 	# machines.append(inlet(str(len(machines)), 'inlet'))
 	# machines[1].inputs = [{'material': Flesh(), 'amount': 1.0}]
-	player = core(str(len(machines)), 'you', initial_energy=500)
+	player = core(str(len(machines)), 'you', initial_energy=1000)
 	machines.append(player)
 
 	output = outlet(str(len(machines)), 'outlet')
@@ -412,7 +412,7 @@ def resolve_network():
 if __name__ == '__main__':
 	# machines, connections = initialise_machines_full()
 	machines, player, grid_output = initialise_grid()
-	per_turn_energy_cost = -2
+	per_turn_energy_cost = 0
 	connections = []
 	# messages = []
 	win_state = [{
