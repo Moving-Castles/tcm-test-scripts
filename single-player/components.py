@@ -255,8 +255,28 @@ class compressor(Machine):
 			return [{'material': material.grind(), 'amount': self.inputs[0]['amount']}] 
 
 		else:
-			self.outflow = [{'material': material.grind(), 'amount': self.inputs[0]['amount']}]			
+			self.outflow = [{'material': material, 'amount': self.inputs[0]['amount']}]			
 			return [{'material': Slurry(), 'amount': self.inputs[0]['amount']}]
+
+class wetter(Machine):
+	def __init__(self, machine_id, name):
+		super().__init__()
+		self.inputs = [False]
+		self.name = name
+		self.machine_id = machine_id
+		self.outputs = [False]
+		self.cost = 40
+
+	def process(self):
+		material = copy.deepcopy(self.inputs[0]['material'])
+		if hasattr(material, "wet"):
+			self.outflow = [{'material': material.wet(), 'amount': self.inputs[0]['amount']}]
+			return [{'material': material.grind(), 'amount': self.inputs[0]['amount']}] 
+
+		else:
+			self.outflow = [{'material': material, 'amount': self.inputs[0]['amount']}]			
+			return [{'material': Slurry(), 'amount': self.inputs[0]['amount']}]
+
 
 
 class centrifuge(Machine):
