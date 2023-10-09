@@ -1,0 +1,41 @@
+server {
+    listen 80;
+    listen [::]:80;
+
+    server_name tcm.agnescameron.info;
+
+    location / {
+        include proxy_params;
+        proxy_pass http://127.0.0.1:5000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+        proxy_read_timeout 86400s;
+        proxy_send_timeout 86400s;
+    }
+
+#    location /static/ {
+#        alias ~/tcm-test-scripts/multiplayer/static/;
+#        expires 30d;
+#    }
+
+    location /socket.io {
+        include proxy_params;
+        proxy_http_version 1.1;
+        proxy_buffering off;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "Upgrade";
+        proxy_pass http://127.0.0.1:5000/socket.io;
+    }
+
+    listen [::]:443 ssl ipv6only=on; # managed by Certbot
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/tcm.agnescameron.info/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/tcm.agnescameron.info/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
+
+}
