@@ -591,4 +591,5 @@ recipes = [
 	Recipe({'foam', 'MSG'}, FlaminHotCheeto()),
 	Recipe({'hot bugs', 'MSG'}, Nugget()),
 	Recipe({'synthetic cannabinoid', 'Flamin Hot Cheeto'}, Vomit()),	
+	Recipe({'reconstituted egg', 'oil'}, Mayonnaise()),	
 ]
