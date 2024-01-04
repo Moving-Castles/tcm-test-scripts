@@ -1,0 +1,51 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+  <title>THIS CURSED MACHINE</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"
+    integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg=="
+    crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js"
+    integrity="sha512-aMGMvNYu8Ue4G+fHa359jcPb1u+ytAF+P2SCb+PxrjCdO3n3ZTxJ30zuH39rimUggmTwmh2u7wvQsDTHESnmfQ=="
+    crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leader-line/1.0.3/leader-line.min.js"
+    integrity="sha512-aFBNsI3+D6ObLLtyKwdZPZzDbcCC6+Bh+2UNV8HC0R95BpcBT+dmmZ5NMpJi/Ic8uO0W7FGcg33IfuHg+7Ryew=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script>
+
+    // Make myWindow and myWindow2 draggable in different ways...
+
+    $(document).ready(function () {
+          var socket = io();
+
+          socket.on('connect', function() {
+              socket.emit('create_player');
+              console.log('sent create: session id is', socket.io.engine.id)
+          });
+
+
+          socket.on('log_event', function(msg, cb) {
+             $('#chat_log').append( $('<li/>').html('<i>' + msg.data + '</i>'));
+             
+             if (cb)
+                cb();
+          });
+
+          socket.on('disconnect', function() {
+              socket.disconnect();
+          });
+        });
+    
+  </script>
+</head>
+
+<body>
+
+  <h1>THIS CURSED MACHINE</h1>
+
+  <div><p>you're in the market edition now</p></div>
+</body>
+
+</html>
