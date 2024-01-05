@@ -2,6 +2,7 @@ from .offer import *
 from .transaction import *
 from constants.offer_type import *
 from constants.materials import *
+import copy
 
 class Listing:
     
@@ -16,15 +17,13 @@ class Listing:
         # avoid same reference issue by initialising each one with its own list
         # TODO: how to we deep clone?
         
-        all_ids1 = []
-        all_ids2 = []
+        all_ids = []
         
         for id in Materials:
-            all_ids1.append((id, dict()))
-            all_ids2.append((id, dict()))
+            all_ids.append((id, dict()))
         
-        self.buy_offers            = dict(all_ids1)
-        self.sell_offers           = dict(all_ids2)
+        self.buy_offers            = dict(copy.deepcopy(all_ids))
+        self.sell_offers           = dict(copy.deepcopy(all_ids))
         
     
     def addOffer(self, offer: Offer):
@@ -65,8 +64,6 @@ class Listing:
         
         found_offer_price = None
         
-        print("offer_keys", offer_keys)
-        
         for offer_prices in offer_keys:
             if is_buy_offer == True and offer_prices > offer.item_price:
                 continue
@@ -90,6 +87,7 @@ class Listing:
                 
             transaction = Transaction()
             transaction.addTransactionByDeterminingOfferType(offer, found_offer)
+
             self.completed_transactions.append(transaction)
             
         else:

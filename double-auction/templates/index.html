@@ -37,7 +37,7 @@
           });
 
           $('form#bid').submit(function(event){
-              socket.emit('offer', {type: $('#type').val(), material: $('#material').val(), unit_price: $('#unit_price').val(), num_units: 20 });
+              socket.emit('offer', {type: $('#type').val(), material: $('#material').val(), unit_price: $('#unit_price').val(), num_units: $('#num_units').val() });
               return false
           })
         });
@@ -71,7 +71,7 @@
             <span>Unit Price</span> <input type="text" id="unit_price" name="unit_price"/>
           </div>
           <div>
-            <span>No. Units</span> <input type="text" id="unit_price" name="unit_price"/>
+            <span>No. Units</span> <input type="text" id="num_units" name="num_units"/>
           </div>
         </div>
         <input type="submit" value="Bid">

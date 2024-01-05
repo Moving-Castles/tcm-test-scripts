@@ -1,4 +1,5 @@
 from constants.offer_type import * 
+from .player import *
 
 class Offer:
     """Definition of an Offer
@@ -13,7 +14,7 @@ class Offer:
         Offer.offer_id +=  1
         
 
-    def setOfferDetails(self, offer_type: OfferType, item_id, item_price: int):
+    def setOfferDetails(self, offer_type: OfferType, item_id, item_price: int, proposer: Player):
         """Assign values to the Offer
 
         Args:
@@ -24,6 +25,7 @@ class Offer:
         self.offer_type = offer_type
         self.item_id = item_id
         self.item_price = item_price
+        self.proposer = proposer
 
     def getAsString(self) -> str:
         return "OfferID:", self.offer_id, "offer type:", self.offer_type, "itemID:", self.item_id, "item price:", self.item_price
