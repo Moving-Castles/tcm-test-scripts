@@ -19,7 +19,7 @@ class Listing:
         all_ids1 = []
         all_ids2 = []
         
-        for id in ItemIds:
+        for id in Materials:
             all_ids1.append((id, dict()))
             all_ids2.append((id, dict()))
         

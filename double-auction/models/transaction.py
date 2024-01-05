@@ -27,5 +27,4 @@ class Transaction:
             self.addTransaction(offer_2, offer_1)
     
     def getAsString(self) -> str:
-        return "Transaction ID:", self.transaction_id, "Transaction Price:", self.transaction_price, "Buy Offer ID:",\ 
-        self.buy_offer_id, "Sell Offer ID:", self.sell_offer_id
+        return "Transaction ID:", self.transaction_id, "Transaction Price:", self.transaction_price, "Buy Offer ID:", self.buy_offer_id, "Sell Offer ID:", self.sell_offer_id
