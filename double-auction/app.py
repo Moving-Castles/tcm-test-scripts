@@ -62,13 +62,14 @@ def create_player():
 @socketio.event
 def offer(offer):
 	print('offer is', json.dumps(offer))
-	try:
-		new_offer = Offer()
-		new_offer.setOfferDetails(OfferType[offer['type']], Materials[offer['material']], int(offer['unit_price']), fetch_player(request.sid))
-		listing.addOffer(new_offer)
-		emit('log_event', {'data': 'successfully placed ' + offer['type'] + ' offer for ' + str(offer['num_units']) + ' ' + offer['material'] + ' at a unit price of ' + str(offer['unit_price'])})
-	except:
-		emit('log_event', {'data': 'invalid offer type'})
+	# try:
+	new_offer = Offer()
+	new_offer.setOfferDetails(OfferType[offer['type']], Materials[offer['material']], int(offer['unit_price']), fetch_player(request.sid))
+	listing.addOffer(new_offer)
+	emit('log_event', {'data': 'successfully placed ' + offer['type'] + ' offer for ' + str(offer['num_units']) + ' ' + offer['material'] + ' at a unit price of ' + str(offer['unit_price'])})
+	emit('tx_state', {'data': json.dumps(listing.txToJSON())})
+	# except:
+	# 	emit('log_event', {'data': 'invalid offer type'})
 
 @socketio.event
 def connect():

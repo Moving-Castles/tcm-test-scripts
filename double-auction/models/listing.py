@@ -10,93 +10,62 @@ class Listing:
     sell_offers = dict()
     completed_transactions: list[Transaction] = []
     
-    def __init__(self) -> None:
-        """Initialise all dictionaries for offer lists
-        """
-        
-        # avoid same reference issue by initialising each one with its own list
-        # TODO: how to we deep clone?
-        
+    def __init__(self) -> None:        
         all_ids = []
         
         for id in Materials:
-            all_ids.append((id, dict()))
+            all_ids.append(id)
         
-        self.buy_offers            = dict(copy.deepcopy(all_ids))
-        self.sell_offers           = dict(copy.deepcopy(all_ids))
-        
+        # sort buy and sell offers by material type
+        self.buy_offers = dict({k: [] for k in all_ids})
+        self.sell_offers = dict({k: [] for k in all_ids})
+
+
+    def marketPrices(self):
+        print('prices')
     
     def addOffer(self, offer: Offer):
-        """[summary]
-
-        Args:
-            offer (Offer): Offer to add
-        """
-        #TODO: check if the offer will complete any offer, otherwise, add it to the listing
-        
-        if (offer.offer_type == OfferType.BUY):
-            self.handleAnyOffer(offer, self.buy_offers, self.sell_offers, True)
-        elif (offer.offer_type == OfferType.SELL):
-            self.handleAnyOffer(offer, self.sell_offers, self.buy_offers, False)
-            
-        print('buy_offers', self.buy_offers)
-        print('sell_offers', self.sell_offers)
+        self.handleOffer(offer)
         self.formatPrintCompletedTransactions()
-        print()
         
-        
-    # TODO: maybe we can be smart and just use one for optimisation 
-    #
-            # self.handleBuyOffer(offer, self.sell_offers, self.buy_offers)
-    def handleAnyOffer(self, offer: Offer, offer_dict_1, offer_dict_2, is_buy_offer):
-        """[summary]
+    def handleOffer(self, offer: Offer):
 
-        Args:
-            offer (Offer): [description]
-            offer_dict_1 ([type]): [description]
-            offer_dict_2 ([type]): [description]
-            reverse ([type]): [description]
-        """
-        
-        offer_keys = list(offer_dict_2[offer.item_id].keys())
-        # offer_keys.sort(reverse=is_buy_offer) 
-        # look at note in DoubleAuction: if we remove this, then buy offers will always look for lowest seller and work their way up
-        
-        found_offer_price = None
-        
-        for offer_prices in offer_keys:
-            if is_buy_offer == True and offer_prices > offer.item_price:
-                continue
-            elif is_buy_offer == False and offer_prices < offer.item_price:
-                continue
-            else:
-                found_offer_price = offer_prices
-                break
-        
-        
-        print("found_offer_price", found_offer_price)
-        
-        if (found_offer_price != None):
-            
-            # remove the offer and add it to completed offers
-            found_offer: Offer = offer_dict_2[offer.item_id][found_offer_price].pop()
-            
-            # if key list is empty, we delete it
-            if (len(offer_dict_2[offer.item_id][found_offer_price]) == 0):
-                offer_dict_2[offer.item_id].pop(found_offer_price)
-                
-            transaction = Transaction()
-            transaction.addTransactionByDeterminingOfferType(offer, found_offer)
+        found_offer = None
 
-            self.completed_transactions.append(transaction)
-            
-        else:
-            # if can't complete an offer, then we put it into the dictionary to wait for an applicable offer
-            
-            if offer.item_price in offer_dict_1[offer.item_id]:
-                offer_dict_1[offer.item_id][offer.item_price] += [offer]
-            else:
-                offer_dict_1[offer.item_id][offer.item_price] = [offer]
+        if offer.offer_type == OfferType.BUY:
+            # filter sell offers and order according to price, lowest first, then by date
+            offers = self.sell_offers[offer.item_id]
+            sorted_offers = sorted(offers, key=lambda o: o.item_price)
+            for sell_offer in sorted_offers:
+                if offer.item_price >= sell_offer.item_price:
+                    found_offer = sell_offer
+                    offers[:] = [o for o in offers if o.offer_id != found_offer.offer_id]
+                    break
+
+            if found_offer == None:
+                print('no matching offer')
+                self.buy_offers[offer.item_id].append(offer)
+                return
+
+        elif offer.offer_type == OfferType.SELL:
+            # filter buy offers and order according to price, highest first, then by date
+            offers = self.buy_offers[offer.item_id]
+            sorted_offers = sorted(offers, key=lambda o: o.item_price, reverse=True)
+            for buy_offer in sorted_offers:
+                if offer.item_price <= buy_offer.item_price:
+                    found_offer = buy_offer
+                    offers[:] = [o for o in offers if o.offer_id != found_offer.offer_id]
+                    break
+
+            if found_offer == None:
+                print('no matching offer')
+                self.sell_offers[offer.item_id].append(offer)
+                return
+
+
+        transaction = Transaction()
+        transaction.addTransaction(offer, found_offer)
+        self.completed_transactions.append(transaction)
 
             
     def formatPrintCompletedTransactions(self):
@@ -104,3 +73,8 @@ class Listing:
         for transaction in self.completed_transactions:
             print(transaction.getAsString())
         print()
+
+
+    def txToJSON(self):
+        print([tx.asDict() for tx in self.completed_transactions])
+        return [tx.asDict() for tx in self.completed_transactions]

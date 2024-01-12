@@ -32,6 +32,10 @@
                 cb();
           });
 
+          socket.on('tx_state', function(msg, cb) {
+              console.log(msg.data)
+          });
+
           socket.on('disconnect', function() {
               socket.disconnect();
           });
