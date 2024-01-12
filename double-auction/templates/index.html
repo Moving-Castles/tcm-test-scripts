@@ -40,6 +40,10 @@
               console.log(msg.data)
           });
 
+          socket.on('player_info', function(msg, cb) {
+              console.log(msg.data)
+          });
+
           socket.on('disconnect', function() {
               socket.disconnect();
           });

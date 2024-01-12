@@ -17,13 +17,20 @@ class Transaction(object):
         self.material = found_offer.item_id
         self.volume = volume
 
+        offer_cost = offer.item_price*volume
+        actual_cost = found_offer.item_price*volume
+
         if offer.offer_type == OfferType.BUY:
             self.buyer = offer.proposer
             self.seller = found_offer.proposer
-
         else:
             self.buyer = found_offer.proposer
             self.seller = offer.proposer
+
+        self.buyer.points += offer_cost - actual_cost
+        self.buyer.materials[found_offer.item_id.name] += volume
+        self.seller.points += actual_cost            
+
 
     def asString(self):
         return "tx_id", self.tx_id, "tx_price", self.tx_price,  "material", self.material.name, "volume", self.volume
