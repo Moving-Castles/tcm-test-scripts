@@ -29,37 +29,46 @@ class Listing:
         self.formatPrintCompletedTransactions()
 
     def handleOffer(self, offer: Offer):
-        found_offer = None
         volume = 0
+        found_offer = None
+        offer_complete = False
 
         if offer.offer_type == OfferType.BUY:
             # filter sell offers and order according to price, lowest first, then by date
             offers = self.sell_offers[offer.item_id]
             sorted_offers = sorted(offers, key=lambda o: o.item_price)
             for sell_offer in sorted_offers:
+                print('running loop over sell offers')
                 if offer.item_price >= sell_offer.item_price:
                     found_offer = sell_offer
                     if found_offer.volume == offer.volume:
                         volume = offer.volume
                         offers[:] = [o for o in offers if o.offer_id != found_offer.offer_id]
+                        offer_complete = True
 
                     # if they are selling more than the bidder wants, keep the offer on the market
                     elif found_offer.volume > offer.volume:
                         volume = offer.volume
                         found_offer.volume = found_offer.volume - offer.volume
+                        offer_complete = True
 
-                    # if they are selling less than the bidder wants sell that amount and add the bid
+                    # if found offer is selling less than the bidder wants, sell that much and remove it
                     else:
                         volume = found_offer.volume
                         offer.volume = offer.volume - found_offer.volume
-                        self.buy_offers[offer.item_id].append(offer)
                         offers[:] = [o for o in offers if o.offer_id != found_offer.offer_id]
-                        break
 
-            if found_offer == None:
-                print('no matching offer')
+                if found_offer:
+                    transaction = Transaction()
+                    transaction.addTransaction(offer, found_offer, volume)
+                    self.completed_transactions.append(transaction)
+                    found_offer = None
+
+                if offer_complete: break
+
+            if not offer_complete: 
                 self.buy_offers[offer.item_id].append(offer)
-                return
+
 
         elif offer.offer_type == OfferType.SELL:
             # filter buy offers and order according to price, highest first, then by date
@@ -67,33 +76,36 @@ class Listing:
             sorted_offers = sorted(offers, key=lambda o: o.item_price, reverse=True)
             
             for buy_offer in sorted_offers:
+                print('running loop over buy offers')                
                 if offer.item_price <= buy_offer.item_price:
                     found_offer = buy_offer
                     if found_offer.volume == offer.volume:
                         volume = offer.volume
                         offers[:] = [o for o in offers if o.offer_id != found_offer.offer_id]
+                        offer_complete = True
 
                     # if they are selling more than the bidder wants, sell that amount and add to market, remove the bid
                     elif found_offer.volume < offer.volume:
                         volume = found_offer.volume
                         offer.volume = offer.volume - found_offer.volume
-                        self.sell_offers[offer.item_id].append(offer)
                         offers[:] = [o for o in offers if o.offer_id != found_offer.offer_id]
 
-                    # if they are selling less than the bidder wants, 
+                    # if they are selling less than the bidder wants, complete the bid
                     else:
                         volume = offer.volume
                         found_offer.volume = found_offer.volume - offer.volume
-                        break
+                        offer_complete = True
 
-            if found_offer == None:
-                print('no matching offer')
+                if found_offer:
+                    transaction = Transaction()
+                    transaction.addTransaction(offer, found_offer, volume)
+                    self.completed_transactions.append(transaction)
+                    found_offer = None
+                
+                if offer_complete: break
+
+            if not offer_complete: 
                 self.sell_offers[offer.item_id].append(offer)
-                return
-
-        transaction = Transaction()
-        transaction.addTransaction(offer, found_offer, volume)
-        self.completed_transactions.append(transaction)
 
             
     def formatPrintCompletedTransactions(self):
