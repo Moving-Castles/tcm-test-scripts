@@ -41,7 +41,20 @@
           });
 
           socket.on('player_info', function(msg, cb) {
-              console.log(msg.data)
+            console.log(msg.bids)
+            bids = JSON.parse(msg.bids)
+            data = JSON.parse(msg.data)
+
+            $('#player_bids').html(`<h2>Points: ${data.points}</h2>`)
+
+            bids.buy_offers.forEach( bid => {
+              $('#player_bids').append(`<p>BUYING ${bid.volume} ${bid.item_id} at ${bid.item_price}`)
+            })
+
+            bids.sell_offers.forEach( bid => {
+              $('#player_bids').append(`<p>SELLING ${bid.volume} ${bid.item_id} at ${bid.item_price}`)
+            })
+            console.log(msg.data, msg.bids)
           });
 
           socket.on('disconnect', function() {
@@ -49,8 +62,9 @@
           });
 
           $('form#bid').submit(function(event){
-              socket.emit('offer', {type: $('#type').val(), material: $('#material').val(), unit_price: $('#unit_price').val(), num_units: $('#num_units').val() });
-              return false
+            console.log('emitting')
+            socket.emit('offer', {type: $('#type').val(), material: $('#material').val(), unit_price: $('#unit_price').val(), num_units: $('#num_units').val() });
+            return false
           })
         });
     
@@ -63,6 +77,7 @@
 
   <div><p>you're in the market edition now</p></div>
 
+      <div id="player_bids"></div>
       <form id="bid" method="POST" action='#'>
         <div class="form-items">
           <div><span>Type:</span> 
