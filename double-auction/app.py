@@ -19,6 +19,7 @@ thread = None
 thread_lock = Lock()
 players = []
 listing = Listing()
+player_id = 0
 
 def fetch_player(player_id):
 	for player in players:
@@ -54,20 +55,31 @@ def chat(message):
 
 @socketio.event
 def create_player():
+	global player_id
 	print('makin player')
-	new_player = Player(request.sid)
+	player_id += 1
+	new_player = Player(request.sid, player_id)
 	players.append(new_player)
+	emit('player_info', {'data': json.dumps(new_player.toJSON())})
 	print('created new player, players are', players)
 
 @socketio.event
 def offer(offer):
 	print('offer is', json.dumps(offer))
+	# check player can complete bid and put in escrow
+
 	# try:
 	new_offer = Offer()
-	new_offer.setOfferDetails(OfferType[offer['type']], Materials[offer['material']], int(offer['unit_price']), fetch_player(request.sid), int(offer['num_units']))
+	new_offer.setOfferDetails(OfferType[offer['type']], Materials[offer['material']], int(offer['unit_price']), int(offer['num_units']), fetch_player(request.sid))
 	listing.addOffer(new_offer)
+
 	emit('log_event', {'data': 'successfully placed ' + offer['type'] + ' offer for ' + str(offer['num_units']) + ' ' + offer['material'] + ' at a unit price of ' + str(offer['unit_price'])})
 	emit('tx_state', {'data': json.dumps(listing.txToJSON())})
+
+	for player in players:
+		print('emitting to', player.id, player.session_id)
+		bids = player.getCurrentBids(listing)
+		emit('bid_info', {'data':  json.dumps(bids)}, to=player.session_id)
 	# except:
 	# 	emit('log_event', {'data': 'invalid offer type'})
 

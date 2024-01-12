@@ -36,6 +36,10 @@
               console.log(msg.data)
           });
 
+          socket.on('bid_info', function(msg, cb) {
+              console.log(msg.data)
+          });
+
           socket.on('disconnect', function() {
               socket.disconnect();
           });

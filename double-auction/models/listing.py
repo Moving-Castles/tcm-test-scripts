@@ -38,7 +38,6 @@ class Listing:
             offers = self.sell_offers[offer.item_id]
             sorted_offers = sorted(offers, key=lambda o: o.item_price)
             for sell_offer in sorted_offers:
-                print('running loop over sell offers')
                 if offer.item_price >= sell_offer.item_price:
                     found_offer = sell_offer
                     if found_offer.volume == offer.volume:
@@ -75,8 +74,7 @@ class Listing:
             offers = self.buy_offers[offer.item_id]
             sorted_offers = sorted(offers, key=lambda o: o.item_price, reverse=True)
             
-            for buy_offer in sorted_offers:
-                print('running loop over buy offers')                
+            for buy_offer in sorted_offers:             
                 if offer.item_price <= buy_offer.item_price:
                     found_offer = buy_offer
                     if found_offer.volume == offer.volume:

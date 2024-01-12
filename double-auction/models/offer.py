@@ -11,7 +11,7 @@ class Offer:
         self.offer_id = Offer.offer_id
         Offer.offer_id +=  1
         
-    def setOfferDetails(self, offer_type: OfferType, item_id, item_price: int, proposer: Player, volume: int):
+    def setOfferDetails(self, offer_type: OfferType, item_id, item_price: int, volume: int, proposer: Player):
         self.offer_type = offer_type
         self.item_id = item_id
         self.item_price = item_price
@@ -24,7 +24,7 @@ class Offer:
     def asDict(self) -> dict:
         return {
             "offer_id": self.offer_id,
-            "offer_type": self.offer_type,
+            "offer_type": self.offer_type.name,
             "item_id": self.item_id.name,
             "item_price": self.item_price,
             "volume": self.volume
