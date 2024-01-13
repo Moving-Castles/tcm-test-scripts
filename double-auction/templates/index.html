@@ -17,6 +17,11 @@
 
     // Make myWindow and myWindow2 draggable in different ways...
 
+    function formatDate(datestring) {
+      const new_date = new Date(Date.parse(datestring))
+      return new_date.toTimeString().split(' ')[0]
+    }
+
     $(document).ready(function () {
           var socket = io();
 
@@ -48,22 +53,22 @@
             $('#player_bids').html(`<h2>you are player ${data.id} you have ${data.points} points, ${data.materials.BUGS} BUGS, ${data.materials.MDMA} MDMA, and ${data.materials.PISS} PISS </h2><h3>active bids:</h3>`)
 
             bids.buy_offers.forEach( bid => {
-              $('#player_bids').append(`<p>BUYING ${bid.volume} ${bid.item_id} at ${bid.item_price}`)
+              $('#player_bids').append($('<li/>').html(`BUYING ${bid.volume} ${bid.material} at ${bid.unit_price}`))
             })
 
             bids.sell_offers.forEach( bid => {
-              $('#player_bids').append(`<p>SELLING ${bid.volume} ${bid.item_id} at ${bid.item_price}`)
+              $('#player_bids').append($('<li/>').html(`SELLING ${bid.volume} ${bid.material} at ${bid.unit_price}`))
             })
 
             $('#log').html('<h3>completed transactions:</h3>')
 
             bids.buy_completed.forEach( bid => {
-              $('#log').append( $('<li/>').html(`<i>bought ${bid.volume} ${bid.material} at ${bid.tx_price}</i>`));
+              $('#log').append( $('<li/>').html(`<i>${formatDate(bid.timestamp)} → bought ${bid.volume} ${bid.material} at ${bid.tx_price}</i>`));
              
             })
 
             bids.sell_completed.forEach( bid => {
-              $('#log').append( $('<li/>').html(`<i>sold ${bid.volume} ${bid.material} at ${bid.tx_price}</i>`));
+              $('#log').append( $('<li/>').html(`<i>${formatDate(bid.timestamp)} → sold ${bid.volume} ${bid.material} at ${bid.tx_price}</i>`));
              
             })
             console.log(msg.data, msg.bids)
@@ -75,7 +80,7 @@
 
           $('form#bid').submit(function(event){
             console.log('emitting')
-            socket.emit('offer', {type: $('#type').val(), material: $('#material').val(), unit_price: $('#unit_price').val(), num_units: $('#num_units').val() });
+            socket.emit('offer', {type: $('#type').val(), material: $('#material').val(), unit_price: $('#unit_price').val(), volume: $('#volume').val() });
             return false
           })
         });
@@ -110,7 +115,7 @@
             <span>Unit Price</span> <input type="text" id="unit_price" name="unit_price"/>
           </div>
           <div>
-            <span>No. Units</span> <input type="text" id="num_units" name="num_units"/>
+            <span>No. Units</span> <input type="text" id="volume" name="volume"/>
           </div>
         </div>
         <input type="submit" value="Bid">

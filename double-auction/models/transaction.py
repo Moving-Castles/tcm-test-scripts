@@ -2,6 +2,7 @@ from .offer import *
 from constants.offer_type import *
 from constants.materials import *
 import json
+import datetime
 
 class Transaction(object):
     
@@ -13,13 +14,14 @@ class Transaction(object):
         Transaction.tx_id +=  1
         
     def addTransaction(self, offer: Offer, found_offer: Offer, volume: int):
-        self.tx_price = found_offer.item_price
-        self.material = found_offer.item_id
+        self.tx_price = found_offer.unit_price
+        self.material = found_offer.material
         self.volume = volume
         self.type = offer.offer_type
+        self.timestamp = datetime.datetime.now()
 
-        offer_cost = offer.item_price*volume
-        actual_cost = found_offer.item_price*volume
+        offer_cost = offer.unit_price*volume
+        actual_cost = found_offer.unit_price*volume
 
         if offer.offer_type == OfferType.BUY:
             self.buyer = offer.proposer
@@ -29,17 +31,18 @@ class Transaction(object):
             self.seller = offer.proposer
 
         self.buyer.points += offer_cost - actual_cost
-        self.buyer.materials[found_offer.item_id.name] += volume
+        self.buyer.materials[found_offer.material.name] += volume
         self.seller.points += actual_cost            
 
 
-    def asString(self):
+    def asString(self) -> str:
         return "tx_id", self.tx_id, "tx_price", self.tx_price,  "material", self.material.name, "volume", self.volume
 
-    def asDict(self):
+    def asDict(self) -> dict:
         return {
             "tx_id": self.tx_id, 
             "tx_price": self.tx_price, 
             "material": self.material.name, 
-            "volume": self.volume
+            "volume": self.volume,
+            "timestamp": self.timestamp
         }

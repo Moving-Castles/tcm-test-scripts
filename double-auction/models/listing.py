@@ -34,10 +34,10 @@ class Listing:
                 volume += tx.volume
             
             if volume != 0: 
-                guide_price = cumulative_price/volume
+                guide_price = round(cumulative_price/volume)
 
             self.guide_prices[material] = {"volume": volume, "price": guide_price}
-                
+
         return self.guide_prices
 
 
@@ -52,10 +52,10 @@ class Listing:
 
         if offer.offer_type == OfferType.BUY:
             # filter sell offers and order according to price, lowest first, then by date
-            offers = self.sell_offers[offer.item_id]
-            sorted_offers = sorted(offers, key=lambda o: o.item_price)
+            offers = self.sell_offers[offer.material]
+            sorted_offers = sorted(offers, key=lambda o: o.unit_price)
             for sell_offer in sorted_offers:
-                if offer.item_price >= sell_offer.item_price:
+                if offer.unit_price >= sell_offer.unit_price:
                     found_offer = sell_offer
                     if found_offer.volume == offer.volume:
                         volume = offer.volume
@@ -83,16 +83,16 @@ class Listing:
                 if offer_complete: break
 
             if not offer_complete: 
-                self.buy_offers[offer.item_id].append(offer)
+                self.buy_offers[offer.material].append(offer)
 
 
         elif offer.offer_type == OfferType.SELL:
             # filter buy offers and order according to price, highest first, then by date
-            offers = self.buy_offers[offer.item_id]
-            sorted_offers = sorted(offers, key=lambda o: o.item_price, reverse=True)
+            offers = self.buy_offers[offer.material]
+            sorted_offers = sorted(offers, key=lambda o: o.unit_price, reverse=True)
             
             for buy_offer in sorted_offers:             
-                if offer.item_price <= buy_offer.item_price:
+                if offer.unit_price <= buy_offer.unit_price:
                     found_offer = buy_offer
                     if found_offer.volume == offer.volume:
                         volume = offer.volume
@@ -120,7 +120,7 @@ class Listing:
                 if offer_complete: break
 
             if not offer_complete: 
-                self.sell_offers[offer.item_id].append(offer)
+                self.sell_offers[offer.material].append(offer)
 
             
     def formatPrintCompletedTransactions(self):
