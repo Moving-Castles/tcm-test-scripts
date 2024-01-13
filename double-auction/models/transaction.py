@@ -16,6 +16,7 @@ class Transaction(object):
         self.tx_price = found_offer.item_price
         self.material = found_offer.item_id
         self.volume = volume
+        self.type = offer.offer_type
 
         offer_cost = offer.item_price*volume
         actual_cost = found_offer.item_price*volume

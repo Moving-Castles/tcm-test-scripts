@@ -15,7 +15,9 @@ class Player:
 	def getCurrentBids(self, listing):
 		bids = {
 			"sell_offers": [],
-			"buy_offers": []
+			"buy_offers": [],
+			"buy_completed": [],
+			"sell_completed": [],
 		}
 
 		for material in listing.sell_offers.keys():
@@ -26,6 +28,14 @@ class Player:
 			for offer in listing.buy_offers[material]:
 				if offer.proposer.id == self.id:
 					bids["buy_offers"].append(offer.asDict())
+
+		for tx in listing.completed_transactions:
+			if tx.buyer.id == self.id:
+				print('appending')
+				bids["buy_completed"].append(tx.asDict())
+
+			if tx.seller.id == self.id:
+				bids["sell_completed"].append(tx.asDict())
 
 		return bids
 

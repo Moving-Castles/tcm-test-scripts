@@ -45,7 +45,7 @@
             bids = JSON.parse(msg.bids)
             data = JSON.parse(msg.data)
 
-            $('#player_bids').html(`<h2>Points: ${data.points}</h2>`)
+            $('#player_bids').html(`<h2>you are player ${data.id} you have ${data.points} points, ${data.materials.BUGS} BUGS, ${data.materials.MDMA} MDMA, and ${data.materials.PISS} PISS </h2><h3>active bids:</h3>`)
 
             bids.buy_offers.forEach( bid => {
               $('#player_bids').append(`<p>BUYING ${bid.volume} ${bid.item_id} at ${bid.item_price}`)
@@ -53,6 +53,18 @@
 
             bids.sell_offers.forEach( bid => {
               $('#player_bids').append(`<p>SELLING ${bid.volume} ${bid.item_id} at ${bid.item_price}`)
+            })
+
+            $('#log').html('<h3>completed transactions:</h3>')
+
+            bids.buy_completed.forEach( bid => {
+              $('#log').append( $('<li/>').html(`<i>bought ${bid.volume} ${bid.material} at ${bid.tx_price}</i>`));
+             
+            })
+
+            bids.sell_completed.forEach( bid => {
+              $('#log').append( $('<li/>').html(`<i>sold ${bid.volume} ${bid.material} at ${bid.tx_price}</i>`));
+             
             })
             console.log(msg.data, msg.bids)
           });

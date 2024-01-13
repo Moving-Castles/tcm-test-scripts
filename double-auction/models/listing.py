@@ -11,19 +11,36 @@ class Listing:
     completed_transactions: list[Transaction] = []
     
     def __init__(self) -> None:        
-        all_ids = []
+        self.all_ids = []
         
         for id in Materials:
-            all_ids.append(id)
+            self.all_ids.append(id)
         
         # sort buy and sell offers by material type
-        self.buy_offers = dict({k: [] for k in all_ids})
-        self.sell_offers = dict({k: [] for k in all_ids})
-
+        self.buy_offers = dict({m: [] for m in self.all_ids})
+        self.sell_offers = dict({m: [] for m in self.all_ids})
+        self.guide_prices = dict({m: {"volume": 0, "price": 0} for m in self.all_ids})
 
     def marketPrices(self):
         print('prices')
-    
+        # todo: window by timestamp
+        for material in self.all_ids:
+            cumulative_price = 0
+            volume = 0
+            guide_price = 0
+            filtered_txs = [tx for tx in self.completed_transactions if tx.material == material]
+            for tx in filtered_txs:
+                cumulative_price += tx.tx_price * tx.volume
+                volume += tx.volume
+            
+            if volume != 0: 
+                guide_price = cumulative_price/volume
+
+            self.guide_prices[material] = {"volume": volume, "price": guide_price}
+                
+        return self.guide_prices
+
+
     def addOffer(self, offer: Offer):
         self.handleOffer(offer)
         self.formatPrintCompletedTransactions()

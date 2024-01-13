@@ -67,31 +67,35 @@ def create_player():
 def offer(offer):
 	print('offer is', json.dumps(offer))
 	# check player can complete bid and put in escrow
-	offer_placer = fetch_player(request.sid)
+	bidder = fetch_player(request.sid)
 
 	if offer['type'] == 'BUY':
 		offer_cost = int(offer['num_units'])*int(offer['unit_price'])
-		if offer_placer.points >= offer_cost:
-			offer_placer.points -= offer_cost
+		if bidder.points >= offer_cost:
+			bidder.points -= offer_cost
 
 		else:
 			emit('log_event', {'data': 'insufficient funds'})
 			return
 
 	if offer['type'] == 'SELL':
-		if offer_placer.materials[offer['material']] >= int(offer['num_units']):
-			offer_placer.materials[offer['material']] -= int(offer['num_units'])
+		if bidder.materials[offer['material']] >= int(offer['num_units']):
+			bidder.materials[offer['material']] -= int(offer['num_units'])
 
 		else:
 			emit('log_event', {'data': 'insufficient ' + offer['material'] + ' to complete transaction'})
+			return
 
 	# try:
 	new_offer = Offer()
-	new_offer.setOfferDetails(OfferType[offer['type']], Materials[offer['material']], int(offer['unit_price']), int(offer['num_units']), offer_placer)
+	new_offer.setOfferDetails(OfferType[offer['type']], Materials[offer['material']], int(offer['unit_price']), int(offer['num_units']), bidder)
 	listing.addOffer(new_offer)
 
 	emit('log_event', {'data': 'successfully placed ' + offer['type'] + ' offer for ' + str(offer['num_units']) + ' ' + offer['material'] + ' at a unit price of ' + str(offer['unit_price'])})
 	emit('tx_state', {'data': json.dumps(listing.txToJSON())}, broadcast=True)
+
+	print('price tracker')
+	print(listing.marketPrices())
 
 	for player in players:
 		print('emitting to', player.id, player.session_id)
