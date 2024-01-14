@@ -308,7 +308,7 @@ button {
 }
 
 #log {
-  width: 400px;
+  width: 500px;
 }
 
 .active-bid {
@@ -323,6 +323,13 @@ button {
   background: black;
   color: white;
   border: 4px solid white; 
+}
+
+.alert {
+  position: fixed;
+  width: 300px;
+  height: 100px;
+  margin: 20px;
 }
 
 .flex-container {

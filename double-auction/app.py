@@ -73,29 +73,31 @@ def offer(offer):
 	# has funds / materials
 	# player is not maxed out of active bids
 	current_bids = bidder.getCurrentBids(listing)
-	if (len(current_bids["buy_offers"]) + len(current_bids["sell_offers"]) > 5):
-		emit('log_event', {'data': 'max active bids reached'})
-		return
 
-	if offer['type'] == 'BUY':
-		offer_cost = int(offer['volume'])*int(offer['unit_price'])
-		if bidder.points >= offer_cost:
-			bidder.points -= offer_cost
-
-		else:
-			emit('log_event', {'data': 'insufficient funds'})
-			return
-
-	if offer['type'] == 'SELL':
-		if bidder.materials[offer['material']] >= int(offer['volume']):
-			bidder.materials[offer['material']] -= int(offer['volume'])
-
-		else:
-			emit('log_event', {'data': 'insufficient ' + offer['material'] + ' to complete transaction'})
-			return
-
-	# try:
 	try:
+		if (len(current_bids["buy_offers"]) + len(current_bids["sell_offers"]) > 5):
+			emit('log_event', {'data': 'max active bids reached'})
+			return
+
+		if offer['type'] == 'BUY':
+			offer_cost = int(offer['volume'])*int(offer['unit_price'])
+			if bidder.points >= offer_cost:
+				bidder.points -= offer_cost
+
+			else:
+				emit('log_event', {'data': 'insufficient funds'})
+				return
+
+		if offer['type'] == 'SELL':
+			if bidder.materials[offer['material']] >= int(offer['volume']):
+				bidder.materials[offer['material']] -= int(offer['volume'])
+
+			else:
+				emit('log_event', {'data': 'insufficient ' + offer['material'] + ' to complete transaction'})
+				return
+
+		# try:
+
 		new_offer = Offer()
 		new_offer.setOfferDetails(OfferType[offer['type']], Materials[offer['material']], int(offer['unit_price']), int(offer['volume']), bidder)
 		listing.addOffer(new_offer)

@@ -31,10 +31,8 @@
           });
 
           socket.on('log_event', function(msg, cb) {
-             $('#log').append( $('<li/>').html('<i>' + msg.data + '</i>'));
-             
-             if (cb)
-                cb();
+            const alert = $('<div/>').addClass("alert").html('<i>' + msg.data + '</i>').delay(2000).fadeOut(400)
+             $('body').append(alert);
           });
 
           socket.on('tx_state', function(msg, cb) {
@@ -79,7 +77,7 @@
             $('#log').html('<h3>completed transactions:</h3>')
 
             bids.buy_completed.forEach( bid => {
-              $('#log').append( $('<li/>').html(`<i>${formatDate(bid.timestamp)} → bought ${bid.volume} ${bid.material} at ${bid.tx_price} → <b>-${bid.tx_price*bid.volume} points</b></i>`));
+              $('#log').append( $('<li/>').html(`<i>${formatDate(bid.timestamp)} → bought ${bid.volume} ${bid.material} at ${bid.tx_price} → <b>+${bid.volume} ${bid.material}</b></i>`));
              
             })
 
