@@ -95,20 +95,25 @@ def offer(offer):
 			return
 
 	# try:
-	new_offer = Offer()
-	new_offer.setOfferDetails(OfferType[offer['type']], Materials[offer['material']], int(offer['unit_price']), int(offer['volume']), bidder)
-	listing.addOffer(new_offer)
+	try:
+		new_offer = Offer()
+		new_offer.setOfferDetails(OfferType[offer['type']], Materials[offer['material']], int(offer['unit_price']), int(offer['volume']), bidder)
+		listing.addOffer(new_offer)
 
-	emit('log_event', {'data': 'successfully placed ' + offer['type'] + ' offer for ' + str(offer['volume']) + ' ' + offer['material'] + ' at a unit price of ' + str(offer['unit_price'])})
-	emit('tx_state', {'data': json.dumps(listing.txToJSON(), sort_keys=True, default=str)}, broadcast=True)
+		emit('log_event', {'data': 'successfully placed ' + offer['type'] + ' offer for ' + str(offer['volume']) + ' ' + offer['material'] + ' at a unit price of ' + str(offer['unit_price'])})
+		emit('tx_state', {'data': json.dumps(listing.txToJSON(), sort_keys=True, default=str)}, broadcast=True)
 
-	print('price tracker')
-	print(listing.marketPrices())
+		print('price tracker')
+		print(listing.marketPrices())
 
-	for player in players:
-		print('emitting to', player.id, player.session_id)
-		bids = player.getCurrentBids(listing)
-		emit('player_info', {'data': json.dumps(player.toJSON(), sort_keys=True, default=str), 'bids': json.dumps(bids, sort_keys=True, default=str)}, to=player.session_id)
+		for player in players:
+			print('emitting to', player.id, player.session_id)
+			bids = player.getCurrentBids(listing)
+			emit('player_info', {'data': json.dumps(player.toJSON(), sort_keys=True, default=str), 'bids': json.dumps(bids, sort_keys=True, default=str)}, to=player.session_id)
+
+	except Exception as e: 
+		print(e)
+		emit('log_event', {'data': 'invalid bid format'})
 
 @socketio.event
 def connect():

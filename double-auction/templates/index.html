@@ -50,15 +50,25 @@
             bids = JSON.parse(msg.bids)
             data = JSON.parse(msg.data)
 
-            $('#player_bids').html(`<h2>you are player ${data.id} you have ${data.points} points, ${data.materials.BUGS} BUGS, ${data.materials.MDMA} MDMA, and ${data.materials.PISS} PISS </h2><h3>active bids:</h3>`)
+            $('#player-info').html(`<h2>you are player ${data.id} you have ${data.points} points, ${data.materials.BUGS} BUGS, ${data.materials.MDMA} MDMA, and ${data.materials.PISS} PISS </h2><h3>active bids:</h3>`)
+
+            $('#player-bids').html('');
 
             bids.buy_offers.forEach( bid => {
-              $('#player_bids').append($('<li/>').html(`BUYING ${bid.volume} ${bid.material} at ${bid.unit_price}`))
+              $('#player-bids').append($('<div/>').addClass('active-bid').html(`BUY ${bid.volume} ${bid.material} @ ${bid.unit_price}`))
             })
 
             bids.sell_offers.forEach( bid => {
-              $('#player_bids').append($('<li/>').html(`SELLING ${bid.volume} ${bid.material} at ${bid.unit_price}`))
+              $('#player-bids').append($('<div/>').addClass('active-bid').html(`SELL ${bid.volume} ${bid.material} @ ${bid.unit_price}`))
             })
+
+            const total_offers = bids.sell_offers.length + bids.buy_offers.length
+            
+            if(total_offers < 5){
+              for(let i=0; i<6-total_offers; i++){
+                $('#player-bids').append($('<div/>').addClass('active-bid').html(''))
+              }
+            }
 
             $('#log').html('<h3>completed transactions:</h3>')
 
@@ -94,7 +104,8 @@
 
   <div><p>you're in the market edition now</p></div>
 
-      <div id="player_bids"></div>
+      <div id="player-info"></div>
+      <div id="player-bids"></div>
 
       <div>
         <h3>make a bid:</h3>
@@ -121,7 +132,7 @@
               <span>unit price:</span> <input type="text" id="unit_price" name="unit_price"/>
             </div>
           </div>
-          <button form="bid" value="BID">BID</button>
+          <button value="BID">BID</button>
         </form>
       </div>
 
