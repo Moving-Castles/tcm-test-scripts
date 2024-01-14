@@ -266,6 +266,13 @@ button {
   }
 }
 
+button.dashboard {
+  padding: 5px;
+  border: 4px solid white;
+  font-size: var(--font-size-normal);
+  font-family: var(--font-family);
+}
+
 [role="button"] {
   text-decoration: underline;
 }

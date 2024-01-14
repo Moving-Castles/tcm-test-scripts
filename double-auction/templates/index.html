@@ -53,14 +53,14 @@
 
             bids.buy_offers.forEach( bid => {
               const bid_content = $('<div/>').addClass('active-bid').html(`BUY ${bid.volume} ${bid.material} @ ${bid.unit_price}`)
-              const escrow = $('<div/>').addClass('escrow').html(`${bid.volume*bid.unit_price} POINTS`)
+              const escrow = $('<div/>').addClass('escrow').html(`${Math.floor(bid.volume*bid.unit_price)} POINTS`)
               bid_content.append(escrow)
               $('#player-bids').append(bid_content)
             })
 
             bids.sell_offers.forEach( bid => {
              const bid_content = $('<div/>').addClass('active-bid').html(`SELL ${bid.volume} ${bid.material} @ ${bid.unit_price}`)
-              const escrow = $('<div/>').addClass('escrow').html(`${bid.volume} ${bid.material}`)
+              const escrow = $('<div/>').addClass('escrow').html(`${Math.floor(bid.volume)} ${bid.material}`)
               bid_content.append(escrow)
               $('#player-bids').append(bid_content)
             })
@@ -96,8 +96,14 @@
             socket.emit('offer', {type: $('#type').val(), material: $('#material').val(), unit_price: $('#unit_price').val(), volume: $('#volume').val() });
             return false
           })
-        });
+
+          $('.convert').click(function(event){
+            console.log('converting')
+            socket.emit('convert', {from: 'BUGS', to: 'PISS'})
+          });
     
+    });
+
   </script>
 </head>
 
@@ -107,6 +113,16 @@
       <div><p>you're in the market edition now</p></div><br>
 
       <div id="player-info"></div><br/>
+
+      <h3>internal dashboard:</h3>
+      <div id="dashboard">
+          <!-- <button class="dashboard" id="buy" value="bugs">buy bugs <span id="bugs-price"><b>1 point</b></span> -->
+          <button class="dashboard convert" value="bugs_piss">bugs → piss<br>
+              <span id="bugs-piss-efficiency">10% eff.</span></button>
+          <button class="dashboard convert" value="piss_mdma">piss → mdma<br>
+            <span id="piss-mdma-efficiency">10% eff.</span></button>
+      </div><br/>
+
       <h3>active bids:</h3>
       <div id="player-bids"></div>
 

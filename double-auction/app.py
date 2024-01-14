@@ -31,12 +31,22 @@ def log_event(event):
 	print('logging', event)
 	socketio.emit('log_event', {'data': event})
 
+# need to explicitly invoke socketio here as it's a separate thread
 def background_thread():
 	count = 0
 	with app.test_request_context():
 		while True:
+			print('tick')
 			socketio.sleep(5)
-			# print('tick')
+			# get prices and send
+			listing.trackMarketPrices()
+			socketio.emit('price_info', {"data": json.dumps(listing.price_history, sort_keys=True, default=str)})
+
+			for player in players:
+				player.materials['BUGS'] -= 5
+				socketio.emit('player_info', {'data': json.dumps(player.toJSON(), sort_keys=True, default=str), 'bids': json.dumps(player.getCurrentBids(listing), sort_keys=True, default=str)}, to=player.session_id)
+				# socketio.emit('log_event', {'data': 'bug rental collected'}, to=player.session_id)
+
 
 def remove_player(player_id):
 	rm_player = fetch_player(player_id)
@@ -64,6 +74,12 @@ def create_player():
 	print('created new player, players are', players)
 
 @socketio.event
+def convert(msg):
+	player = fetch_player(request.sid)
+	feedback_msg = player.convert(msg["from"], msg["to"])
+	emit('log_event', {'data': feedback_msg})
+
+@socketio.event
 def offer(offer):
 	print('offer is', json.dumps(offer, sort_keys=True, default=str))
 	# check player can complete bid and put in escrow
@@ -75,12 +91,18 @@ def offer(offer):
 	current_bids = bidder.getCurrentBids(listing)
 
 	try:
+		int(offer['volume'])
+	except:
+		emit('log_event', {'data': 'can only trade materials in whole units'})
+		return	
+
+	try:
 		if (len(current_bids["buy_offers"]) + len(current_bids["sell_offers"]) > 5):
 			emit('log_event', {'data': 'max active bids reached'})
 			return
 
 		if offer['type'] == 'BUY':
-			offer_cost = int(offer['volume'])*int(offer['unit_price'])
+			offer_cost = int(offer['volume'])*float(offer['unit_price'])
 			if bidder.points >= offer_cost:
 				bidder.points -= offer_cost
 
@@ -99,14 +121,13 @@ def offer(offer):
 		# try:
 
 		new_offer = Offer()
-		new_offer.setOfferDetails(OfferType[offer['type']], Materials[offer['material']], int(offer['unit_price']), int(offer['volume']), bidder)
+		new_offer.setOfferDetails(OfferType[offer['type']], Materials[offer['material']], float(offer['unit_price']), int(offer['volume']), bidder)
 		listing.addOffer(new_offer)
 
 		emit('log_event', {'data': 'successfully placed ' + offer['type'] + ' offer for ' + str(offer['volume']) + ' ' + offer['material'] + ' at a unit price of ' + str(offer['unit_price'])})
 		emit('tx_state', {'data': json.dumps(listing.txToJSON(), sort_keys=True, default=str)}, broadcast=True)
 
 		print('price tracker')
-		print(listing.marketPrices())
 
 		for player in players:
 			print('emitting to', player.id, player.session_id)
@@ -123,6 +144,7 @@ def connect():
 	with thread_lock:
 		print('connected')
 		if thread is None:
+			print('startin thread')
 			thread = socketio.start_background_task(background_thread)
 
 @socketio.event

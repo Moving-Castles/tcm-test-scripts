@@ -5,6 +5,7 @@ class Player:
 		super().__init__()
 		self.session_id = copy.deepcopy(session_id)
 		self.id = player_id
+		self.level = 1
 		self.points = 1000
 		self.materials = {
 			'BUGS': 1000,
@@ -39,9 +40,17 @@ class Player:
 
 		return bids
 
+	def convert(self, from_mat, to_mat):
+		print('converting', from_mat, to_mat)
+
+	def increaseLevel(self):
+		# check enough points, deduct points if so
+		self.level += 1
+
 	def toJSON(self):
 		return {
 			'id': self.id,
+			'level': self.level,
 			'points': self.points,
 			'materials': self.materials
 		}

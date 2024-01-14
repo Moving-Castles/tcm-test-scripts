@@ -3,6 +3,7 @@ from .transaction import *
 from constants.offer_type import *
 from constants.materials import *
 import copy
+import datetime
 
 class Listing:
     
@@ -19,9 +20,10 @@ class Listing:
         # sort buy and sell offers by material type
         self.buy_offers = dict({m: [] for m in self.all_ids})
         self.sell_offers = dict({m: [] for m in self.all_ids})
-        self.guide_prices = dict({m: {"volume": 0, "price": 0} for m in self.all_ids})
+        self.guide_prices = dict({m.name: {"volume": 0, "price": 0} for m in self.all_ids})
+        self.price_history = []
 
-    def marketPrices(self):
+    def trackMarketPrices(self):
         print('prices')
         # todo: window by timestamp
         for material in self.all_ids:
@@ -36,9 +38,13 @@ class Listing:
             if volume != 0: 
                 guide_price = round(cumulative_price/volume)
 
-            self.guide_prices[material] = {"volume": volume, "price": guide_price}
 
-        return self.guide_prices
+            self.guide_prices[material.name] = guide_price
+
+
+        current_prices = copy.deepcopy(self.guide_prices)
+        current_prices["timestamp"] = datetime.datetime.now()
+        self.price_history.append(current_prices)
 
 
     def addOffer(self, offer: Offer):
@@ -127,7 +133,6 @@ class Listing:
         print("\nCompleted Transactions:")
         for transaction in self.completed_transactions:
             print(transaction.asString())
-        print()
 
 
     def txToJSON(self):
