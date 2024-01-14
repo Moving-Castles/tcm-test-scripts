@@ -69,6 +69,14 @@ def offer(offer):
 	# check player can complete bid and put in escrow
 	bidder = fetch_player(request.sid)
 
+	# check valid offer
+	# has funds / materials
+	# player is not maxed out of active bids
+	current_bids = bidder.getCurrentBids(listing)
+	if (len(current_bids["buy_offers"]) + len(current_bids["sell_offers"]) > 5):
+		emit('log_event', {'data': 'max active bids reached'})
+		return
+
 	if offer['type'] == 'BUY':
 		offer_cost = int(offer['volume'])*int(offer['unit_price'])
 		if bidder.points >= offer_cost:
