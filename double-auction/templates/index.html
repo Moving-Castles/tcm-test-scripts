@@ -95,31 +95,36 @@
   <div><p>you're in the market edition now</p></div>
 
       <div id="player_bids"></div>
-      <form id="bid" method="POST" action='#'>
-        <div class="form-items">
-          <div><span>Type:</span> 
-            <select name="type" id="type">
-              <option value="BUY">buy</option>
-              <option value="SELL">sell</option>
-            </select>
+
+      <div>
+        <h3>make a bid:</h3>
+        <form id="bid" method="POST" action='#'>
+          <div class="form-items">
+            <div><span>type:</span> 
+              <select name="type" id="type">
+                <option value="BUY">buy</option>
+                <option value="SELL">sell</option>
+              </select>
+            </div>
+            <div>
+              <span>material:</span>
+                <select name="material" id="material">
+                <option value="PISS">piss</option>
+                <option value="BUGS">bugs</option>
+                <option value="MDMA">MDMA</option>
+              </select>
+            </div>
+            <div>
+              <span>volume</span> <input type="text" id="volume" name="volume"/>
+            </div>
+            <div>
+              <span>unit price</span> <input type="text" id="unit_price" name="unit_price"/>
+            </div>
           </div>
-          <div>
-            <span>Material:</span>
-              <select name="material" id="material">
-              <option value="PISS">piss</option>
-              <option value="BUGS">bugs</option>
-              <option value="MDMA">MDMA</option>
-            </select>
-          </div>
-          <div>
-            <span>Unit Price</span> <input type="text" id="unit_price" name="unit_price"/>
-          </div>
-          <div>
-            <span>No. Units</span> <input type="text" id="volume" name="volume"/>
-          </div>
-        </div>
-        <input type="submit" value="Bid">
-      </form>
+          <input type="submit" value="Bid">
+        </form>
+      </div>
+
       <div id="log"></div>
 </body>
 
