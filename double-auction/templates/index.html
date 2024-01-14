@@ -31,8 +31,7 @@
           });
 
           socket.on('log_event', function(msg, cb) {
-            const alert = $('<div/>').addClass("alert").html('<i>' + msg.data + '</i>').delay(2000).fadeOut(400)
-             $('body').append(alert);
+            $("#alert").html('<i>' + msg.data + '</i>').show().delay(2000).fadeOut(400)
           });
 
           socket.on('tx_state', function(msg, cb) {
@@ -68,7 +67,7 @@
 
             const total_offers = bids.sell_offers.length + bids.buy_offers.length
             
-            if(total_offers < 5){
+            if(total_offers < 6){
               for(let i=0; i<6-total_offers; i++){
                 $('#player-bids').append($('<div/>').addClass('active-bid').html(''))
               }
@@ -139,6 +138,7 @@
           </div>
           <button value="BID">BID</button>
         </form>
+        <div id="alert"></div>
       </div>
 
       <div id="log"></div>
