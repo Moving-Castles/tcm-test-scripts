@@ -50,16 +50,22 @@
             bids = JSON.parse(msg.bids)
             data = JSON.parse(msg.data)
 
-            $('#player-info').html(`<h2>you are player ${data.id} you have ${data.points} points, ${data.materials.BUGS} BUGS, ${data.materials.MDMA} MDMA, and ${data.materials.PISS} PISS </h2><h3>active bids:</h3>`)
+            $('#player-info').html(`<h2>you are player ${data.id} you have ${data.points} points, ${data.materials.BUGS} BUGS, ${data.materials.MDMA} MDMA, and ${data.materials.PISS} PISS</h2>`)
 
             $('#player-bids').html('');
 
             bids.buy_offers.forEach( bid => {
-              $('#player-bids').append($('<div/>').addClass('active-bid').html(`BUY ${bid.volume} ${bid.material} @ ${bid.unit_price}`))
+              const bid_content = $('<div/>').addClass('active-bid').html(`BUY ${bid.volume} ${bid.material} @ ${bid.unit_price}`)
+              const escrow = $('<div/>').addClass('escrow').html(`${bid.volume*bid.unit_price} POINTS`)
+              bid_content.append(escrow)
+              $('#player-bids').append(bid_content)
             })
 
             bids.sell_offers.forEach( bid => {
-              $('#player-bids').append($('<div/>').addClass('active-bid').html(`SELL ${bid.volume} ${bid.material} @ ${bid.unit_price}`))
+             const bid_content = $('<div/>').addClass('active-bid').html(`SELL ${bid.volume} ${bid.material} @ ${bid.unit_price}`)
+              const escrow = $('<div/>').addClass('escrow').html(`${bid.volume} ${bid.material}`)
+              bid_content.append(escrow)
+              $('#player-bids').append(bid_content)
             })
 
             const total_offers = bids.sell_offers.length + bids.buy_offers.length
@@ -73,12 +79,12 @@
             $('#log').html('<h3>completed transactions:</h3>')
 
             bids.buy_completed.forEach( bid => {
-              $('#log').append( $('<li/>').html(`<i>${formatDate(bid.timestamp)} → bought ${bid.volume} ${bid.material} at ${bid.tx_price}</i>`));
+              $('#log').append( $('<li/>').html(`<i>${formatDate(bid.timestamp)} → bought ${bid.volume} ${bid.material} at ${bid.tx_price} → <b>-${bid.tx_price*bid.volume} points</b></i>`));
              
             })
 
             bids.sell_completed.forEach( bid => {
-              $('#log').append( $('<li/>').html(`<i>${formatDate(bid.timestamp)} → sold ${bid.volume} ${bid.material} at ${bid.tx_price}</i>`));
+              $('#log').append( $('<li/>').html(`<i>${formatDate(bid.timestamp)} → sold ${bid.volume} ${bid.material} at ${bid.tx_price} → <b>+${bid.tx_price*bid.volume} points</b></i>`));
              
             })
             console.log(msg.data, msg.bids)
@@ -99,14 +105,15 @@
 </head>
 
 <body>
+    <div id='page-container'>
+      <h1>THIS CURSED MACHINE</h1>
+      <div><p>you're in the market edition now</p></div><br>
 
-  <h1>THIS CURSED MACHINE</h1>
-
-  <div><p>you're in the market edition now</p></div>
-
-      <div id="player-info"></div>
+      <div id="player-info"></div><br/>
+      <h3>active bids:</h3>
       <div id="player-bids"></div>
 
+      <div class="flex-container">
       <div>
         <h3>make a bid:</h3>
         <form id="bid" method="POST" action='#'>
@@ -137,6 +144,8 @@
       </div>
 
       <div id="log"></div>
+    </div>
+  </div>
 </body>
 
 </html>
