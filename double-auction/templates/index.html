@@ -31,7 +31,7 @@
           });
 
           socket.on('log_event', function(msg, cb) {
-            $("#alert").html('<i>' + msg.data + '</i>').show().delay(2000).fadeOut(400)
+            $("#alert").html('<i>' + msg.data + '</i>').show().delay(6000).fadeOut(400)
           });
 
           socket.on('tx_state', function(msg, cb) {
@@ -76,12 +76,12 @@
             $('#log').html('<h3>completed transactions:</h3>')
 
             bids.buy_completed.forEach( bid => {
-              $('#log').append( $('<li/>').html(`<i>${formatDate(bid.timestamp)} → bought ${bid.volume} ${bid.material} at ${bid.tx_price} → <b>+${bid.volume} ${bid.material}</b></i>`));
+              $('#log').append( $('<li/>').html(`<i><b>${formatDate(bid.timestamp)}</b> → bought ${bid.volume} ${bid.material} at ${bid.tx_price} <b>+${bid.volume} ${bid.material}</b></i>`));
              
             })
 
             bids.sell_completed.forEach( bid => {
-              $('#log').append( $('<li/>').html(`<i>${formatDate(bid.timestamp)} → sold ${bid.volume} ${bid.material} at ${bid.tx_price} → <b>+${bid.tx_price*bid.volume} points</b></i>`));
+              $('#log').append( $('<li/>').html(`<i><b>${formatDate(bid.timestamp)}</b> → sold ${bid.volume} ${bid.material} at ${bid.tx_price} <b>+${bid.tx_price*bid.volume} points</b></i>`));
              
             })
             console.log(msg.data, msg.bids)
