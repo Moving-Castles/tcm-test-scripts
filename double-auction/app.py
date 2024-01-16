@@ -110,7 +110,37 @@ def buy_bugs(msg):
 	else:
 		emit('log_event', {'data': "insufficient points"})
 
-	emit('player_info', {'data': json.dumps(player.toJSON(), sort_keys=True, default=str), 'bids': json.dumps(bids, sort_keys=True, default=str)}, to=player.session_id)
+
+@socketio.event
+def sell_piss(msg):
+	player = fetch_player(request.sid)
+	# feedback_msg = player.convert(msg["from"], msg["to"])
+	bids = player.getCurrentBids(listing)
+	amount = msg["volume"]
+
+	if player.materials['PISS'] >= amount:
+		player.points += 12
+		player.materials['PISS'] -= amount
+		emit('player_info', {'data': json.dumps(player.toJSON(), sort_keys=True, default=str), 'bids': json.dumps(bids, sort_keys=True, default=str)}, to=player.session_id)
+
+	else:
+		emit('log_event', {'data': "insufficient PISS"})
+
+
+@socketio.event
+def sell_mdma(msg):
+	player = fetch_player(request.sid)
+	# feedback_msg = player.convert(msg["from"], msg["to"])
+	bids = player.getCurrentBids(listing)
+	amount = msg["volume"]
+
+	if player.materials['MDMA'] >= amount:
+		player.points += 130
+		player.materials['MDMA'] -= amount
+		emit('player_info', {'data': json.dumps(player.toJSON(), sort_keys=True, default=str), 'bids': json.dumps(bids, sort_keys=True, default=str)}, to=player.session_id)
+
+	else:
+		emit('log_event', {'data': "insufficient MDMA"})
 
 
 @socketio.event
