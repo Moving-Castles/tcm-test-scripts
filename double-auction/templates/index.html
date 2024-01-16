@@ -98,6 +98,7 @@
           $('.convert').click(function(event){
             if ($(this).attr('value') == "bugs_piss") socket.emit('convert', {from: 'BUGS', to: 'PISS'})
             else if ($(this).attr('value') == "piss_mdma") socket.emit('convert', {from: 'PISS', to: 'MDMA'})
+            else if ($(this).attr('value') == "buy_bugs") socket.emit('buy_bugs', {volume: 10})
           });
     
     });
@@ -119,6 +120,8 @@
               <span id="bugs-piss-efficiency">10% eff.</span></button>
           <button class="dashboard convert" value="piss_mdma">piss → mdma<br>
             <span id="piss-mdma-efficiency">10% eff.</span></button>
+          <button class="dashboard convert" value="buy_bugs">buy 10 bugs<br>
+            <span >10 points</span></button>
       </div><br/>
 
       <h3>active bids:</h3>

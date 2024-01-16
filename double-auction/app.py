@@ -76,21 +76,42 @@ def create_player():
 @socketio.event
 def convert(msg):
 	player = fetch_player(request.sid)
-	feedback_msg = player.convert(msg["from"], msg["to"])
+	# feedback_msg = player.convert(msg["from"], msg["to"])
 	bids = player.getCurrentBids(listing)
 
 	if msg["from"] == 'BUGS' and msg["to"] == 'PISS':
-		player.materials['BUGS'] -= 10
-		player.materials['PISS'] += player.level*0.1*10
-		emit('player_info', {'data': json.dumps(player.toJSON(), sort_keys=True, default=str), 'bids': json.dumps(bids, sort_keys=True, default=str)}, to=player.session_id)
+		if player.materials['BUGS'] >= 10:
+			player.materials['BUGS'] -= 10
+			player.materials['PISS'] += player.level*0.1*10
+			emit('player_info', {'data': json.dumps(player.toJSON(), sort_keys=True, default=str), 'bids': json.dumps(bids, sort_keys=True, default=str)}, to=player.session_id)
+		else:
+			emit('log_event', {'data': "insufficient BUGS to connvert"})
 
 	if msg["from"] == 'PISS' and msg["to"] == 'MDMA':
-		player.materials['PISS'] -= 10
-		player.materials['MDMA'] += player.level*0.1*10
+		if player.materials['PISS'] >= 10:
+			player.materials['PISS'] -= 10
+			player.materials['MDMA'] += player.level*0.1*10
+			emit('player_info', {'data': json.dumps(player.toJSON(), sort_keys=True, default=str), 'bids': json.dumps(bids, sort_keys=True, default=str)}, to=player.session_id)
+		else:
+			emit('log_event', {'data': "insufficient PISS to connvert"})
+
+@socketio.event
+def buy_bugs(msg):
+	player = fetch_player(request.sid)
+	# feedback_msg = player.convert(msg["from"], msg["to"])
+	bids = player.getCurrentBids(listing)
+	amount = msg["volume"]
+
+	if player.points >= amount:
+		player.points -= amount
+		player.materials['BUGS'] += amount
 		emit('player_info', {'data': json.dumps(player.toJSON(), sort_keys=True, default=str), 'bids': json.dumps(bids, sort_keys=True, default=str)}, to=player.session_id)
 
+	else:
+		emit('log_event', {'data': "insufficient points"})
 
-	emit('log_event', {'data': feedback_msg})
+	emit('player_info', {'data': json.dumps(player.toJSON(), sort_keys=True, default=str), 'bids': json.dumps(bids, sort_keys=True, default=str)}, to=player.session_id)
+
 
 @socketio.event
 def offer(offer):
