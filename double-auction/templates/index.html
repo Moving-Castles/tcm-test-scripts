@@ -27,7 +27,6 @@
 
           socket.on('connect', function() {
               socket.emit('create_player');
-              console.log('sent create: session id is', socket.io.engine.id)
           });
 
           socket.on('log_event', function(msg, cb) {
@@ -35,15 +34,14 @@
           });
 
           socket.on('tx_state', function(msg, cb) {
-              console.log(msg.data)
+              console.log('got tx_state', msg.data)
           });
 
           socket.on('bid_info', function(msg, cb) {
-              console.log(msg.data)
+              console.log('got bid_info', msg.data)
           });
 
           socket.on('player_info', function(msg, cb) {
-            console.log(msg.bids)
             bids = JSON.parse(msg.bids)
             data = JSON.parse(msg.data)
 
@@ -98,8 +96,8 @@
           })
 
           $('.convert').click(function(event){
-            console.log('converting')
-            socket.emit('convert', {from: 'BUGS', to: 'PISS'})
+            if ($(this).attr('value') == "bugs_piss") socket.emit('convert', {from: 'BUGS', to: 'PISS'})
+            else if ($(this).attr('value') == "piss_mdma") socket.emit('convert', {from: 'PISS', to: 'MDMA'})
           });
     
     });

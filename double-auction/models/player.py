@@ -9,8 +9,8 @@ class Player:
 		self.points = 1000
 		self.materials = {
 			'BUGS': 1000,
-			'PISS': 100,
-			'MDMA': 500
+			'PISS': 0,
+			'MDMA': 0
 		}
 
 	def getCurrentBids(self, listing):
